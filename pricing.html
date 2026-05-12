@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pilih Paket · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f2f7ff', 50: '#ecf3ff', 100: '#dde9ff', 200: '#c2d6ff',
+              300: '#9cb9ff', 400: '#7592ff', 500: '#465fff', 600: '#3641f5',
+              700: '#2a31d8', 800: '#252dae', 900: '#262e89', 950: '#161950'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#344054', 800: '#1d2939', 900: '#101828', 950: '#0c111d'
+            },
+            success: { 50: '#ecfdf3', 500: '#12b76a', 600: '#039855' },
+            warning: { 50: '#fffaeb', 500: '#f79009', 600: '#dc6803' },
+            error: { 50: '#fef3f2', 500: '#f04438', 600: '#d92d20' },
+            sumrize: { DEFAULT: '#FF4438', hover: '#e63b30' }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    profileOpen: false,
+    billingCycle: 'monthly',
+    currentPlan: 'spark',
+    checkoutOpen: false,
+    checkoutStep: 1,
+    selectedPlan: null,
+    paymentMethod: 'va',
+    plans: {
+      free: { name: 'Free', priceMonthly: 0, priceYearly: 0 },
+      spark: { name: 'Spark', priceMonthly: 99000, priceYearly: 950000 },
+      pro: { name: 'Pro', priceMonthly: 299000, priceYearly: 2870000 }
+    },
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    formatIDR(n) { return 'Rp' + n.toLocaleString('id-ID'); },
+    openCheckout(planKey) {
+      this.selectedPlan = planKey;
+      this.checkoutStep = 1;
+      this.checkoutOpen = true;
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (Invoice highlighted since pricing is reached from there) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+        </a>
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
+        <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a href="index.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="rizz.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="settings.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span>
+            </button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- Topbar (with back link to Invoice since this is reached from there) -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+              <div>
+                <a href="invoice.html" class="mb-2 inline-flex items-center gap-1 text-xs font-medium text-gray-500 transition hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400">
+                  <i data-lucide="arrow-left" class="h-3.5 w-3.5"></i>
+                  <span x-text="lang === 'id' ? 'Kembali ke Invoice' : 'Back to Invoice'">Back to Invoice</span>
+                </a>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Pilih Paket Sumrize' : 'Choose Your Sumrize Plan'">Choose Your Sumrize Plan</h1>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Mulai dengan gratis, atau pilih paket yang sesuai untuk membuka semua fitur. Batalkan kapan saja.' : 'Start free, or pick a plan that unlocks every feature. Cancel anytime.'">Start free, or pick a plan that unlocks every feature.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span x-text="languages[lang].flag + ' ' + languages[lang].label"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                      <span class="flex items-center gap-3">
+                        <span class="text-lg leading-none" x-text="meta.flag"></span>
+                        <span x-text="meta.label"></span>
+                      </span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Profile dropdown -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button type="button" @click="profileOpen = !profileOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">Spark</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="settings" class="h-4 w-4"></i>
+                      Account settings
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="info" class="h-4 w-4"></i>
+                      Support
+                    </a>
+                  </div>
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800">
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10">
+                      <i data-lucide="log-out" class="h-4 w-4"></i>
+                      Sign out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Billing cycle toggle (Monthly / Yearly with discount badge) -->
+          <div class="mb-6 flex flex-col items-center gap-3">
+            <div class="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white p-1 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <button type="button" @click="billingCycle = 'monthly'" :class="billingCycle === 'monthly' ? 'bg-brand-500 text-white shadow-theme-sm' : 'text-gray-500 dark:text-gray-400'" class="rounded-full px-5 py-1.5 text-sm font-semibold transition">
+                <span x-text="lang === 'id' ? 'Bulanan' : 'Monthly'">Monthly</span>
+              </button>
+              <button type="button" @click="billingCycle = 'yearly'" :class="billingCycle === 'yearly' ? 'bg-brand-500 text-white shadow-theme-sm' : 'text-gray-500 dark:text-gray-400'" class="inline-flex items-center gap-2 rounded-full px-5 py-1.5 text-sm font-semibold transition">
+                <span x-text="lang === 'id' ? 'Tahunan' : 'Yearly'">Yearly</span>
+                <span class="rounded-full bg-success-50 px-2 py-0.5 text-[10px] font-bold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500" x-text="lang === 'id' ? 'Hemat 20%' : 'Save 20%'">Save 20%</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ===== Pricing tier cards =====
+               3 tiers: Free, Spark (popular/recommended), Pro.
+               Currently-active plan gets a "Current Plan" ribbon instead of a CTA. -->
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+            <!-- ===== Free tier ===== -->
+            <article class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <header class="mb-5">
+                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">Free</p>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-4xl font-bold text-gray-900 dark:text-white">Rp0</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '/selamanya' : '/forever'">/forever</span>
+                </div>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Cocok buat coba-coba & grup pribadi.' : 'For casual use & personal groups.'">For casual use & personal groups.</p>
+              </header>
+
+              <ul class="mb-6 flex-1 space-y-3 text-sm">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? '1 connector aktif' : '1 active connector'">1 active connector</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Ringkasan harian (1×/hari)' : 'Daily summary (1×/day)'">Daily summary (1×/day)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? '7 hari riwayat ringkasan' : '7-day summary history'">7-day summary history</span>
+                </li>
+                <li class="flex items-start gap-2 text-gray-400">
+                  <i data-lucide="x" class="mt-0.5 h-4 w-4 flex-shrink-0"></i>
+                  <span x-text="lang === 'id' ? 'Tidak termasuk Ask Rizz' : 'No Ask Rizz access'">No Ask Rizz access</span>
+                </li>
+              </ul>
+
+              <button type="button" @click="openCheckout('free')" class="w-full rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700" x-text="lang === 'id' ? 'Mulai Gratis' : 'Start for free'">Start for free</button>
+            </article>
+
+            <!-- ===== Spark tier (POPULAR / currently active for this user) ===== -->
+            <article class="relative flex flex-col rounded-2xl border-2 border-brand-500 bg-white p-6 shadow-theme-md dark:bg-white/[0.03]">
+              <!-- Popular ribbon -->
+              <span class="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-brand-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-theme-sm">
+                <i data-lucide="sparkles" class="h-3 w-3"></i>
+                <span x-text="lang === 'id' ? 'Paling Populer' : 'Most Popular'">Most Popular</span>
+              </span>
+
+              <header class="mb-5">
+                <div class="mb-2 flex items-center gap-2">
+                  <p class="text-xs font-bold uppercase tracking-wider text-brand-500">Spark</p>
+                  <span x-show="currentPlan === 'spark'" class="rounded-full bg-success-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-600 dark:bg-success-500/[0.15] dark:text-success-500" x-text="lang === 'id' ? 'Paket Anda' : 'Your Plan'">Your Plan</span>
+                </div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-4xl font-bold text-gray-900 dark:text-white" x-text="billingCycle === 'monthly' ? formatIDR(plans.spark.priceMonthly) : formatIDR(Math.round(plans.spark.priceYearly / 12))">Rp99.000</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '/bulan' : '/month'">/month</span>
+                </div>
+                <p x-show="billingCycle === 'yearly'" class="mt-1 text-xs text-success-600 dark:text-success-500" x-text="(lang === 'id' ? 'Ditagih tahunan ' : 'Billed yearly ') + formatIDR(plans.spark.priceYearly)">Billed yearly Rp950.000</p>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Buat individu yang serius ngegrup.' : 'For individuals who live in group chats.'">For individuals who live in group chats.</p>
+              </header>
+
+              <ul class="mb-6 flex-1 space-y-3 text-sm">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? '5 connector aktif' : '5 active connectors'"><strong class="font-semibold text-gray-900 dark:text-white">5</strong> active connectors</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Ringkasan unlimited' : 'Unlimited summaries'">Unlimited summaries</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Ask Rizz dengan 200 pesan/hari' : 'Ask Rizz · 200 messages/day'">Ask Rizz · 200 messages/day</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? '90 hari riwayat ringkasan' : '90-day summary history'">90-day summary history</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Image generation 30/hari' : 'Image generation · 30/day'">Image generation · 30/day</span>
+                </li>
+              </ul>
+
+              <button type="button"
+                      x-show="currentPlan !== 'spark'"
+                      @click="openCheckout('spark')"
+                      class="w-full rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover"
+                      x-text="lang === 'id' ? 'Pilih Spark' : 'Choose Spark'">Choose Spark</button>
+              <button type="button"
+                      x-show="currentPlan === 'spark'"
+                      disabled
+                      class="w-full cursor-default rounded-full border border-gray-200 bg-gray-50 px-5 py-2.5 text-sm font-semibold text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                      x-text="lang === 'id' ? 'Paket Aktif' : 'Current Plan'">Current Plan</button>
+            </article>
+
+            <!-- ===== Pro tier ===== -->
+            <article class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <header class="mb-5">
+                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">Pro</p>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-4xl font-bold text-gray-900 dark:text-white" x-text="billingCycle === 'monthly' ? formatIDR(plans.pro.priceMonthly) : formatIDR(Math.round(plans.pro.priceYearly / 12))">Rp299.000</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '/bulan' : '/month'">/month</span>
+                </div>
+                <p x-show="billingCycle === 'yearly'" class="mt-1 text-xs text-success-600 dark:text-success-500" x-text="(lang === 'id' ? 'Ditagih tahunan ' : 'Billed yearly ') + formatIDR(plans.pro.priceYearly)">Billed yearly Rp2.870.000</p>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Buat tim/komunitas yang butuh kontrol lebih.' : 'For teams & communities that need more control.'">For teams &amp; communities that need more control.</p>
+              </header>
+
+              <ul class="mb-6 flex-1 space-y-3 text-sm">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Connector unlimited' : 'Unlimited connectors'">Unlimited connectors</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Ringkasan unlimited + custom schedule' : 'Unlimited summaries + custom schedules'">Unlimited summaries + custom schedules</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Ask Rizz unlimited' : 'Unlimited Ask Rizz'">Unlimited Ask Rizz</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Riwayat selamanya + export' : 'Forever history + export'">Forever history + export</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Priority support & SLA' : 'Priority support & SLA'">Priority support &amp; SLA</span>
+                </li>
+              </ul>
+
+              <button type="button" @click="openCheckout('pro')" class="w-full rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-brand-600" x-text="lang === 'id' ? 'Upgrade ke Pro' : 'Upgrade to Pro'">Upgrade to Pro</button>
+            </article>
+          </div>
+
+          <!-- Trust line + FAQ pointer -->
+          <div class="mt-8 flex flex-col items-center gap-3 text-center">
+            <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+              <span class="inline-flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="h-4 w-4 text-success-500"></i>
+                <span x-text="lang === 'id' ? 'Pembayaran terenkripsi' : 'Encrypted payments'">Encrypted payments</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <i data-lucide="undo-2" class="h-4 w-4 text-brand-500"></i>
+                <span x-text="lang === 'id' ? 'Batal kapan saja' : 'Cancel anytime'">Cancel anytime</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <i data-lucide="badge-check" class="h-4 w-4 text-warning-500"></i>
+                <span x-text="lang === 'id' ? 'Garansi 7 hari uang kembali' : '7-day money-back guarantee'">7-day money-back guarantee</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== Checkout Modal =====
+       3-step flow: review → payment → success.
+       Triggered by tier card buttons via openCheckout(planKey). -->
+  <div
+    x-show="checkoutOpen"
+    x-cloak
+    @keydown.escape.window="checkoutOpen = false"
+    x-transition.opacity.duration.200ms
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="checkout-modal-title"
+  >
+    <div @click="checkoutOpen = false" class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+
+    <div
+      x-transition:enter="ease-out duration-200"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="ease-in duration-150"
+      class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
+    >
+      <button type="button" @click="checkoutOpen = false" aria-label="Close" class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
+        <i data-lucide="x" class="h-5 w-5"></i>
+      </button>
+
+      <!-- Step indicator -->
+      <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-3 dark:border-gray-800">
+        <span :class="checkoutStep >= 1 ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">1</span>
+        <span :class="checkoutStep >= 1 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Tinjau' : 'Review'">Review</span>
+        <span class="mx-1 h-px w-6 bg-gray-200 dark:bg-gray-700"></span>
+        <span :class="checkoutStep >= 2 ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">2</span>
+        <span :class="checkoutStep >= 2 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Pembayaran' : 'Payment'">Payment</span>
+        <span class="mx-1 h-px w-6 bg-gray-200 dark:bg-gray-700"></span>
+        <span :class="checkoutStep >= 3 ? 'bg-success-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">3</span>
+        <span :class="checkoutStep >= 3 ? 'text-success-600 dark:text-success-500' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Selesai' : 'Done'">Done</span>
+      </div>
+
+      <!-- ===== Step 1: Review ===== -->
+      <div x-show="checkoutStep === 1" class="p-6">
+        <h2 id="checkout-modal-title" class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Konfirmasi Langganan' : 'Confirm Subscription'">Confirm Subscription</h2>
+        <p class="mb-5 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tinjau paket sebelum melanjutkan ke pembayaran.' : 'Review the plan before continuing to payment.'">Review the plan before continuing to payment.</p>
+
+        <!-- Plan summary -->
+        <div class="mb-4 rounded-xl border border-brand-500 bg-brand-50/40 p-4 dark:bg-brand-500/[0.08]">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-brand-500 dark:text-brand-400" x-text="lang === 'id' ? 'Paket' : 'Plan'">Plan</p>
+              <p class="text-base font-semibold text-gray-900 dark:text-white" x-text="selectedPlan ? plans[selectedPlan].name : ''">—</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="billingCycle === 'monthly' ? (lang === 'id' ? 'Tagihan bulanan' : 'Billed monthly') : (lang === 'id' ? 'Tagihan tahunan (hemat 20%)' : 'Billed yearly (save 20%)')">Billed monthly</p>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedPlan ? formatIDR(billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) : ''"></p>
+          </div>
+        </div>
+
+        <!-- Total breakdown -->
+        <dl class="space-y-2 border-t border-gray-100 pt-4 text-sm dark:border-gray-800">
+          <div class="flex justify-between text-gray-500 dark:text-gray-400">
+            <dt x-text="lang === 'id' ? 'Subtotal' : 'Subtotal'">Subtotal</dt>
+            <dd x-text="selectedPlan ? formatIDR(billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) : ''"></dd>
+          </div>
+          <div class="flex justify-between text-gray-500 dark:text-gray-400">
+            <dt>PPN 11%</dt>
+            <dd x-text="selectedPlan ? formatIDR(Math.round((billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) * 0.11)) : ''"></dd>
+          </div>
+          <div class="flex justify-between border-t border-gray-100 pt-2 font-semibold text-gray-900 dark:border-gray-800 dark:text-white">
+            <dt x-text="lang === 'id' ? 'Total' : 'Total'">Total</dt>
+            <dd x-text="selectedPlan ? formatIDR(Math.round((billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) * 1.11)) : ''"></dd>
+          </div>
+        </dl>
+
+        <div class="mt-6 flex gap-3">
+          <button type="button" @click="checkoutOpen = false" class="flex-1 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700" x-text="lang === 'id' ? 'Batal' : 'Cancel'">Cancel</button>
+          <button type="button" @click="checkoutStep = 2" class="flex-1 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover" x-text="lang === 'id' ? 'Lanjut ke Pembayaran' : 'Continue to Payment'">Continue to Payment</button>
+        </div>
+      </div>
+
+      <!-- ===== Step 2: Payment Method ===== -->
+      <div x-show="checkoutStep === 2" class="p-6" x-cloak>
+        <h2 class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Pilih Metode Pembayaran' : 'Choose Payment Method'">Choose Payment Method</h2>
+        <p class="mb-5 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Semua transaksi dienkripsi via Midtrans.' : 'All transactions encrypted via Midtrans.'">All transactions encrypted via Midtrans.</p>
+
+        <div class="mb-6 space-y-2">
+          <label class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition" :class="paymentMethod === 'va' ? 'border-brand-500 bg-brand-50/40 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
+            <input type="radio" name="payment" value="va" x-model="paymentMethod" class="h-4 w-4 accent-brand-500" />
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-theme-sm dark:bg-gray-800">
+              <i data-lucide="building-2" class="h-4 w-4 text-gray-600 dark:text-gray-400"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Virtual Account (BCA, BNI, Mandiri…)' : 'Virtual Account (BCA, BNI, Mandiri…)'">Virtual Account</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Transfer bank, terverifikasi otomatis' : 'Bank transfer, auto-verified'">Bank transfer, auto-verified</p>
+            </div>
+          </label>
+
+          <label class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition" :class="paymentMethod === 'qris' ? 'border-brand-500 bg-brand-50/40 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
+            <input type="radio" name="payment" value="qris" x-model="paymentMethod" class="h-4 w-4 accent-brand-500" />
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-theme-sm dark:bg-gray-800">
+              <i data-lucide="qr-code" class="h-4 w-4 text-gray-600 dark:text-gray-400"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">QRIS</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Scan dari GoPay, OVO, DANA, dll.' : 'Scan from GoPay, OVO, DANA, etc.'">Scan from GoPay, OVO, DANA, etc.</p>
+            </div>
+          </label>
+
+          <label class="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition" :class="paymentMethod === 'card' ? 'border-brand-500 bg-brand-50/40 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
+            <input type="radio" name="payment" value="card" x-model="paymentMethod" class="h-4 w-4 accent-brand-500" />
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-theme-sm dark:bg-gray-800">
+              <i data-lucide="credit-card" class="h-4 w-4 text-gray-600 dark:text-gray-400"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Kartu Kredit/Debit' : 'Credit / Debit Card'">Credit / Debit Card</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Visa, Mastercard, JCB</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="flex gap-3">
+          <button type="button" @click="checkoutStep = 1" class="rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+            <i data-lucide="arrow-left" class="inline h-4 w-4 align-text-bottom"></i>
+            <span x-text="lang === 'id' ? 'Kembali' : 'Back'">Back</span>
+          </button>
+          <button type="button" @click="checkoutStep = 3" class="flex-1 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+            <span x-text="lang === 'id' ? 'Bayar Sekarang' : 'Pay Now'">Pay Now</span>
+            <span x-text="' · ' + (selectedPlan ? formatIDR(Math.round((billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) * 1.11)) : '')"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== Step 3: Success ===== -->
+      <div x-show="checkoutStep === 3" class="p-6 text-center" x-cloak>
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-50 text-success-500 dark:bg-success-500/[0.15]">
+          <i data-lucide="check" class="h-8 w-8"></i>
+        </div>
+        <h2 class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Berlangganan Berhasil!' : 'Subscription Active!'">Subscription Active!</h2>
+        <p class="mx-auto mb-5 max-w-sm text-sm text-gray-500 dark:text-gray-400">
+          <span x-text="lang === 'id' ? 'Selamat menggunakan paket ' : 'Welcome to your '"></span>
+          <span class="font-semibold text-gray-900 dark:text-white" x-text="selectedPlan ? plans[selectedPlan].name : ''"></span>
+          <span x-text="lang === 'id' ? '. Invoice sudah dikirim ke email Anda.' : ' plan. Invoice sent to your email.'"></span>
+        </p>
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <a href="invoice.html" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+            <i data-lucide="file-text" class="h-4 w-4"></i>
+            <span x-text="lang === 'id' ? 'Lihat Invoice' : 'View Invoice'">View Invoice</span>
+          </a>
+          <a href="index.html" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+            <i data-lucide="home" class="h-4 w-4"></i>
+            <span x-text="lang === 'id' ? 'Ke Beranda' : 'Go to Home'">Go to Home</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>

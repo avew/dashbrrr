@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pengaturan · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f2f7ff', 50: '#ecf3ff', 100: '#dde9ff', 200: '#c2d6ff',
+              300: '#9cb9ff', 400: '#7592ff', 500: '#465fff', 600: '#3641f5',
+              700: '#2a31d8', 800: '#252dae', 900: '#262e89', 950: '#161950'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#344054', 800: '#1d2939', 900: '#101828', 950: '#0c111d'
+            },
+            error: {
+              50: '#fef3f2', 500: '#f04438', 600: '#d92d20'
+            },
+            sumrize: {
+              DEFAULT: '#FF4438',
+              hover: '#e63b30'
+            }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    profileOpen: false,
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <!-- ===== Page Wrapper Start ===== -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (shared with index.html — Pengaturan active here) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <!-- Brand + collapse toggle (shared pattern with index.html).
+           Collapsed (lg): S badge on top, toggle below, stacked. -->
+      <div
+        class="relative flex items-center justify-center pt-8 pb-7"
+        :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''"
+      >
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img
+            src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png"
+            class="h-12 w-auto dark:hidden"
+            alt="Sumrize"
+          />
+          <img
+            src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png"
+            class="hidden h-12 w-auto dark:block"
+            alt="Sumrize"
+          />
+        </a>
+
+        <!-- Compact brand mark (collapsed on lg only) -->
+        <a
+          href="index.html"
+          class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm"
+          :class="sidebarToggle ? 'lg:flex' : ''"
+          aria-label="Sumrize"
+        >
+          S
+        </a>
+
+        <button
+          type="button"
+          @click="sidebarToggle = !sidebarToggle"
+          aria-label="Toggle sidebar"
+          class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
+          :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'"
+        >
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a href="index.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="rizz.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="settings.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span>
+            </button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span>
+            </button>
+          </div>
+
+          <!-- Logout moved to topbar profile dropdown -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile backdrop -->
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area Start ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- ===== Page Header (Settings) ===== -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <!-- Mobile hamburger -->
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+
+              <div>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl">Account Settings</h1>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                  Manage your profile details, linked sign-in methods, and current subscription without changing the live page flow.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher (re-used from index.html) -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-haspopup="listbox" :aria-expanded="langOpen.toString()">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span x-text="languages[lang].flag + ' ' + languages[lang].label"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="listbox">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'" role="option" :aria-selected="(lang === code).toString()">
+                      <span class="flex items-center gap-3">
+                        <span class="text-lg leading-none" x-text="meta.flag"></span>
+                        <span x-text="meta.label"></span>
+                      </span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Profile dropdown (shared pattern with index.html) -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button
+                  type="button"
+                  @click="profileOpen = !profileOpen"
+                  class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5"
+                  aria-haspopup="menu"
+                  :aria-expanded="profileOpen.toString()"
+                >
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="menu">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">Spark</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="settings" class="h-4 w-4"></i>
+                      Account settings
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="info" class="h-4 w-4"></i>
+                      Support
+                    </a>
+                  </div>
+
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800">
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10">
+                      <i data-lucide="log-out" class="h-4 w-4"></i>
+                      Sign out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Cards capped at max-w-4xl so the page header above stays
+               full-width like Beranda. -->
+          <div class="max-w-4xl">
+
+          <!-- ===== Subscription Card =====
+               brand-500 border flags this as the primary summary card.
+               Layout = (a) header w/ label chip + date + plan pill,
+                        (b) 2-col stat grid for Plan & Billing,
+                        (c) subtle divider footer for the destructive action. -->
+          <section class="mb-6 rounded-2xl border border-brand-500 bg-white shadow-theme-md dark:bg-white/[0.03]">
+            <div class="p-5 md:p-6">
+              <header class="mb-5 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                <div class="flex-1">
+                  <div class="mb-2.5 inline-flex items-center gap-2 rounded-lg bg-brand-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="calendar-days" class="h-3.5 w-3.5"></i>
+                    Active Period
+                  </div>
+                  <h2 class="text-lg font-semibold leading-tight text-gray-900 dark:text-white md:text-xl">
+                    27 Apr 2026 14:20 — 27 May 2026 14:20
+                  </h2>
+                </div>
+                <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-theme-sm">
+                  <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
+                  Spark
+                </span>
+              </header>
+
+              <!-- Stat grid: Current Plan & Billing -->
+              <div class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="rounded-xl border border-gray-200 bg-gray-50 p-3.5 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <div class="mb-1.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                    <i data-lucide="layers" class="h-3.5 w-3.5"></i>
+                    Current Plan
+                  </div>
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                    Spark <span class="font-normal text-gray-500 dark:text-gray-400">(SPARK_IDR_MONTHLY)</span>
+                  </p>
+                </div>
+                <div class="rounded-xl border border-gray-200 bg-gray-50 p-3.5 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <div class="mb-1.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                    <i data-lucide="credit-card" class="h-3.5 w-3.5"></i>
+                    Billing
+                  </div>
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                    Monthly <span class="font-normal text-gray-500 dark:text-gray-400">· 99,000 IDR</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Cancel Subscription: full-width outline-style destructive action,
+                   inside the card body (matches original placement, less aggressive
+                   than a solid red button). -->
+              <button type="button" class="flex w-full items-center justify-center gap-2 rounded-xl border border-error-500/30 bg-error-500/[0.04] px-4 py-2.5 text-sm font-medium text-error-500 transition hover:bg-error-500/10 dark:bg-error-500/[0.06]">
+                <i data-lucide="ban" class="h-4 w-4"></i>
+                Cancel Subscription
+              </button>
+            </div>
+          </section>
+
+          <!-- ===== Profile Form Card =====
+               Two-zone pattern, mirrors Connector cards on Beranda:
+                 (a) body  — inputs (Full Name) + read-only stat cards (Email,
+                             WhatsApp) + Google Sign-in panel
+                 (b) band  — brand-50 footer with centered Save Changes button -->
+          <section class="overflow-hidden rounded-2xl border border-brand-500 bg-white shadow-theme-md dark:bg-white/[0.03]">
+            <form class="space-y-5 p-5 md:p-6" onsubmit="event.preventDefault()">
+
+              <!-- Full Name (icon-prefixed input) -->
+              <div>
+                <label for="full-name" class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">Full Name</label>
+                <div class="relative">
+                  <i data-lucide="user" class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"></i>
+                  <input
+                    id="full-name"
+                    type="text"
+                    value="Avew"
+                    class="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm text-gray-900 placeholder-gray-400 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <!-- Email + WhatsApp (read-only display cards w/ icon badges) -->
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <!-- Email -->
+                <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <div class="mb-3 flex items-center gap-3">
+                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                      <i data-lucide="mail" class="h-4 w-4"></i>
+                    </div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Email Address</p>
+                  </div>
+                  <p class="mb-2 break-all text-base font-medium text-gray-900 dark:text-white">aseprojali@gmail.com</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Set automatically when you link Google below.</p>
+                </div>
+
+                <!-- WhatsApp -->
+                <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <div class="mb-3 flex items-center gap-3">
+                    <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-500/[0.15] dark:text-emerald-400">
+                      <i data-lucide="phone" class="h-4 w-4"></i>
+                    </div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400">WhatsApp Number</p>
+                  </div>
+                  <p class="mb-2 text-base font-medium text-gray-900 dark:text-white">6285294316666</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Your WhatsApp number cannot be changed.</p>
+                </div>
+              </div>
+
+              <!-- Google Sign-in panel: framed sub-section with icon header -->
+              <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-5 dark:border-gray-800 dark:bg-white/[0.02]">
+                <div class="mb-3 flex items-center gap-3">
+                  <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white shadow-theme-sm dark:bg-gray-800">
+                    <i data-lucide="link-2" class="h-4 w-4 text-brand-500"></i>
+                  </div>
+                  <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Google Sign-in</h3>
+                </div>
+                <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                  Link your Google account to enable <strong class="font-semibold text-gray-700 dark:text-gray-300">Continue with Google</strong> after you registered with WhatsApp OTP.
+                </p>
+                <button type="button" class="inline-flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-theme-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Link Google account
+                </button>
+              </div>
+            </form>
+
+            <!-- (b) Footer band: Save Changes (slim band, right-aligned button) -->
+            <footer class="flex items-center justify-end bg-brand-50 px-5 py-3 dark:bg-brand-500/[0.08]">
+              <button type="submit" form="" class="inline-flex items-center gap-2 rounded-full bg-sumrize px-5 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <i data-lucide="save" class="h-4 w-4"></i>
+                Save Changes
+              </button>
+            </footer>
+          </section>
+          </div>
+
+        </div>
+      </main>
+    </div>
+    <!-- ===== Content Area End ===== -->
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>

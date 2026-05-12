@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rizz AI · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f2f7ff', 50: '#ecf3ff', 100: '#dde9ff', 200: '#c2d6ff',
+              300: '#9cb9ff', 400: '#7592ff', 500: '#465fff', 600: '#3641f5',
+              700: '#2a31d8', 800: '#252dae', 900: '#262e89', 950: '#161950'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#344054', 800: '#1d2939', 900: '#101828', 950: '#0c111d'
+            },
+            error: { 50: '#fef3f2', 500: '#f04438', 600: '#d92d20' },
+            sumrize: { DEFAULT: '#FF4438', hover: '#e63b30' }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    profileOpen: false,
+    scopeOpen: false,
+    toolOpen: false,
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (Rizz AI active) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+        </a>
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
+        <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a href="index.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="rizz.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="settings.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span>
+            </button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile backdrop -->
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- Page header (consistent with other pages) -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+              <div>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl">Rizz AI</h1>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                  Chat directly with Rizz, keep a persistent thread history, and switch context across your connected channels from one place.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span x-text="languages[lang].flag + ' ' + languages[lang].label"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                      <span class="flex items-center gap-3">
+                        <span class="text-lg leading-none" x-text="meta.flag"></span>
+                        <span x-text="meta.label"></span>
+                      </span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Profile dropdown -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button type="button" @click="profileOpen = !profileOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">Spark</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="settings" class="h-4 w-4"></i>
+                      Account settings
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="info" class="h-4 w-4"></i>
+                      Support
+                    </a>
+                  </div>
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800">
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10">
+                      <i data-lucide="log-out" class="h-4 w-4"></i>
+                      Sign out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Chat Workspace =====
+               Two-panel grid. Saved Chats (320px fixed) | Chat panel (1fr).
+               Stacks on mobile (grid-cols-1). -->
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+
+            <!-- ===== Saved Chats Panel ===== -->
+            <aside class="rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <header class="flex items-center justify-between gap-2 border-b border-gray-100 p-4 dark:border-gray-800">
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base font-semibold text-gray-900 dark:text-white">Saved Chats</h2>
+                  <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-300">1</span>
+                </div>
+                <button type="button" aria-label="New chat" class="flex h-9 w-9 items-center justify-center rounded-full bg-sumrize text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+                  <i data-lucide="plus" class="h-4 w-4"></i>
+                </button>
+              </header>
+
+              <ul class="space-y-1 p-2">
+                <!-- Active chat card (selected state: brand left border + brand wash) -->
+                <li>
+                  <button type="button" class="block w-full rounded-xl border-l-2 border-brand-500 bg-brand-50/40 p-3 text-left transition dark:bg-brand-500/[0.08]">
+                    <p class="mb-1.5 truncate text-sm font-semibold text-gray-900 dark:text-white">di bebenah ada topik apa ?</p>
+                    <span class="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-gray-700">
+                      <i data-lucide="layout-grid" class="h-2.5 w-2.5"></i>
+                      All Connectors
+                    </span>
+                    <p class="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                      Di grup <span class="font-semibold text-gray-700 dark:text-gray-300">Bebenah</span>, obrolannya hari ini cukup rame dan lompat-lompat, tapi garis besarnya begini…
+                    </p>
+                    <p class="mt-2 text-[11px] text-gray-400">13 Mei, 00.13</p>
+                  </button>
+                </li>
+
+                <!-- Empty hint when no further chats -->
+                <li>
+                  <div class="rounded-xl border border-dashed border-gray-200 p-4 text-center dark:border-gray-700">
+                    <i data-lucide="message-square-plus" class="mx-auto mb-2 h-5 w-5 text-gray-400"></i>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Mulai obrolan baru untuk tambah ke daftar.</p>
+                  </div>
+                </li>
+              </ul>
+            </aside>
+
+            <!-- ===== Chat Panel =====
+                 Fixed height = viewport minus topbar/padding (calc value chosen
+                 so input bar stays in view without scrolling the whole page). -->
+            <section class="flex h-[calc(100vh-220px)] min-h-[560px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+
+              <!-- Chat header: scope chip + title + ASK FROM dropdown -->
+              <header class="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-gray-800 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="crosshair" class="h-3 w-3"></i>
+                    Connector Scope
+                  </div>
+                  <h2 class="mb-1 truncate text-lg font-semibold text-gray-900 dark:text-white md:text-xl">di bebenah ada topik apa ?</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">All Connectors · 5 messages</p>
+                </div>
+
+                <!-- ASK FROM selector — connector scope filter for this chat -->
+                <div class="flex-shrink-0">
+                  <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Ask From</p>
+                  <div class="relative" @click.outside="scopeOpen = false">
+                    <button type="button" @click="scopeOpen = !scopeOpen" class="inline-flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                      <span class="flex items-center gap-2">
+                        <i data-lucide="layout-grid" class="h-4 w-4"></i>
+                        All · All Connectors
+                      </span>
+                      <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="scopeOpen ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="scopeOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                      <button type="button" class="flex w-full items-center gap-3 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400">
+                        <i data-lucide="layout-grid" class="h-4 w-4"></i>
+                        All Connectors
+                      </button>
+                      <button type="button" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                        <img src="./Sumrize — Because life’s too short to scroll group chats_files/whatsapp.webp" class="h-4 w-4 rounded-full" alt="" />
+                        Bebenah
+                      </button>
+                      <button type="button" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                        <img src="./Sumrize — Because life’s too short to scroll group chats_files/discord.png" class="h-4 w-4 rounded-full" alt="" />
+                        general
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </header>
+
+              <!-- Quick suggestion chips -->
+              <div class="flex flex-wrap gap-2 border-b border-gray-100 px-5 py-3 dark:border-gray-800">
+                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                  <i data-lucide="sparkles" class="h-3 w-3"></i>
+                  What happened recently?
+                </button>
+                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                  <i data-lucide="list" class="h-3 w-3"></i>
+                  Key points
+                </button>
+                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                  <i data-lucide="check-square" class="h-3 w-3"></i>
+                  Action items
+                </button>
+                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                  <i data-lucide="trending-up" class="h-3 w-3"></i>
+                  Compared to last month
+                </button>
+              </div>
+
+              <!-- Thread (scrollable) -->
+              <div class="flex-1 space-y-6 overflow-y-auto p-5">
+
+                <!-- User message: right-aligned, brand-500 solid (max contrast vs AI) -->
+                <div class="flex justify-end">
+                  <div class="max-w-[80%] rounded-2xl rounded-tr-md bg-brand-500 px-4 py-3 text-sm text-white shadow-theme-sm">
+                    di bebenah ada topik apa ?
+                  </div>
+                </div>
+
+                <!-- AI message: avatar + attribution + tool indicator + markdown card -->
+                <div class="flex gap-3">
+                  <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-sm">
+                    <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  </div>
+                  <div class="min-w-0 flex-1 space-y-2">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Rizz</p>
+                      <span class="text-xs text-gray-400">just now</span>
+                    </div>
+
+                    <!-- Tool-use indicator: expandable, shows which tool + params -->
+                    <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
+                      <button type="button" @click="toolOpen = !toolOpen" class="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/[0.03]">
+                        <span class="flex items-center gap-2">
+                          <i data-lucide="wrench" class="h-3.5 w-3.5"></i>
+                          Used 1 tool
+                          <span class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[10px] dark:bg-white/10">fetch_chat_history</span>
+                        </span>
+                        <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="toolOpen ? 'rotate-180' : ''"></i>
+                      </button>
+                      <div x-show="toolOpen" x-cloak x-collapse class="border-t border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400">
+                        <p><span class="font-mono text-gray-500">connector:</span> Bebenah (WhatsApp Group)</p>
+                        <p><span class="font-mono text-gray-500">range:</span> last 24 hours</p>
+                        <p><span class="font-mono text-gray-500">messages:</span> 312</p>
+                      </div>
+                    </div>
+
+                    <!-- Markdown-rendered response -->
+                    <div class="space-y-3 rounded-2xl rounded-tl-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
+                      <p>Di grup <strong class="font-semibold text-gray-900 dark:text-white">Bebenah</strong>, obrolannya hari ini cukup rame dan lompat-lompat, tapi garis besarnya begini:</p>
+
+                      <p class="font-semibold text-gray-900 dark:text-white">Topik utama yang muncul:</p>
+
+                      <ul class="space-y-2 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
+                        <li>Bahas <strong class="font-semibold text-gray-900 dark:text-white">end user</strong> yang chat dan cara nanggapi/verify.</li>
+                        <li>Ngomongin <strong class="font-semibold text-gray-900 dark:text-white">server staging</strong>, build <strong class="font-semibold text-gray-900 dark:text-white">1.14.0-SNAPSHOT</strong>, admin console, dan deployment yang belum berhasil.</li>
+                        <li>Diskusi soal <strong class="font-semibold text-gray-900 dark:text-white">permission upload vs edit</strong> untuk submit.</li>
+                        <li>Ngirim <strong class="font-semibold text-gray-900 dark:text-white">laporan pentest MPN V1</strong> dengan 6 temuan dan rencana fixing.</li>
+                        <li>Testing login yang sempat error terus diperbaiki.</li>
+                        <li>Obrolan ringan: musik Dewa 19, MC gendut/hamil (candaan), coping stress kerja, pengamen, waffer, dan curhat IG pajak rame hujatan.</li>
+                      </ul>
+
+                      <p class="text-gray-500 dark:text-gray-400">Kalau mau Rizz ringkas lebih rapi atau fokus ke satu topik tertentu, tinggal bilang ya.</p>
+                    </div>
+
+                    <!-- Message actions: copy, regenerate, feedback -->
+                    <div class="flex items-center gap-1 pl-1">
+                      <button type="button" aria-label="Copy" class="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200">
+                        <i data-lucide="copy" class="h-3.5 w-3.5"></i>
+                      </button>
+                      <button type="button" aria-label="Regenerate" class="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200">
+                        <i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>
+                      </button>
+                      <button type="button" aria-label="Good response" class="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200">
+                        <i data-lucide="thumbs-up" class="h-3.5 w-3.5"></i>
+                      </button>
+                      <button type="button" aria-label="Bad response" class="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200">
+                        <i data-lucide="thumbs-down" class="h-3.5 w-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input bar: bordered textarea + Send -->
+              <form class="border-t border-gray-100 p-4 dark:border-gray-800" onsubmit="event.preventDefault()">
+                <div class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2 transition focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800">
+                  <button type="button" aria-label="Attach" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200">
+                    <i data-lucide="paperclip" class="h-4 w-4"></i>
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="Ask anything to rizz…"
+                    class="flex-1 bg-transparent py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white"
+                  />
+                  <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-sumrize px-4 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+                    <i data-lucide="send-horizontal" class="h-4 w-4"></i>
+                    Send
+                  </button>
+                </div>
+                <p class="mt-2 text-[11px] text-gray-400">Rizz can make mistakes. Verify important info.</p>
+              </form>
+            </section>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>

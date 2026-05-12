@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Referral · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f2f7ff', 50: '#ecf3ff', 100: '#dde9ff', 200: '#c2d6ff',
+              300: '#9cb9ff', 400: '#7592ff', 500: '#465fff', 600: '#3641f5',
+              700: '#2a31d8', 800: '#252dae', 900: '#262e89', 950: '#161950'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#344054', 800: '#1d2939', 900: '#101828', 950: '#0c111d'
+            },
+            success: { 50: '#ecfdf3', 500: '#12b76a', 600: '#039855' },
+            warning: { 50: '#fffaeb', 500: '#f79009', 600: '#dc6803' },
+            error: { 50: '#fef3f2', 500: '#f04438', 600: '#d92d20' },
+            sumrize: { DEFAULT: '#FF4438', hover: '#e63b30' }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    profileOpen: false,
+    referralCode: 'L5AQ2G',
+    referralUrl: 'app.sumrize.me/r/L5AQ2G',
+    copied: false,
+    /* Demo cycle: 0=empty | 1=progress | 2=bronze ready | 3=bronze claimed | 4=all claimed */
+    demoStage: 0,
+    demoStages: [
+      { count: 0, claimed: [] },
+      { count: 3, claimed: [] },
+      { count: 5, claimed: [] },
+      { count: 7, claimed: ['bronze'] },
+      { count: 25, claimed: ['bronze', 'silver', 'gold'] }
+    ],
+    tiers: [
+      { key: 'bronze', threshold: 5,  rewardMonths: 0.5,  iconColor: 'amber-600' },
+      { key: 'silver', threshold: 10, rewardMonths: 1,    iconColor: 'gray-400'  },
+      { key: 'gold',   threshold: 25, rewardMonths: 6,    iconColor: 'warning-500' }
+    ],
+    tierLabel: {
+      bronze: { en: 'Bronze', id: 'Bronze' },
+      silver: { en: 'Silver', id: 'Silver' },
+      gold:   { en: 'Gold',   id: 'Gold' }
+    },
+    tierReward: {
+      bronze: { en: '14 days Spark free', id: '14 hari Spark gratis' },
+      silver: { en: '1 month Spark free', id: '1 bulan Spark gratis' },
+      gold:   { en: '6 months Spark free', id: '6 bulan Spark gratis' }
+    },
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    get referralCount() { return this.demoStages[this.demoStage].count; },
+    get claimedTiers()  { return this.demoStages[this.demoStage].claimed; },
+    get readyTier() {
+      return this.tiers.find(t => !this.claimedTiers.includes(t.key) && this.referralCount >= t.threshold) || null;
+    },
+    get nextTier() {
+      return this.tiers.find(t => !this.claimedTiers.includes(t.key) && this.referralCount < t.threshold) || null;
+    },
+    get allClaimed() { return this.claimedTiers.length === this.tiers.length; },
+    /* Overall progress across all tiers (referralCount / max threshold = 25) */
+    get overallPercent() {
+      return Math.min(100, Math.round((this.referralCount / 25) * 100));
+    },
+    tierStatus(key) {
+      if (this.claimedTiers.includes(key)) return 'claimed';
+      const tier = this.tiers.find(t => t.key === key);
+      if (this.referralCount >= tier.threshold) return 'ready';
+      return 'locked';
+    },
+    tierProgressPercent(key) {
+      const tier = this.tiers.find(t => t.key === key);
+      return Math.min(100, Math.round((this.referralCount / tier.threshold) * 100));
+    },
+    cycleDemoStage() {
+      this.demoStage = (this.demoStage + 1) % this.demoStages.length;
+    },
+    copyLink() {
+      navigator.clipboard?.writeText('https://' + this.referralUrl).catch(() => {});
+      this.copied = true;
+      setTimeout(() => this.copied = false, 2000);
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (Referral active) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+        </a>
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
+        <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li><a href="index.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''"><i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i><span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span></a></li>
+            <li><a href="rizz.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''"><i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i><span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span></a></li>
+            <li><a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''"><i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i><span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span></a></li>
+            <li><a href="referral.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''"><i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i><span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span></a></li>
+            <li><a href="settings.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''"><i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i><span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span></a></li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition"><i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i><span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span></button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition"><i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i><span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span></button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- Page header -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+              <div>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Program Referral' : 'Referral Program'">Referral Program</h1>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Undang teman, kumpulkan referral, buka paket Spark gratis di tiap milestone.' : 'Invite friends, hit milestones, unlock free Spark plan at every tier.'">Invite friends, hit milestones, unlock free Spark plan at every tier.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span x-text="languages[lang].flag + ' ' + languages[lang].label"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                      <span class="flex items-center gap-3"><span class="text-lg leading-none" x-text="meta.flag"></span><span x-text="meta.label"></span></span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Profile dropdown -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button type="button" @click="profileOpen = !profileOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">Spark</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"><i data-lucide="settings" class="h-4 w-4"></i>Account settings</a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"><i data-lucide="info" class="h-4 w-4"></i>Support</a>
+                  </div>
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800"><a href="#" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10"><i data-lucide="log-out" class="h-4 w-4"></i>Sign out</a></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Hero: 2 cards =====
+               LEFT  = referral code + copy + social share buttons
+               RIGHT = aggregate stats + state-aware primary CTA -->
+          <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+            <!-- LEFT card: Referral code + share -->
+            <section class="rounded-2xl border border-brand-500 bg-white p-6 shadow-theme-sm dark:bg-white/[0.03]">
+              <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Kode Referral Anda' : 'Your Referral Code'">Your Referral Code</p>
+              <p class="mb-1 font-mono text-3xl font-bold tracking-wider text-gray-900 dark:text-white md:text-4xl" x-text="referralCode">L5AQ2G</p>
+              <p class="mb-4 text-sm text-gray-500 dark:text-gray-400" x-text="'https://' + referralUrl">https://app.sumrize.me/r/L5AQ2G</p>
+              <p class="mb-5 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bagikan link ini ke teman — registrasi mereka otomatis terhubung ke akun Anda.' : 'Share this link with friends — their sign-up auto-links to your account.'">Share this link with friends — their sign-up auto-links to your account.</p>
+
+              <!-- Primary copy action -->
+              <button type="button" @click="copyLink()" class="mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100">
+                <i data-lucide="copy" class="h-4 w-4" x-show="!copied"></i>
+                <i data-lucide="check" class="h-4 w-4" x-show="copied" x-cloak></i>
+                <span x-text="copied ? (lang === 'id' ? 'Tersalin!' : 'Copied!') : (lang === 'id' ? 'Salin Link Referral' : 'Copy Referral Link')">Copy Referral Link</span>
+              </button>
+
+              <!-- Social share buttons row.
+                   Reduces friction vs forcing user to copy + open WA/Telegram manually. -->
+              <p class="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Atau bagikan via' : 'Or share via'">Or share via</p>
+              <div class="grid grid-cols-4 gap-2">
+                <a :href="'https://wa.me/?text=' + encodeURIComponent('Cobain Sumrize, AI summary buat group chat. Pakai kode ' + referralCode + ': https://' + referralUrl)" target="_blank" rel="noopener" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-success-500 hover:bg-success-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-success-500 dark:hover:bg-success-500/10">
+                  <img src="./Sumrize — Because life’s too short to scroll group chats_files/whatsapp.webp" class="h-6 w-6" alt="" />
+                  <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">WhatsApp</span>
+                </a>
+                <a :href="'https://t.me/share/url?url=' + encodeURIComponent('https://' + referralUrl) + '&text=' + encodeURIComponent('Cobain Sumrize! Kode: ' + referralCode)" target="_blank" rel="noopener" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-500 dark:hover:bg-brand-500/10">
+                  <img src="./Sumrize — Because life’s too short to scroll group chats_files/telegram.png" class="h-6 w-6 object-contain" alt="" />
+                  <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">Telegram</span>
+                </a>
+                <a :href="'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Sumrize AI summary buat group chat. Pakai kode ' + referralCode + ': https://' + referralUrl)" target="_blank" rel="noopener" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-white dark:hover:bg-white/5">
+                  <svg class="h-6 w-6 text-gray-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">X / Twitter</span>
+                </a>
+                <a :href="'mailto:?subject=' + encodeURIComponent('Coba Sumrize') + '&body=' + encodeURIComponent('Pakai kode ' + referralCode + ' di https://' + referralUrl)" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-error-500 hover:bg-error-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-error-500 dark:hover:bg-error-500/10">
+                  <img src="./Sumrize — Because life’s too short to scroll group chats_files/Gmail_Icon.png" class="h-6 w-6 object-contain" alt="" />
+                  <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">Email</span>
+                </a>
+              </div>
+            </section>
+
+            <!-- RIGHT card: Stats + state-aware CTA -->
+            <section class="flex flex-col rounded-2xl border border-brand-500 bg-white p-6 shadow-theme-sm dark:bg-white/[0.03]">
+              <!-- Stats grid (3 stats: Joined, Next reward, Active until if claimed) -->
+              <div class="mb-5 grid grid-cols-2 gap-3">
+                <div class="rounded-xl border border-gray-200 bg-gray-50 p-3.5 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Sudah Bergabung' : 'Joined'">Joined</p>
+                  <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    <span x-text="referralCount">0</span><span class="text-gray-400">/25</span>
+                  </p>
+                </div>
+                <div class="rounded-xl border border-gray-200 bg-gray-50 p-3.5 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="allClaimed ? (lang === 'id' ? 'Status' : 'Status') : (lang === 'id' ? 'Hadiah Berikutnya' : 'Next Reward')">Next Reward</p>
+                  <p class="text-base font-bold text-gray-900 dark:text-white" x-show="!allClaimed && nextTier" x-text="(nextTier ? tierLabel[nextTier.key][lang] + ' · ' + tierReward[nextTier.key][lang] : '')"></p>
+                  <p class="text-base font-bold text-gray-900 dark:text-white" x-show="!allClaimed && readyTier && !nextTier" x-text="readyTier ? tierLabel[readyTier.key][lang] + ' · ' + tierReward[readyTier.key][lang] : ''"></p>
+                  <p class="flex items-center gap-1 text-base font-bold text-success-600 dark:text-success-500" x-show="allClaimed" x-cloak>
+                    <i data-lucide="trophy" class="h-4 w-4"></i>
+                    <span x-text="lang === 'id' ? 'Top Referrer' : 'Top Referrer'">Top Referrer</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Overall progress bar with milestone markers at 5, 10, 25 friends -->
+              <div class="mb-6">
+                <div class="mb-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span x-text="lang === 'id' ? 'Progress menuju Gold' : 'Progress toward Gold'">Progress toward Gold</span>
+                  <span class="font-semibold text-gray-700 dark:text-gray-300"><span x-text="overallPercent"></span>%</span>
+                </div>
+                <div class="relative h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                  <div class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all duration-500" :style="'width: ' + overallPercent + '%'"></div>
+                  <!-- Milestone markers at 20% (5 friends) and 40% (10 friends). Gold is at 100%. -->
+                  <div class="absolute top-1/2 left-[20%] h-3 w-px -translate-y-1/2 bg-gray-300 dark:bg-gray-600"></div>
+                  <div class="absolute top-1/2 left-[40%] h-3 w-px -translate-y-1/2 bg-gray-300 dark:bg-gray-600"></div>
+                </div>
+                <div class="mt-1 flex justify-between text-[10px] text-gray-400">
+                  <span>0</span>
+                  <span class="ml-[15%]">5 · Bronze</span>
+                  <span class="ml-[12%]">10 · Silver</span>
+                  <span>25 · Gold</span>
+                </div>
+              </div>
+
+              <!-- ===== State-aware CTA =====
+                   5 distinct states. Critical UX detail: never show an enabled
+                   button user can't actually use. Empty state nudges to share;
+                   ready state has the bright CTA; claimed states show success +
+                   point to the next milestone, not "Claim Reward" forever. -->
+
+              <!-- STATE: ready to claim (highlight) -->
+              <div x-show="readyTier" class="mt-auto rounded-xl bg-gradient-to-br from-sumrize/10 to-brand-500/10 p-4">
+                <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                  <i data-lucide="gift" class="h-4 w-4 text-sumrize"></i>
+                  <span x-text="lang === 'id' ? 'Hadiah siap diklaim!' : 'Reward ready to claim!'">Reward ready to claim!</span>
+                </p>
+                <p class="mb-3 text-xs text-gray-600 dark:text-gray-400">
+                  <span x-text="readyTier ? tierLabel[readyTier.key][lang] : ''"></span> ·
+                  <span x-text="readyTier ? tierReward[readyTier.key][lang] : ''"></span>
+                </p>
+                <button type="button" class="w-full rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+                  <span x-text="(lang === 'id' ? 'Klaim ' : 'Claim ') + (readyTier ? tierLabel[readyTier.key][lang] : '')">Claim Bronze</span>
+                </button>
+              </div>
+
+              <!-- STATE: in progress (1+ refs, no ready tier) -->
+              <div x-show="!readyTier && !allClaimed && nextTier && referralCount > 0" x-cloak class="mt-auto rounded-xl border border-dashed border-brand-200 bg-brand-50/30 p-4 dark:border-brand-500/30 dark:bg-brand-500/[0.05]">
+                <p class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                  <i data-lucide="trending-up" class="h-4 w-4 text-brand-500"></i>
+                  <span>
+                    <span x-text="nextTier ? (nextTier.threshold - referralCount) : ''"></span>
+                    <span x-text="lang === 'id' ? ' lagi ke ' : ' more to '"></span>
+                    <span x-text="nextTier ? tierLabel[nextTier.key][lang] : ''"></span>
+                  </span>
+                </p>
+                <p class="text-xs text-gray-600 dark:text-gray-400" x-text="lang === 'id' ? 'Terus bagikan link untuk membuka hadiah berikutnya.' : 'Keep sharing your link to unlock the next reward.'">Keep sharing your link to unlock the next reward.</p>
+              </div>
+
+              <!-- STATE: empty (0 referrals, nothing claimed) -->
+              <div x-show="referralCount === 0 && !allClaimed" x-cloak class="mt-auto rounded-xl border border-dashed border-gray-300 p-4 text-center dark:border-gray-700">
+                <i data-lucide="users" class="mx-auto mb-2 h-8 w-8 text-gray-400"></i>
+                <p class="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Mulai dari 0' : 'Start from zero'">Start from zero</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Salin link di atas dan bagikan ke 5 teman pertama untuk klaim Bronze.' : 'Copy the link above and share with your first 5 friends to claim Bronze.'">Copy the link above and share with 5 friends to claim Bronze.</p>
+              </div>
+
+              <!-- STATE: all claimed (max referrer — KEY UX INSIGHT) -->
+              <div x-show="allClaimed" x-cloak class="mt-auto rounded-xl bg-gradient-to-br from-warning-50 to-warning-500/10 p-4 text-center dark:from-warning-500/[0.08] dark:to-warning-500/[0.04]">
+                <div class="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-warning-500 text-white shadow-theme-sm">
+                  <i data-lucide="trophy" class="h-6 w-6"></i>
+                </div>
+                <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Semua hadiah terbuka!' : 'All rewards unlocked!'">All rewards unlocked!</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400" x-text="lang === 'id' ? 'Anda Top Referrer Sumrize. Terima kasih sudah menyebarkan! Lanjutkan bagikan untuk teman Anda — tanpa tambahan reward, semua karena cinta 💛' : 'You\'re a Top Sumrize Referrer. Keep sharing for the love of it — no more rewards, just gratitude 💛'">You're a Top Sumrize Referrer.</p>
+              </div>
+            </section>
+          </div>
+
+          <!-- ===== Reward Tiers (3 card grid) =====
+               Always visible so users know the full reward ladder upfront.
+               Each card visualizes state (locked/ready/claimed) for that tier. -->
+          <section class="mb-6">
+            <div class="mb-3 flex items-center gap-2">
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Jenjang Hadiah' : 'Reward Tiers'">Reward Tiers</h2>
+              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                <span x-text="claimedTiers.length"></span>/3
+                <span x-text="lang === 'id' ? 'diklaim' : 'claimed'">claimed</span>
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <!-- Template-style: each tier card. Reuses pattern for all 3. -->
+              <template x-for="tier in tiers" :key="tier.key">
+                <article
+                  class="overflow-hidden rounded-2xl border bg-white p-5 shadow-theme-sm transition dark:bg-white/[0.03]"
+                  :class="{
+                    'border-success-500': tierStatus(tier.key) === 'claimed',
+                    'border-brand-500 ring-2 ring-brand-500/10': tierStatus(tier.key) === 'ready',
+                    'border-gray-200 opacity-80 dark:border-gray-800': tierStatus(tier.key) === 'locked'
+                  }"
+                >
+                  <header class="mb-4 flex items-center justify-between">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl"
+                         :class="{
+                           'bg-success-50 text-success-500 dark:bg-success-500/[0.15]': tierStatus(tier.key) === 'claimed',
+                           'bg-amber-50 text-amber-600 dark:bg-amber-500/[0.15] dark:text-amber-400': tier.key === 'bronze',
+                           'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300': tier.key === 'silver' && tierStatus(tier.key) !== 'claimed',
+                           'bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]': tier.key === 'gold' && tierStatus(tier.key) !== 'claimed'
+                         }">
+                      <i data-lucide="trophy" class="h-5 w-5" x-show="tierStatus(tier.key) === 'claimed'"></i>
+                      <i data-lucide="award" class="h-5 w-5" x-show="tierStatus(tier.key) !== 'claimed'"></i>
+                    </div>
+                    <span x-show="tierStatus(tier.key) === 'claimed'" class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                      <i data-lucide="check" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Diklaim' : 'Claimed'">Claimed</span>
+                    </span>
+                    <span x-show="tierStatus(tier.key) === 'ready'" class="inline-flex items-center gap-1 rounded-full bg-sumrize px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+                      <i data-lucide="zap" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Siap' : 'Ready'">Ready</span>
+                    </span>
+                    <span x-show="tierStatus(tier.key) === 'locked'" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-500 dark:bg-white/10 dark:text-gray-400">
+                      <i data-lucide="lock" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Terkunci' : 'Locked'">Locked</span>
+                    </span>
+                  </header>
+
+                  <h3 class="mb-1 text-lg font-bold text-gray-900 dark:text-white" x-text="tierLabel[tier.key][lang]"></h3>
+                  <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span x-text="tier.threshold"></span>
+                    <span x-text="lang === 'id' ? ' teman → ' : ' friends → '"></span>
+                    <strong class="font-semibold text-gray-700 dark:text-gray-300" x-text="tierReward[tier.key][lang]"></strong>
+                  </p>
+
+                  <!-- Per-tier progress bar -->
+                  <div class="mb-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                    <span>
+                      <span x-text="Math.min(referralCount, tier.threshold)"></span>
+                      <span>/</span>
+                      <span x-text="tier.threshold"></span>
+                    </span>
+                    <span class="font-semibold" x-text="tierProgressPercent(tier.key) + '%'"></span>
+                  </div>
+                  <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                    <div class="h-full rounded-full transition-all duration-500"
+                         :class="{
+                           'bg-success-500': tierStatus(tier.key) === 'claimed',
+                           'bg-sumrize': tierStatus(tier.key) === 'ready',
+                           'bg-brand-400': tierStatus(tier.key) === 'locked'
+                         }"
+                         :style="'width: ' + tierProgressPercent(tier.key) + '%'"></div>
+                  </div>
+                </article>
+              </template>
+            </div>
+          </section>
+
+          <!-- ===== Referral list =====
+               Empty state vs filled table. Filled state shown when count > 0. -->
+          <section class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <header class="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Daftar Referral Anda' : 'Your Referrals'">Your Referrals</h2>
+              <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-300" x-text="referralCount + (lang === 'id' ? ' bergabung' : ' joined')">0 joined</span>
+            </header>
+
+            <!-- Empty state (count = 0) -->
+            <div x-show="referralCount === 0" class="px-5 py-10 text-center">
+              <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                <i data-lucide="users" class="h-7 w-7"></i>
+              </div>
+              <p class="mb-1 text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Belum ada referral' : 'No referrals yet'">No referrals yet</p>
+              <p class="mx-auto max-w-sm text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bagikan link Anda di atas. Daftar teman yang sudah bergabung akan muncul di sini.' : 'Share your link above. Friends who join will show up here.'">Share your link above. Friends who join will show up here.</p>
+            </div>
+
+            <!-- Filled list (count > 0) - mock 3 sample entries; first row is the most recent.
+                 In production this would be a server-paginated list. -->
+            <ul x-show="referralCount > 0" x-cloak class="divide-y divide-gray-100 dark:divide-gray-800">
+              <li class="flex items-center justify-between gap-3 px-5 py-3.5">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500 font-semibold text-xs">AN</div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Andi N.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">andi@example.com · 2 May 2026</p>
+                  </div>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-[11px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                  <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                  <span x-text="lang === 'id' ? 'Terverifikasi' : 'Verified'">Verified</span>
+                </span>
+              </li>
+              <li class="flex items-center justify-between gap-3 px-5 py-3.5">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-warning-50 text-warning-600 dark:bg-warning-500/[0.15] dark:text-warning-500 font-semibold text-xs">BU</div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Budi S.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">budi@example.com · 5 May 2026</p>
+                  </div>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-warning-50 px-2.5 py-1 text-[11px] font-semibold text-warning-600 dark:bg-warning-500/[0.15] dark:text-warning-500">
+                  <span class="h-1.5 w-1.5 rounded-full bg-warning-500"></span>
+                  <span x-text="lang === 'id' ? 'Menunggu' : 'Pending'">Pending</span>
+                </span>
+              </li>
+              <li class="flex items-center justify-between gap-3 px-5 py-3.5">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500 font-semibold text-xs">CI</div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">Citra L.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">citra@example.com · 10 May 2026</p>
+                  </div>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2.5 py-1 text-[11px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                  <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                  <span x-text="lang === 'id' ? 'Terverifikasi' : 'Verified'">Verified</span>
+                </span>
+              </li>
+              <li x-show="referralCount > 3" x-cloak class="px-5 py-3.5 text-center text-xs text-gray-400" x-text="(lang === 'id' ? '+ ' : '+ ') + (referralCount - 3) + (lang === 'id' ? ' lainnya' : ' more')">+ more</li>
+            </ul>
+          </section>
+
+          <!-- ===== How it works (3-step explainer) ===== -->
+          <section class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <h2 class="mb-4 text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Cara kerjanya' : 'How it works'">How it works</h2>
+            <ol class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <li class="flex gap-3">
+                <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">1</span>
+                <div>
+                  <p class="mb-1 text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Bagikan link' : 'Share your link'">Share your link</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Copy atau klik tombol share di atas — kirim ke teman via WA, Telegram, X, atau email.' : 'Copy or click a share button above — send to friends via WhatsApp, Telegram, X, or email.'">Copy or click a share button.</p>
+                </div>
+              </li>
+              <li class="flex gap-3">
+                <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">2</span>
+                <div>
+                  <p class="mb-1 text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Teman mendaftar' : 'Friend signs up'">Friend signs up</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Otomatis terhubung ke akun Anda. Status verifikasi muncul di daftar referral.' : 'Auto-linked to your account. Verification status shows in the list.'">Auto-linked to your account.</p>
+                </div>
+              </li>
+              <li class="flex gap-3">
+                <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">3</span>
+                <div>
+                  <p class="mb-1 text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Klaim hadiah berlapis' : 'Claim tiered rewards'">Claim tiered rewards</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bronze (5) → Silver (10) → Gold (25). Selalu ada milestone berikutnya.' : 'Bronze (5) → Silver (10) → Gold (25). There\'s always a next milestone.'">Bronze → Silver → Gold.</p>
+                </div>
+              </li>
+            </ol>
+          </section>
+
+          <!-- Mockup demo control -->
+          <div class="mt-6 flex flex-col items-center gap-2 text-xs text-gray-400">
+            <div class="flex items-center gap-2">
+              <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+              <span x-text="lang === 'id' ? 'Mode demo · Stage ' : 'Demo mode · Stage '">Demo mode · Stage </span>
+              <span class="font-mono"><span x-text="demoStage + 1"></span>/<span x-text="demoStages.length"></span></span>
+            </div>
+            <button type="button" @click="cycleDemoStage()" class="rounded-lg border border-gray-200 px-3 py-1 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/5">
+              <span x-show="demoStage === 0" x-text="lang === 'id' ? 'Stage berikutnya: 3 referral (progress)' : 'Next stage: 3 referrals (progressing)'">Next: progressing</span>
+              <span x-show="demoStage === 1" x-cloak x-text="lang === 'id' ? 'Stage berikutnya: 5 referral (Bronze siap claim)' : 'Next stage: 5 referrals (Bronze ready)'"></span>
+              <span x-show="demoStage === 2" x-cloak x-text="lang === 'id' ? 'Stage berikutnya: 7 referral (Bronze sudah diklaim)' : 'Next stage: 7 referrals (Bronze claimed)'"></span>
+              <span x-show="demoStage === 3" x-cloak x-text="lang === 'id' ? 'Stage berikutnya: 25 referral (semua tier diklaim)' : 'Next stage: 25 referrals (all claimed)'"></span>
+              <span x-show="demoStage === 4" x-cloak x-text="lang === 'id' ? 'Kembali ke awal (kosong)' : 'Reset to empty state'"></span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>

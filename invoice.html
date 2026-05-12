@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f2f7ff', 50: '#ecf3ff', 100: '#dde9ff', 200: '#c2d6ff',
+              300: '#9cb9ff', 400: '#7592ff', 500: '#465fff', 600: '#3641f5',
+              700: '#2a31d8', 800: '#252dae', 900: '#262e89', 950: '#161950'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#344054', 800: '#1d2939', 900: '#101828', 950: '#0c111d'
+            },
+            success: { 50: '#ecfdf3', 500: '#12b76a', 600: '#039855' },
+            warning: { 50: '#fffaeb', 500: '#f79009', 600: '#dc6803' },
+            error: { 50: '#fef3f2', 500: '#f04438', 600: '#d92d20' },
+            sumrize: { DEFAULT: '#FF4438', hover: '#e63b30' }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    profileOpen: false,
+    hasSubscription: true,
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (Invoice active) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+        </a>
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
+        <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a href="index.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="rizz.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="settings.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span>
+            </button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- Page header -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+              <div>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Riwayat Invoice' : 'Invoice History'">Invoice History</h1>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tinjau siklus penagihan dan unduh ulang invoice untuk arsip Anda.' : 'Review past billing cycles and download invoices for your records.'">Review past billing cycles and download invoices for your records.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span x-text="languages[lang].flag + ' ' + languages[lang].label"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                      <span class="flex items-center gap-3">
+                        <span class="text-lg leading-none" x-text="meta.flag"></span>
+                        <span x-text="meta.label"></span>
+                      </span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Profile dropdown -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button type="button" @click="profileOpen = !profileOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">Spark</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="settings" class="h-4 w-4"></i>
+                      Account settings
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="info" class="h-4 w-4"></i>
+                      Support
+                    </a>
+                  </div>
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800">
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10">
+                      <i data-lucide="log-out" class="h-4 w-4"></i>
+                      Sign out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Filter bar ===== -->
+          <section class="mb-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label for="filter-start" class="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tanggal Mulai' : 'Start Date'">Start Date</label>
+                <input id="filter-start" type="date" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+              </div>
+              <div>
+                <label for="filter-end" class="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tanggal Akhir' : 'End Date'">End Date</label>
+                <input id="filter-end" type="date" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+              </div>
+              <div>
+                <label for="filter-status" class="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">Status</label>
+                <select id="filter-status" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                  <option x-text="lang === 'id' ? 'Semua Status' : 'All Status'">All Status</option>
+                  <option x-text="lang === 'id' ? 'Aktif' : 'Active'">Active</option>
+                  <option x-text="lang === 'id' ? 'Berakhir' : 'Expired'">Expired</option>
+                  <option x-text="lang === 'id' ? 'Tertunda' : 'Pending'">Pending</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Filled state: Table + Pagination =====
+               Shown when hasSubscription = true. Each row represents one billing
+               cycle / invoice. Status badge uses success/gray tokens.  -->
+          <section x-show="hasSubscription" class="overflow-hidden rounded-2xl border border-brand-500 bg-white shadow-theme-sm dark:bg-white/[0.03]">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-gray-50/50 dark:bg-white/[0.02]">
+                  <tr>
+                    <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Detail Paket' : 'Plan Details'">Plan Details</th>
+                    <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                    <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Harga' : 'Price'">Price</th>
+                    <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Masa Berlaku' : 'Valid Period'">Valid Period</th>
+                    <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Aksi' : 'Action'">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                  <!-- Active row -->
+                  <tr class="transition hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <p class="font-semibold text-gray-900 dark:text-white">Spark</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">SPARK_IDR_MONTHLY</p>
+                    </td>
+                    <td class="px-5 py-4">
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                        <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                        <span x-text="lang === 'id' ? 'Aktif' : 'Active'">Active</span>
+                      </span>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <p class="font-semibold text-gray-900 dark:text-white">Rp99.000</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '/ bulan' : '/ month'">/ month</p>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4 text-sm">
+                      <p><span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Mulai' : 'From'">From</span> <span class="ml-1 font-medium text-gray-900 dark:text-white">27 Apr 2026</span></p>
+                      <p><span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Akhir' : 'To'">To</span> <span class="ml-2 font-medium text-gray-900 dark:text-white">27 May 2026</span></p>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                        <i data-lucide="printer" class="h-3.5 w-3.5"></i>
+                        <span x-text="lang === 'id' ? 'Cetak' : 'Print'">Print</span>
+                      </button>
+                    </td>
+                  </tr>
+
+                  <!-- Past period rows (demo) -->
+                  <tr class="transition hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <p class="font-semibold text-gray-900 dark:text-white">Spark</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">SPARK_IDR_MONTHLY</p>
+                    </td>
+                    <td class="px-5 py-4">
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-400">
+                        <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                        <span x-text="lang === 'id' ? 'Berakhir' : 'Expired'">Expired</span>
+                      </span>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <p class="font-semibold text-gray-900 dark:text-white">Rp99.000</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '/ bulan' : '/ month'">/ month</p>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4 text-sm">
+                      <p><span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Mulai' : 'From'">From</span> <span class="ml-1 font-medium text-gray-900 dark:text-white">27 Mar 2026</span></p>
+                      <p><span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Akhir' : 'To'">To</span> <span class="ml-2 font-medium text-gray-900 dark:text-white">27 Apr 2026</span></p>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                        <i data-lucide="printer" class="h-3.5 w-3.5"></i>
+                        <span x-text="lang === 'id' ? 'Cetak' : 'Print'">Print</span>
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr class="transition hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <p class="font-semibold text-gray-900 dark:text-white">Spark</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">SPARK_IDR_MONTHLY</p>
+                    </td>
+                    <td class="px-5 py-4">
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-400">
+                        <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                        <span x-text="lang === 'id' ? 'Berakhir' : 'Expired'">Expired</span>
+                      </span>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <p class="font-semibold text-gray-900 dark:text-white">Rp99.000</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '/ bulan' : '/ month'">/ month</p>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4 text-sm">
+                      <p><span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Mulai' : 'From'">From</span> <span class="ml-1 font-medium text-gray-900 dark:text-white">27 Feb 2026</span></p>
+                      <p><span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Akhir' : 'To'">To</span> <span class="ml-2 font-medium text-gray-900 dark:text-white">27 Mar 2026</span></p>
+                    </td>
+                    <td class="whitespace-nowrap px-5 py-4">
+                      <button type="button" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                        <i data-lucide="printer" class="h-3.5 w-3.5"></i>
+                        <span x-text="lang === 'id' ? 'Cetak' : 'Print'">Print</span>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination footer -->
+            <footer class="flex flex-col items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-gray-800 sm:flex-row">
+              <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                <span>
+                  <span x-text="lang === 'id' ? 'Menampilkan' : 'Showing'">Showing</span>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">3</span>
+                  <span x-text="lang === 'id' ? 'dari' : 'of'">of</span>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">3</span>
+                  <span x-text="lang === 'id' ? 'data' : 'entries'">entries</span>
+                </span>
+                <select class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                  <option x-text="(lang === 'id' ? '10 baris' : '10 rows')">10 rows</option>
+                  <option x-text="(lang === 'id' ? '25 baris' : '25 rows')">25 rows</option>
+                  <option x-text="(lang === 'id' ? '50 baris' : '50 rows')">50 rows</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" disabled class="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-gray-200 text-gray-400 dark:border-gray-700 dark:text-gray-600" aria-label="Previous">
+                  <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                </button>
+                <button type="button" class="flex h-8 min-w-[32px] items-center justify-center rounded-lg bg-brand-500 px-2 text-xs font-bold text-white shadow-theme-sm">1</button>
+                <button type="button" disabled class="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-gray-200 text-gray-400 dark:border-gray-700 dark:text-gray-600" aria-label="Next">
+                  <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                </button>
+              </div>
+            </footer>
+          </section>
+
+          <!-- ===== Empty state =====
+               Shown when hasSubscription = false. Hero card with icon + CTA
+               that links to pricing.html for the subscribe flow. -->
+          <section x-show="!hasSubscription" class="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-12" x-cloak>
+            <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+              <i data-lucide="receipt-text" class="h-10 w-10"></i>
+            </div>
+            <h2 class="mb-2 text-xl font-semibold text-gray-900 dark:text-white md:text-2xl" x-text="lang === 'id' ? 'Belum ada langganan aktif' : 'No active subscription yet'">No active subscription yet</h2>
+            <p class="mx-auto mb-6 max-w-md text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Pilih paket untuk mulai menggunakan semua fitur Sumrize: ringkasan harian, Ask Rizz, multi-connector, dan lainnya.' : 'Choose a plan to start using all Sumrize features: daily summaries, Ask Rizz, multi-connector, and more.'">Choose a plan to start using all Sumrize features.</p>
+            <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <a href="pricing.html" class="inline-flex items-center gap-2 rounded-full bg-sumrize px-6 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+                <i data-lucide="layout-grid" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Lihat Paket' : 'View Plans'">View Plans</span>
+              </a>
+              <a href="pricing.html?trial=1" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                <i data-lucide="sparkles" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Start 14-day Free Trial'">Start Free Trial</span>
+              </a>
+            </div>
+            <p class="mt-4 text-xs text-gray-400" x-text="lang === 'id' ? 'Tanpa kartu kredit. Batalkan kapan saja.' : 'No credit card required. Cancel anytime.'">No credit card required. Cancel anytime.</p>
+          </section>
+
+          <!-- Mockup demo control: flip between filled / empty state for design review.
+               In production this toggle would be removed; the state comes from the API. -->
+          <div class="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
+            <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+            <button type="button" @click="hasSubscription = !hasSubscription" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
+              <span x-show="hasSubscription" x-text="lang === 'id' ? 'Lihat sebagai user baru (tanpa langganan)' : 'View as new user (no subscription)'"></span>
+              <span x-show="!hasSubscription" x-text="lang === 'id' ? 'Lihat dengan data langganan' : 'View with subscription data'" x-cloak></span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>
