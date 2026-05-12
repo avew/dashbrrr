@@ -61,9 +61,13 @@
     /* Wizard state */
     step: 1,
     groupLink: '',
-    schedule: 'morning',
+    /* Tier gating — free users get a fixed daily evening summary.
+       Spark (paid) unlocks morning, custom time, and on-demand. */
+    userTier: 'free',
+    schedule: 'evening',
     customTime: '08:00',
     distribution: 'me',
+    trialJustStarted: false,
     languages: {
       en: { label: 'English', flag: '🇬🇧' },
       id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
@@ -92,6 +96,24 @@
     next() { if (this.step < 4) this.step++; },
     back() { if (this.step > 1) this.step--; },
     submit() { this.step = 4; },
+    /* Schedule selection — gated by tier. Spark-only options are no-op for free. */
+    isPremiumSchedule(key) { return ['morning', 'custom', 'ondemand'].includes(key); },
+    selectSchedule(key) {
+      if (this.isPremiumSchedule(key) && this.userTier === 'free') return;
+      this.schedule = key;
+    },
+    /* Instant trial activation — for mockup, flips userTier so options unlock live.
+       Real app would post to /trial/start, then update tier from server response. */
+    startTrial() {
+      this.userTier = 'spark';
+      this.schedule = 'morning'; /* upgrade default to the most popular option */
+      this.trialJustStarted = true;
+      setTimeout(() => this.trialJustStarted = false, 3500);
+    },
+    revertToFree() {
+      this.userTier = 'free';
+      this.schedule = 'evening'; /* force back to the only free option */
+    },
     init() {
       this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
       this.lang = localStorage.getItem('lang') || 'en';
@@ -263,66 +285,153 @@
       </div>
     </section>
 
-    <!-- ===== STEP 2: Summary Schedule ===== -->
+    <!-- ===== STEP 2: Summary Schedule (TIER-GATED) =====
+         Free users get fixed evening summary only. Spark unlocks morning,
+         custom time, and on-demand. Trial CTA banner sits above the grid;
+         clicking it instantly unlocks (mockup demo of value). -->
     <section x-show="step === 2" x-cloak class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8">
-      <h1 class="text-xl font-semibold text-gray-900 dark:text-white md:text-2xl" x-text="lang === 'id' ? 'Kapan Anda ingin terima summary?' : 'When do you want summaries?'">When do you want summaries?</h1>
-      <p class="mb-6 mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Pilih jadwal yang paling cocok dengan rutinitas Anda. Bisa diubah kapan saja.' : 'Pick a schedule that fits your routine. Changeable anytime.'">Pick a schedule that fits your routine.</p>
+      <div class="mb-5 flex items-start justify-between gap-3">
+        <div class="flex-1">
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white md:text-2xl" x-text="lang === 'id' ? 'Kapan Anda ingin terima summary?' : 'When do you want summaries?'">When do you want summaries?</h1>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Pilih jadwal yang paling cocok dengan rutinitas Anda. Bisa diubah kapan saja.' : 'Pick a schedule that fits your routine. Changeable anytime.'">Pick a schedule that fits your routine.</p>
+        </div>
+        <!-- Tier badge -->
+        <span x-show="userTier === 'free'" class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">
+          <i data-lucide="user" class="h-3 w-3"></i>
+          <span x-text="lang === 'id' ? 'Free' : 'Free'">Free</span>
+        </span>
+        <span x-show="userTier === 'spark'" x-cloak class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-theme-sm">
+          <i data-lucide="sparkles" class="h-3 w-3"></i>
+          <span x-text="lang === 'id' ? 'Spark Trial' : 'Spark Trial'">Spark Trial</span>
+        </span>
+      </div>
 
-      <!-- Schedule option cards -->
+      <!-- ===== Trial CTA banner (shown only for free users) =====
+           Visible upgrade path — describes value, no scare tactics. Risk-reducer
+           lines below button ("Tanpa kartu kredit · Batal kapan saja"). -->
+      <div x-show="userTier === 'free'" class="mb-5 overflow-hidden rounded-2xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.05] via-white to-brand-500/[0.05] dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1]">
+        <div class="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+          <div class="flex items-start gap-3">
+            <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+              <i data-lucide="sparkles" class="h-5 w-5"></i>
+            </div>
+            <div>
+              <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Buka semua opsi jadwal dengan Spark Trial' : 'Unlock every schedule option with Spark Trial'">Unlock every schedule with Spark Trial</p>
+              <ul class="space-y-0.5 text-xs text-gray-600 dark:text-gray-400">
+                <li class="flex items-center gap-1.5">
+                  <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Jadwal pagi 06:00 · ringkas saat sarapan' : 'Morning at 06:00 · read while you commute'">Morning at 06:00</span>
+                </li>
+                <li class="flex items-center gap-1.5">
+                  <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Custom time · pilih jam suka-suka' : 'Custom time · any hour you want'">Custom time</span>
+                </li>
+                <li class="flex items-center gap-1.5">
+                  <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'On-demand via Ask Rizz · kapan saja' : 'On-demand via Ask Rizz · anytime'">On-demand</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="flex flex-col items-stretch gap-1.5 md:items-end">
+            <button type="button" @click="startTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+              <i data-lucide="sparkles" class="h-4 w-4"></i>
+              <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+            </button>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tanpa kartu kredit · Batal kapan saja' : 'No credit card · Cancel anytime'">No credit card · Cancel anytime</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Trial-just-activated toast (3.5s after startTrial) ===== -->
+      <div x-show="trialJustStarted" x-cloak x-transition.opacity class="mb-5 flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-50 p-3 dark:bg-success-500/[0.1]">
+        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-success-500 text-white">
+          <i data-lucide="check" class="h-4 w-4"></i>
+        </div>
+        <div class="flex-1 text-sm">
+          <p class="font-semibold text-success-600 dark:text-success-500" x-text="lang === 'id' ? 'Spark Trial aktif!' : 'Spark Trial activated!'">Spark Trial activated!</p>
+          <p class="text-xs text-gray-600 dark:text-gray-400" x-text="lang === 'id' ? 'Semua jadwal terbuka selama 14 hari. Pilih yang paling cocok di bawah.' : 'All schedules unlocked for 14 days. Pick the one that fits you.'">All schedules unlocked for 14 days.</p>
+        </div>
+      </div>
+
+      <!-- ===== Trial active banner (persistent after toast fades) ===== -->
+      <div x-show="userTier === 'spark' && !trialJustStarted" x-cloak class="mb-5 flex items-center gap-3 rounded-xl bg-gradient-to-r from-sumrize/[0.08] to-brand-500/[0.08] p-3 text-sm">
+        <i data-lucide="sparkles" class="h-4 w-4 flex-shrink-0 text-sumrize"></i>
+        <span class="flex-1 text-gray-700 dark:text-gray-300">
+          <strong class="font-semibold" x-text="lang === 'id' ? 'Trial Spark aktif' : 'Spark Trial active'">Spark Trial active</strong>
+          <span x-text="lang === 'id' ? ' sampai 27 Mei 2026 · Semua jadwal terbuka' : ' until 27 May 2026 · All schedules unlocked'"> until 27 May 2026 · All schedules unlocked</span>
+        </span>
+      </div>
+
+      <!-- Schedule option cards (tier-gated). Locked cards have lock badge + reduced opacity. -->
       <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <!-- Morning (most popular) -->
-        <label class="relative flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-               :class="schedule === 'morning' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
-          <span class="absolute right-3 top-3 rounded-full bg-warning-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white" x-text="lang === 'id' ? 'Paling Populer' : 'Most Popular'">Most Popular</span>
-          <input type="radio" name="schedule" value="morning" x-model="schedule" class="sr-only" />
-          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]">
-            <i data-lucide="sunrise" class="h-5 w-5"></i>
-          </div>
-          <div class="flex-1">
-            <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Setiap pagi · 06:00' : 'Every morning · 06:00'">Every morning · 06:00</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Ringkasan semalam, baca sambil ngopi' : 'Last night recap with your morning coffee'">Last night recap with your morning coffee</p>
-          </div>
-        </label>
-
-        <!-- Evening -->
-        <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
+        <!-- Evening (FREE — always available) -->
+        <button type="button" @click="selectSchedule('evening')" class="relative flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-left transition"
                :class="schedule === 'evening' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
-          <input type="radio" name="schedule" value="evening" x-model="schedule" class="sr-only" />
+          <span class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+            <i data-lucide="gift" class="h-2.5 w-2.5"></i>
+            <span x-text="lang === 'id' ? 'Termasuk Free' : 'Included in Free'">Included in Free</span>
+          </span>
           <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
             <i data-lucide="moon" class="h-5 w-5"></i>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 pr-20">
             <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Setiap malam · 20:00' : 'Every evening · 20:00'">Every evening · 20:00</p>
             <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Rekap hari ini sebelum tidur' : 'End-of-day recap before bed'">End-of-day recap before bed</p>
           </div>
-        </label>
+        </button>
 
-        <!-- Custom time -->
-        <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-               :class="schedule === 'custom' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
-          <input type="radio" name="schedule" value="custom" x-model="schedule" class="sr-only" />
+        <!-- Morning (SPARK ONLY) -->
+        <button type="button" @click="selectSchedule('morning')" class="relative flex items-start gap-3 rounded-xl border p-4 text-left transition"
+               :class="userTier === 'free' ? 'cursor-not-allowed border-gray-200 bg-gray-50/50 opacity-70 dark:border-gray-800 dark:bg-white/[0.02]' : (schedule === 'morning' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08] cursor-pointer' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03] cursor-pointer')">
+          <!-- Lock badge (free) -->
+          <span x-show="userTier === 'free'" class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+            <i data-lucide="lock" class="h-2.5 w-2.5"></i>
+            <span x-text="lang === 'id' ? 'Spark' : 'Spark'">Spark</span>
+          </span>
+          <!-- Most Popular badge (spark) -->
+          <span x-show="userTier === 'spark'" x-cloak class="absolute right-3 top-3 rounded-full bg-warning-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white" x-text="lang === 'id' ? 'Paling Populer' : 'Most Popular'">Most Popular</span>
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]">
+            <i data-lucide="sunrise" class="h-5 w-5"></i>
+          </div>
+          <div class="flex-1 pr-20">
+            <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Setiap pagi · 06:00' : 'Every morning · 06:00'">Every morning · 06:00</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Ringkasan semalam, baca sambil ngopi' : 'Last night recap with morning coffee'">Last night recap with morning coffee</p>
+          </div>
+        </button>
+
+        <!-- Custom time (SPARK ONLY) -->
+        <button type="button" @click="selectSchedule('custom')" class="relative flex items-start gap-3 rounded-xl border p-4 text-left transition"
+               :class="userTier === 'free' ? 'cursor-not-allowed border-gray-200 bg-gray-50/50 opacity-70 dark:border-gray-800 dark:bg-white/[0.02]' : (schedule === 'custom' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08] cursor-pointer' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03] cursor-pointer')">
+          <span x-show="userTier === 'free'" class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+            <i data-lucide="lock" class="h-2.5 w-2.5"></i>
+            <span>Spark</span>
+          </span>
           <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
             <i data-lucide="calendar-clock" class="h-5 w-5"></i>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 pr-16">
             <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Jam custom' : 'Custom time'">Custom time</p>
             <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Pilih waktu spesifik' : 'Pick a specific time'">Pick a specific time</p>
-            <input type="time" x-model="customTime" @click.stop class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white" :disabled="schedule !== 'custom'" />
+            <input type="time" x-model="customTime" @click.stop class="mt-2 w-full rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white disabled:cursor-not-allowed disabled:opacity-60" :disabled="userTier === 'free' || schedule !== 'custom'" />
           </div>
-        </label>
+        </button>
 
-        <!-- On-demand only -->
-        <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-               :class="schedule === 'ondemand' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08]' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'">
-          <input type="radio" name="schedule" value="ondemand" x-model="schedule" class="sr-only" />
+        <!-- On-demand only (SPARK ONLY) -->
+        <button type="button" @click="selectSchedule('ondemand')" class="relative flex items-start gap-3 rounded-xl border p-4 text-left transition"
+               :class="userTier === 'free' ? 'cursor-not-allowed border-gray-200 bg-gray-50/50 opacity-70 dark:border-gray-800 dark:bg-white/[0.02]' : (schedule === 'ondemand' ? 'border-brand-500 bg-brand-50/40 ring-2 ring-brand-500/10 dark:bg-brand-500/[0.08] cursor-pointer' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03] cursor-pointer')">
+          <span x-show="userTier === 'free'" class="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+            <i data-lucide="lock" class="h-2.5 w-2.5"></i>
+            <span>Spark</span>
+          </span>
           <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-sumrize/10 text-sumrize">
             <i data-lucide="zap" class="h-5 w-5"></i>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 pr-16">
             <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'On-demand saja' : 'On-demand only'">On-demand only</p>
             <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tanpa jadwal — minta kapan saja via Ask Rizz' : 'No schedule — ask Rizz anytime'">No schedule — ask Rizz anytime</p>
           </div>
-        </label>
+        </button>
       </div>
 
       <!-- Live preview -->
@@ -401,12 +510,15 @@
       </div>
     </section>
 
-    <!-- ===== STEP 4: Success ===== -->
+    <!-- ===== STEP 4: Success (tier-aware) ===== -->
     <section x-show="step === 4" x-cloak class="rounded-2xl border border-success-500 bg-white p-6 text-center shadow-theme-md dark:bg-white/[0.03] md:p-10">
       <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-success-50 text-success-500 dark:bg-success-500/[0.15]">
         <i data-lucide="check" class="h-10 w-10"></i>
       </div>
-      <h1 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Sumrize aktif!' : 'Sumrize is active!'">Sumrize is active!</h1>
+      <h1 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
+        <span x-show="userTier === 'free'" x-text="lang === 'id' ? 'Sumrize Free aktif!' : 'Sumrize Free is active!'">Sumrize Free is active!</span>
+        <span x-show="userTier === 'spark'" x-cloak x-text="lang === 'id' ? 'Sumrize Spark Trial aktif!' : 'Sumrize Spark Trial is active!'">Sumrize Spark Trial is active!</span>
+      </h1>
       <p class="mx-auto mb-6 max-w-md text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'AI WhatsApp Sumrize akan join grup Anda dalam beberapa detik. Summary pertama dikirim sesuai jadwal yang dipilih.' : 'The Sumrize AI joins your group in a few seconds. The first summary arrives on your chosen schedule.'">The Sumrize AI joins your group in a few seconds.</p>
 
       <!-- Next-steps preview cards -->
@@ -428,6 +540,32 @@
         </div>
       </div>
 
+      <!-- Trial countdown reminder (Spark Trial only) -->
+      <div x-show="userTier === 'spark'" x-cloak class="mx-auto mb-6 flex max-w-md items-center gap-3 rounded-xl bg-gradient-to-r from-sumrize/[0.08] to-brand-500/[0.08] p-3 text-left text-sm">
+        <i data-lucide="clock" class="h-5 w-5 flex-shrink-0 text-sumrize"></i>
+        <div>
+          <p class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Trial berakhir 27 Mei 2026' : 'Trial ends 27 May 2026'">Trial ends 27 May 2026</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Lanjut Spark Rp99.000/bulan atau auto-revert ke Free.' : 'Continue Spark at Rp99.000/mo or auto-revert to Free.'">Auto-revert to Free or continue Spark at Rp99.000/mo.</p>
+        </div>
+      </div>
+
+      <!-- Free → upsell card (last chance prompt before exit, but soft) -->
+      <div x-show="userTier === 'free'" class="mx-auto mb-6 max-w-md overflow-hidden rounded-xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.05] to-brand-500/[0.05] p-4 text-left">
+        <div class="flex items-start gap-3">
+          <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+            <i data-lucide="sparkles" class="h-4 w-4"></i>
+          </div>
+          <div class="flex-1">
+            <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Mau jadwal pagi atau custom?' : 'Want morning or custom schedule?'">Want morning or custom schedule?</p>
+            <p class="mb-3 text-xs text-gray-600 dark:text-gray-400" x-text="lang === 'id' ? 'Coba Spark 14 hari gratis — kapan saja bisa balik ke Free.' : 'Try Spark free for 14 days — switch back to Free anytime.'">Try Spark free for 14 days — switch back anytime.</p>
+            <a href="pricing.html?trial=1" class="inline-flex items-center gap-1.5 text-xs font-semibold text-sumrize hover:text-sumrize-hover">
+              <span x-text="lang === 'id' ? 'Mulai Trial Spark' : 'Start Spark Trial'">Start Spark Trial</span>
+              <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
         <a href="index.html" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-sumrize px-6 py-3 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover sm:w-auto">
           <i data-lucide="home" class="h-4 w-4"></i>
@@ -439,6 +577,15 @@
         </a>
       </div>
     </section>
+
+    <!-- Mockup demo control: flip tier for design review. Production: remove. -->
+    <div class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+      <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+      <button type="button" @click="userTier === 'free' ? startTrial() : revertToFree()" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
+        <span x-show="userTier === 'free'" x-text="lang === 'id' ? 'Lihat dengan Spark Trial aktif' : 'View with Spark Trial active'">View with Spark Trial active</span>
+        <span x-show="userTier === 'spark'" x-cloak x-text="lang === 'id' ? 'Lihat sebagai user Free' : 'View as Free user'">View as Free user</span>
+      </button>
+    </div>
 
     <!-- ===== Navigation row (back / cancel / next) — hidden on success step ===== -->
     <div x-show="step < 4" class="mt-6 flex items-center justify-between gap-3">
