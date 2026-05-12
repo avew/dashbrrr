@@ -68,6 +68,17 @@
     scopeOpen: false,
     toolOpen: false,
     sourcesOpen: false,
+    /* First-time empty state — toggle via demo control at page footer.
+       When false: saved chats list and chat thread both replaced by welcome
+       UX with sample question starters. */
+    hasChats: true,
+    inputText: '',
+    sampleQuestions: [
+      { icon: 'messages-square', en: 'What did everyone discuss today?',  id: 'Apa yang dibahas di grup hari ini?' },
+      { icon: 'wallet',          en: 'How much is the arisan fee this month?', id: 'Berapa iuran arisan bulan ini?' },
+      { icon: 'calendar',        en: 'When is the next arisan event?',   id: 'Kapan jadwal arisan berikutnya?' },
+      { icon: 'users',           en: 'Who has not confirmed attendance?', id: 'Siapa yang belum konfirmasi hadir?' }
+    ],
     /* Browse modal: click stat → see actual examples by content type */
     browseOpen: false,
     browseType: 'links',
@@ -122,6 +133,13 @@
       this.userTier = 'spark';
       this.trialJustStarted = true;
       setTimeout(() => this.trialJustStarted = false, 3500);
+    },
+    /* Real trial CTA — sends user through the proper pricing/checkout flow.
+       Production navigation; the in-page startTrial() above is kept only
+       for the demo toggle at the page footer. */
+    goToTrial() {
+      const here = (window.location.pathname.split('/').pop() || 'index.html');
+      window.location.href = 'pricing.html?trial=1&from=' + encodeURIComponent(here);
     },
     revertToFree() {
       this.userTier = 'free';
@@ -395,7 +413,7 @@
                 </div>
               </div>
               <div class="flex flex-col items-stretch gap-1.5 md:items-end">
-                <button type="button" @click="startTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <button type="button" @click="goToTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
                   <i data-lucide="sparkles" class="h-4 w-4"></i>
                   <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
                 </button>
@@ -456,8 +474,17 @@
                 </div>
               </div>
 
+              <!-- Empty state for first-time user (no chats yet) -->
+              <div x-show="!hasChats" x-cloak class="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
+                <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/[0.05]">
+                  <i data-lucide="message-square-plus" class="h-6 w-6 text-gray-400"></i>
+                </div>
+                <p class="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Belum ada chat' : 'No chats yet'">No chats yet</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Mulai pertanyaan pertama Anda di sebelah kanan' : 'Start your first question on the right'">Start your first question on the right</p>
+              </div>
+
               <!-- Date-grouped list -->
-              <nav class="flex-1 space-y-4 overflow-y-auto px-2 pb-2">
+              <nav x-show="hasChats" class="flex-1 space-y-4 overflow-y-auto px-2 pb-2">
                 <!-- TODAY (mix: arisan / family / office) -->
                 <div>
                   <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Hari ini' : 'Today'">Today</h3>
@@ -511,7 +538,7 @@
               </nav>
 
               <!-- Show more (pagination affordance) -->
-              <div class="border-t border-gray-100 dark:border-gray-800">
+              <div x-show="hasChats" class="border-t border-gray-100 dark:border-gray-800">
                 <button type="button" class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-xs font-medium text-gray-500 transition hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5">
                   <span x-text="lang === 'id' ? 'Lihat lebih banyak…' : 'Show more…'">Show more…</span>
                   <i data-lucide="chevron-down" class="h-3.5 w-3.5"></i>
@@ -557,7 +584,7 @@
                           </button>
                         </template>
                         <!-- ONLY 'All connectors' is locked — cross-source search = Spark feature -->
-                        <button type="button" @click="startTrial(); scopeOpen = false" class="flex w-full items-center justify-between gap-3 border-t border-gray-100 px-4 py-2.5 text-sm text-gray-500 opacity-70 transition hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5">
+                        <button type="button" @click="goToTrial()" class="flex w-full items-center justify-between gap-3 border-t border-gray-100 px-4 py-2.5 text-sm text-gray-500 opacity-70 transition hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5">
                           <span class="flex items-center gap-3">
                             <i data-lucide="layout-grid" class="h-4 w-4"></i>
                             <span x-text="lang === 'id' ? 'Semua connector' : 'All connectors'">All connectors</span>
@@ -676,10 +703,9 @@
                 </div>
               </header>
 
-              <!-- Quick suggestion chips (tier-aware).
-                   Free: 4 summary-oriented + 1 locked retrieval (preview value).
-                   Spark: 4 retrieval-oriented chips, no locks. -->
-              <div class="flex flex-wrap gap-2 border-b border-gray-100 px-5 py-3 dark:border-gray-800">
+              <!-- Quick suggestion chips (tier-aware) — only when there's an
+                   active chat. Empty state has its own sample-question cards. -->
+              <div x-show="hasChats" class="flex flex-wrap gap-2 border-b border-gray-100 px-5 py-3 dark:border-gray-800">
 
                 <!-- FREE chips (summary) -->
                 <template x-if="userTier === 'free'">
@@ -701,7 +727,7 @@
                       <span x-text="lang === 'id' ? 'Bandingkan bulan lalu' : 'Compared to last month'">Compared to last month</span>
                     </button>
                     <!-- Locked teaser — preview Spark capability, click triggers trial -->
-                    <button type="button" @click="startTrial()" class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sumrize/[0.08] to-brand-500/[0.08] px-3 py-1.5 text-xs font-medium text-gray-600 ring-1 ring-sumrize/30 transition hover:from-sumrize/[0.15] hover:to-brand-500/[0.15] dark:text-gray-300 dark:ring-sumrize/40">
+                    <button type="button" @click="goToTrial()" class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sumrize/[0.08] to-brand-500/[0.08] px-3 py-1.5 text-xs font-medium text-gray-600 ring-1 ring-sumrize/30 transition hover:from-sumrize/[0.15] hover:to-brand-500/[0.15] dark:text-gray-300 dark:ring-sumrize/40">
                       <i data-lucide="lock" class="h-3 w-3 text-sumrize"></i>
                       <span x-text="lang === 'id' ? 'Cari PDF saja' : 'Find PDFs only'">Find PDFs only</span>
                       <span class="rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">Spark</span>
@@ -732,8 +758,37 @@
                 </template>
               </div>
 
-              <!-- Thread (scrollable) -->
-              <div class="flex-1 space-y-6 overflow-y-auto p-5">
+              <!-- ===== Welcome state (no chats yet) =====
+                   Replaces the thread when hasChats === false. Shows Rizz avatar,
+                   intro copy, and 4 sample question cards user can click to
+                   populate the input below. -->
+              <div x-show="!hasChats" x-cloak class="flex flex-1 flex-col items-center justify-center overflow-y-auto p-6 md:p-8">
+                <!-- Hero -->
+                <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-theme-md">
+                  <i data-lucide="sparkles" class="h-8 w-8"></i>
+                </div>
+                <h2 class="mb-2 text-xl font-bold text-gray-900 dark:text-white md:text-2xl">
+                  <span x-text="lang === 'id' ? 'Halo, saya Rizz 👋' : 'Hi, I\'m Rizz 👋'">Hi, I'm Rizz 👋</span>
+                </h2>
+                <p class="mb-6 max-w-md text-center text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tanya apa saja tentang grup chat Anda — saya cari pesan, link, PDF, atau gambar dari grup yang dipilih.' : 'Ask me anything about your chats — I find messages, links, PDFs, and images from the selected group.'">Ask me anything about your chats.</p>
+
+                <!-- Sample question starters: click → fills input field -->
+                <div class="grid w-full max-w-2xl grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <template x-for="q in sampleQuestions" :key="q.en">
+                    <button type="button" @click="inputText = q[lang]; $refs.chatInput && $refs.chatInput.focus()" class="group flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-3.5 text-left transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
+                      <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 transition group-hover:bg-brand-100 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                        <i :data-lucide="q.icon" class="h-4 w-4"></i>
+                      </div>
+                      <p class="text-sm text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white" x-text="q[lang]"></p>
+                    </button>
+                  </template>
+                </div>
+
+                <p class="mt-6 text-xs text-gray-400" x-text="lang === 'id' ? 'Klik salah satu di atas, atau ketik pertanyaan Anda di kolom bawah' : 'Click one above, or type your question in the box below'">Click one above, or type your question below</p>
+              </div>
+
+              <!-- Thread (scrollable) — shown when hasChats === true -->
+              <div x-show="hasChats" class="flex-1 space-y-6 overflow-y-auto p-5">
 
                 <!-- User message: right-aligned, brand-500 solid (max contrast vs AI) -->
                 <div class="flex justify-end">
@@ -797,7 +852,7 @@
                           <strong class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Dengan Spark: ' : 'With Spark: '">With Spark: </strong>
                           <span x-text="lang === 'id' ? 'lihat link, PDF, dan gambar yang disebut Rizz langsung di sini — plus kutipan persis dari pengirim aslinya.' : 'see links, PDFs, and images Rizz mentions right here — plus exact quotes from the original senders.'">see attached files and exact quotes inline.</span>
                         </p>
-                        <button type="button" @click="startTrial()" class="mt-1 inline-flex items-center gap-1 text-xs font-bold text-sumrize hover:text-sumrize-hover">
+                        <button type="button" @click="goToTrial()" class="mt-1 inline-flex items-center gap-1 text-xs font-bold text-sumrize hover:text-sumrize-hover">
                           <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
                           <i data-lucide="arrow-right" class="h-3 w-3"></i>
                         </button>
@@ -959,7 +1014,9 @@
                   </button>
                   <input
                     type="text"
-                    placeholder="Ask anything to rizz…"
+                    x-model="inputText"
+                    x-ref="chatInput"
+                    :placeholder="lang === 'id' ? 'Tanya apa saja ke Rizz…' : 'Ask anything to Rizz…'"
                     class="flex-1 bg-transparent py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white"
                   />
                   <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-sumrize px-4 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
@@ -972,13 +1029,22 @@
             </section>
           </div>
 
-          <!-- Mockup demo control: flip tier for design review. Production: remove. -->
-          <div class="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
-            <i data-lucide="eye" class="h-3.5 w-3.5"></i>
-            <button type="button" @click="userTier === 'free' ? startTrial() : revertToFree()" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
-              <span x-show="userTier === 'free'" x-text="lang === 'id' ? 'Lihat dengan Spark Trial aktif' : 'View with Spark Trial active'">View with Spark Trial active</span>
-              <span x-show="userTier === 'spark'" x-cloak x-text="lang === 'id' ? 'Lihat sebagai user Free' : 'View as Free user'">View as Free user</span>
-            </button>
+          <!-- Mockup demo controls: tier + first-time toggles. Production: remove. -->
+          <div class="mt-6 flex flex-col items-center justify-center gap-1.5 text-xs text-gray-400">
+            <div class="flex items-center gap-2">
+              <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+              <button type="button" @click="userTier === 'free' ? startTrial() : revertToFree()" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
+                <span x-show="userTier === 'free'" x-text="lang === 'id' ? 'Lihat dengan Spark Trial aktif' : 'View with Spark Trial active'">View with Spark Trial active</span>
+                <span x-show="userTier === 'spark'" x-cloak x-text="lang === 'id' ? 'Lihat sebagai user Free' : 'View as Free user'">View as Free user</span>
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="user-plus" class="h-3.5 w-3.5"></i>
+              <button type="button" @click="hasChats = !hasChats" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
+                <span x-show="hasChats" x-text="lang === 'id' ? 'Lihat sebagai user baru (belum ada chat)' : 'View as first-time user (no chats)'">View as first-time user</span>
+                <span x-show="!hasChats" x-cloak x-text="lang === 'id' ? 'Lihat dengan riwayat chat' : 'View with chat history'">View with chat history</span>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -1146,7 +1212,7 @@
                 </div>
               </div>
               <div class="flex flex-col gap-2 sm:flex-shrink-0">
-                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <button type="button" @click="goToTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
                   <i data-lucide="sparkles" class="h-4 w-4"></i>
                   <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
                 </button>
@@ -1170,7 +1236,7 @@
                 <i data-lucide="file-text" class="h-6 w-6"></i>
               </div>
               <!-- Free: lock badge replaces download -->
-              <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
+              <button x-show="userTier === 'free'" type="button" @click="goToTrial()" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
                 <i data-lucide="lock" class="h-3 w-3"></i>
                 Spark
               </button>
@@ -1190,7 +1256,7 @@
               <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
                 <i data-lucide="file-text" class="h-6 w-6"></i>
               </div>
-              <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
+              <button x-show="userTier === 'free'" type="button" @click="goToTrial()" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
                 <i data-lucide="lock" class="h-3 w-3"></i>
                 Spark
               </button>
@@ -1209,7 +1275,7 @@
               <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
                 <i data-lucide="file-text" class="h-6 w-6"></i>
               </div>
-              <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
+              <button x-show="userTier === 'free'" type="button" @click="goToTrial()" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
                 <i data-lucide="lock" class="h-3 w-3"></i>
                 Spark
               </button>
@@ -1275,7 +1341,7 @@
                 </div>
               </div>
               <div class="flex flex-col gap-2 sm:flex-shrink-0">
-                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <button type="button" @click="goToTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
                   <i data-lucide="sparkles" class="h-4 w-4"></i>
                   <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
                 </button>
@@ -1361,7 +1427,7 @@
                 </div>
               </div>
               <div class="flex flex-col gap-2 sm:flex-shrink-0">
-                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <button type="button" @click="goToTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
                   <i data-lucide="sparkles" class="h-4 w-4"></i>
                   <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
                 </button>
@@ -1381,7 +1447,7 @@
           <!-- Voice 1: sample, play locked for Free -->
           <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
             <!-- Free: locked play button -->
-            <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/10 text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk putar' : 'Try Spark to play'">
+            <button x-show="userTier === 'free'" type="button" @click="goToTrial()" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/10 text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk putar' : 'Try Spark to play'">
               <i data-lucide="lock" class="h-4 w-4"></i>
             </button>
             <!-- Spark: real play button -->
@@ -1426,7 +1492,7 @@
 
           <!-- Voice 2: sample, play locked for Free -->
           <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
-            <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/10 text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk putar' : 'Try Spark to play'">
+            <button x-show="userTier === 'free'" type="button" @click="goToTrial()" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/10 text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk putar' : 'Try Spark to play'">
               <i data-lucide="lock" class="h-4 w-4"></i>
             </button>
             <button x-show="userTier === 'spark'" x-cloak type="button" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-sm transition hover:bg-brand-600" :aria-label="lang === 'id' ? 'Putar voice note' : 'Play voice note'">
@@ -1569,7 +1635,7 @@
                 </div>
               </div>
               <div class="flex flex-col gap-2 sm:flex-shrink-0">
-                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <button type="button" @click="goToTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
                   <i data-lucide="sparkles" class="h-4 w-4"></i>
                   <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
                 </button>
