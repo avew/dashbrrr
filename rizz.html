@@ -67,6 +67,49 @@
     profileOpen: false,
     scopeOpen: false,
     toolOpen: false,
+    sourcesOpen: false,
+    /* Browse modal: click stat → see actual examples by content type */
+    browseOpen: false,
+    browseType: 'links',
+    openBrowse(type) { this.browseType = type; this.browseOpen = true; },
+    /* Per-type CTA copy for Free → Spark upsell inside the browse modal.
+       Title + body are content-specific so the value proposition is concrete
+       per tipe (e.g., specific count + concrete benefit beats generic upgrade). */
+    browseCta: {
+      links: {
+        title: { en: 'Browse all 89 links', id: 'Telusuri semua 89 link' },
+        body:  { en: 'Filter by sender, domain, or date. Plus jump back to the source message.', id: 'Filter by sender, domain, atau tanggal. Plus langsung ke pesan asli.' }
+      },
+      pdfs: {
+        title: { en: 'Unlock all 12 PDFs', id: 'Unlock akses 12 PDF' },
+        body:  { en: 'Sumrize only indexes metadata — your files stay safe in WhatsApp. Spark unlocks download & preview to your device.', id: 'Sumrize cuma indeks metadata · file tetap aman di WhatsApp. Spark unlock download & preview ke device Anda.' }
+      },
+      images: {
+        title: { en: 'View all 34 images', id: 'Lihat semua 34 gambar' },
+        body:  { en: 'Full-resolution lightbox + download the whole album in one tap.', id: 'Lightbox resolusi penuh + download seluruh album sekali tap.'  }
+      },
+      voice: {
+        title: { en: 'Play all 7 voice notes', id: 'Putar semua 7 voice note' },
+        body:  { en: 'Audio stays in WhatsApp — Sumrize only indexes duration & sender. Spark unlocks playback + auto-transcription.', id: 'Audio tetap di WhatsApp · Sumrize cuma indeks durasi & pengirim. Spark unlock playback + transcription otomatis.' }
+      }
+    },
+    /* RAG tier gating — Free = chat only, Spark = artifacts + citations + filters */
+    userTier: 'free',
+    trialJustStarted: false,
+    /* Free user can pick ANY single connector. Only cross-connector
+       (All connectors) search is gated behind Spark. */
+    freeScope: 'arisan',
+    freeScopes: {
+      arisan:    { en: 'Family Arisan',    id: 'Arisan Keluarga', icon: './assets/whatsapp.webp', source: 'WhatsApp', messages: 312 },
+      keluarga:  { en: 'Extended Family',  id: 'Keluarga Besar',  icon: './assets/whatsapp.webp', source: 'WhatsApp', messages: 587 },
+      marketing: { en: 'Marketing Team',   id: 'Tim Marketing',   icon: './assets/discord.png',   source: 'Discord',  messages: 348 }
+    },
+    /* Spark-only filters */
+    filters: { connector: 'all', type: 'any', sender: 'any', dateRange: '30d' },
+    filterOpen: { connector: false, type: false, sender: false, date: false },
+    /* Mock corpus stats — would come from API in production */
+    corpusStats: { messages: 1247, links: 89, pdfs: 12, images: 34, voice: 7, connectors: 2 },
+    senders: ['Tante Sari', 'Bunda Eli', 'Om Yono', 'Tante Tini', 'Pak Budi'],
     languages: {
       en: { label: 'English', flag: '🇬🇧' },
       id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
@@ -74,6 +117,15 @@
     t: {
       en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
       id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    startTrial() {
+      this.userTier = 'spark';
+      this.trialJustStarted = true;
+      setTimeout(() => this.trialJustStarted = false, 3500);
+    },
+    revertToFree() {
+      this.userTier = 'free';
+      this.filters = { connector: 'all', type: 'any', sender: 'any', dateRange: '30d' };
     },
     init() {
       this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
@@ -174,10 +226,19 @@
                 <i data-lucide="menu" class="h-5 w-5"></i>
               </button>
               <div>
-                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl">Rizz AI</h1>
-                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-                  Chat directly with Rizz, keep a persistent thread history, and switch context across your connected channels from one place.
-                </p>
+                <div class="flex items-center gap-2">
+                  <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Ask Rizz' : 'Ask Rizz'">Ask Rizz</h1>
+                  <!-- Tier badge: Free (gray) vs Spark Trial (gradient) -->
+                  <span x-show="userTier === 'free'" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                    <i data-lucide="user" class="h-3 w-3"></i>
+                    Free
+                  </span>
+                  <span x-show="userTier === 'spark'" x-cloak class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-theme-sm">
+                    <i data-lucide="sparkles" class="h-3 w-3"></i>
+                    Spark Trial
+                  </span>
+                </div>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Cari di semua chat Anda — pesan, link, PDF, attachment. Tanpa scroll lagi.' : 'Search across your chats — messages, links, PDFs, attachments. No more scrolling.'">Search across your chats — messages, links, PDFs, attachments. No more scrolling.</p>
               </div>
             </div>
 
@@ -238,47 +299,224 @@
             </div>
           </section>
 
+          <!-- ===== Corpus Stats Bar =====
+               Communicates RAG corpus presence: how many messages/links/PDFs/etc
+               are indexed. Spark sees full breakdown; Free sees one connector. -->
+          <section class="mb-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <!-- Messages: display only (corpus total, not a browsable type) -->
+                <div class="flex items-center gap-2 px-1.5">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="messages-square" class="h-4 w-4"></i>
+                  </div>
+                  <div>
+                    <p class="text-base font-bold text-gray-900 dark:text-white"><span x-text="corpusStats.messages.toLocaleString()">1,247</span></p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'pesan' : 'messages'">messages</p>
+                  </div>
+                </div>
+                <!-- Links: click → browse modal -->
+                <button type="button" @click="openBrowse('links')" :title="lang === 'id' ? 'Klik untuk lihat semua link' : 'Click to browse all links'" class="group flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 transition hover:bg-brand-50 dark:hover:bg-brand-500/[0.08]">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-500 transition group-hover:bg-brand-100 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="link" class="h-4 w-4"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-base font-bold text-gray-900 dark:text-white" x-text="corpusStats.links">89</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'link' : 'links'">links</p>
+                  </div>
+                </button>
+                <!-- PDFs: click → browse modal -->
+                <button type="button" @click="openBrowse('pdfs')" :title="lang === 'id' ? 'Klik untuk lihat semua PDF' : 'Click to browse all PDFs'" class="group flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 transition hover:bg-brand-50 dark:hover:bg-brand-500/[0.08]">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-500 transition group-hover:bg-brand-100 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="file-text" class="h-4 w-4"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-base font-bold text-gray-900 dark:text-white" x-text="corpusStats.pdfs">12</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400">PDF</p>
+                  </div>
+                </button>
+                <!-- Images: click → browse modal -->
+                <button type="button" @click="openBrowse('images')" :title="lang === 'id' ? 'Klik untuk lihat semua gambar' : 'Click to browse all images'" class="group flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 transition hover:bg-brand-50 dark:hover:bg-brand-500/[0.08]">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-500 transition group-hover:bg-brand-100 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="image" class="h-4 w-4"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-base font-bold text-gray-900 dark:text-white" x-text="corpusStats.images">34</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'gambar' : 'images'">images</p>
+                  </div>
+                </button>
+                <!-- Voice: click → browse modal -->
+                <button type="button" @click="openBrowse('voice')" :title="lang === 'id' ? 'Klik untuk lihat semua voice note' : 'Click to browse all voice notes'" class="group flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 transition hover:bg-brand-50 dark:hover:bg-brand-500/[0.08]">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-500 transition group-hover:bg-brand-100 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="mic" class="h-4 w-4"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-base font-bold text-gray-900 dark:text-white" x-text="corpusStats.voice">7</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'voice' : 'voice notes'">voice notes</p>
+                  </div>
+                </button>
+              </div>
+              <!-- Scope indicator (right side) -->
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                <span x-show="userTier === 'free'" x-text="lang === 'id' ? 'Dari 1 connector aktif' : 'From 1 active connector'">From 1 active connector</span>
+                <span x-show="userTier === 'spark'" x-cloak class="inline-flex items-center gap-1.5">
+                  <span x-text="(lang === 'id' ? 'Dari ' : 'From ') + corpusStats.connectors + (lang === 'id' ? ' connector · terindeks' : ' connectors · indexed')">From 2 connectors · indexed</span>
+                  <i data-lucide="check-circle-2" class="h-3.5 w-3.5 text-success-500"></i>
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Trial CTA banner (Free only) =====
+               Shows just below stats so user sees "what they have" before seeing
+               "what they're missing". Soft sell, contextual benefits. -->
+          <section x-show="userTier === 'free'" class="mb-4 overflow-hidden rounded-2xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.05] via-white to-brand-500/[0.05] dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1]">
+            <div class="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+              <div class="flex items-start gap-3">
+                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+                  <i data-lucide="sparkles" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Stop scroll. Tinggal tanya, Rizz cari.' : 'Stop scrolling. Just ask, Rizz finds it.'">Stop scrolling. Just ask, Rizz finds it.</p>
+                  <ul class="space-y-0.5 text-xs text-gray-600 dark:text-gray-400">
+                    <li class="flex items-center gap-1.5">
+                      <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                      <span x-text="lang === 'id' ? 'Cari link, PDF, gambar — klik buka preview' : 'Find links, PDFs, images — click to preview'">Find links, PDFs, images — click to preview</span>
+                    </li>
+                    <li class="flex items-center gap-1.5">
+                      <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                      <span x-text="lang === 'id' ? 'Klik nomor sumber untuk lihat kutipan persisnya' : 'Click source number to see the exact quote'">Click source number to see the exact quote</span>
+                    </li>
+                    <li class="flex items-center gap-1.5">
+                      <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                      <span x-text="lang === 'id' ? 'Tanya sekali — Rizz cari di semua grup chat sekaligus' : 'Ask once — Rizz searches across all your chats at once'">Ask once — searches all chats at once</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="flex flex-col items-stretch gap-1.5 md:items-end">
+                <button type="button" @click="startTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+                </button>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tanpa kartu kredit · Batal kapan saja' : 'No credit card · Cancel anytime'">No credit card · Cancel anytime</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Trial just-started toast — auto-dismiss after 3.5s -->
+          <section x-show="trialJustStarted" x-cloak x-transition.opacity class="mb-4 flex items-center gap-3 rounded-2xl border border-success-500/30 bg-success-50 p-4 dark:bg-success-500/[0.1]">
+            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-500 text-white">
+              <i data-lucide="check" class="h-4 w-4"></i>
+            </div>
+            <div class="flex-1 text-sm">
+              <p class="font-semibold text-success-600 dark:text-success-500" x-text="lang === 'id' ? 'Spark Trial aktif!' : 'Spark Trial activated!'">Spark Trial activated!</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400" x-text="lang === 'id' ? 'Preview link & PDF, sumber clickable, dan filter pencarian — semua aktif selama 14 hari.' : 'Link & PDF previews, clickable sources, and search filters — all unlocked for 14 days.'">All features unlocked for 14 days.</p>
+            </div>
+          </section>
+
+          <!-- Persistent Spark Trial banner (after toast fades) -->
+          <section x-show="userTier === 'spark' && !trialJustStarted" x-cloak class="mb-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-sumrize/[0.08] to-brand-500/[0.08] p-3 text-sm">
+            <i data-lucide="sparkles" class="h-4 w-4 flex-shrink-0 text-sumrize"></i>
+            <span class="flex-1 text-gray-700 dark:text-gray-300">
+              <strong class="font-semibold" x-text="lang === 'id' ? 'Spark Trial aktif' : 'Spark Trial active'">Spark Trial active</strong>
+              <span x-text="lang === 'id' ? ' sampai 27 Mei 2026 · Semua fitur pencarian terbuka' : ' until 27 May 2026 · All search features unlocked'"> until 27 May 2026 · All search features unlocked</span>
+            </span>
+          </section>
+
           <!-- ===== Chat Workspace =====
                Two-panel grid. Saved Chats (320px fixed) | Chat panel (1fr).
                Stacks on mobile (grid-cols-1). -->
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
 
-            <!-- ===== Saved Chats Panel ===== -->
-            <aside class="rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
-              <header class="flex items-center justify-between gap-2 border-b border-gray-100 p-4 dark:border-gray-800">
-                <div class="flex items-center gap-2">
-                  <h2 class="text-base font-semibold text-gray-900 dark:text-white">Saved Chats</h2>
-                  <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-300">1</span>
-                </div>
-                <button type="button" aria-label="New chat" class="flex h-9 w-9 items-center justify-center rounded-full bg-sumrize text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+            <!-- ===== Saved Chats Panel (date-grouped list pattern) =====
+                 Top:    primary "New Chat" CTA (full-width)
+                 Below:  search input
+                 Body:   date sections (Today / Yesterday / Last 7 days)
+                         with title-only items (no chips/preview) for scale.
+                 Footer: "Show more…" pagination affordance. -->
+            <aside class="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <!-- Primary action -->
+              <div class="p-3">
+                <button type="button" class="flex w-full items-center justify-center gap-2 rounded-xl bg-sumrize px-4 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
                   <i data-lucide="plus" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Chat Baru' : 'New Chat'">New Chat</span>
                 </button>
-              </header>
+              </div>
 
-              <ul class="space-y-1 p-2">
-                <!-- Active chat card (selected state: brand left border + brand wash) -->
-                <li>
-                  <button type="button" class="block w-full rounded-xl border-l-2 border-brand-500 bg-brand-50/40 p-3 text-left transition dark:bg-brand-500/[0.08]">
-                    <p class="mb-1.5 truncate text-sm font-semibold text-gray-900 dark:text-white">di bebenah ada topik apa ?</p>
-                    <span class="mb-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-gray-700">
-                      <i data-lucide="layout-grid" class="h-2.5 w-2.5"></i>
-                      All Connectors
-                    </span>
-                    <p class="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-                      Di grup <span class="font-semibold text-gray-700 dark:text-gray-300">Bebenah</span>, obrolannya hari ini cukup rame dan lompat-lompat, tapi garis besarnya begini…
-                    </p>
-                    <p class="mt-2 text-[11px] text-gray-400">13 Mei, 00.13</p>
-                  </button>
-                </li>
+              <!-- Search -->
+              <div class="px-3 pb-3">
+                <div class="relative">
+                  <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+                  <input
+                    type="search"
+                    :placeholder="lang === 'id' ? 'Cari chat…' : 'Search…'"
+                    class="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-3 text-sm placeholder-gray-400 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+              </div>
 
-                <!-- Empty hint when no further chats -->
-                <li>
-                  <div class="rounded-xl border border-dashed border-gray-200 p-4 text-center dark:border-gray-700">
-                    <i data-lucide="message-square-plus" class="mx-auto mb-2 h-5 w-5 text-gray-400"></i>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Mulai obrolan baru untuk tambah ke daftar.</p>
-                  </div>
-                </li>
-              </ul>
+              <!-- Date-grouped list -->
+              <nav class="flex-1 space-y-4 overflow-y-auto px-2 pb-2">
+                <!-- TODAY (mix: arisan / family / office) -->
+                <div>
+                  <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Hari ini' : 'Today'">Today</h3>
+                  <ul class="space-y-0.5">
+                    <li>
+                      <a href="#" class="block truncate rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" x-text="lang === 'id' ? 'Arisan bulan ini di mana ya?' : 'Where\'s arisan this month?'">Where's arisan this month?</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Resep rendang dari Tante Eli' : 'Tante Eli\'s rendang recipe'">Tante Eli's rendang recipe</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Meeting client besok jam berapa?' : 'What time is the client meeting tomorrow?'">What time is the client meeting tomorrow?</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Foto reuni keluarga di Bandung' : 'Family reunion photos from Bandung'">Family reunion photos from Bandung</a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- YESTERDAY -->
+                <div>
+                  <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Kemarin' : 'Yesterday'">Yesterday</h3>
+                  <ul class="space-y-0.5">
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Bayar iuran arisan ke rekening mana?' : 'Which account for arisan payment?'">Which account for arisan payment?</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Tante Tini mau dijemput jam berapa?' : 'When to pick up Tante Tini?'">When to pick up Tante Tini?</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Deadline laporan bulanan kapan?' : 'When is monthly report deadline?'">When is monthly report deadline?</a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- LAST 7 DAYS -->
+                <div>
+                  <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? '7 hari terakhir' : 'Last 7 days'">Last 7 days</h3>
+                  <ul class="space-y-0.5">
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'List belanja kondangan Dini' : 'Shopping list for Dini\'s wedding'">Shopping list for Dini's wedding</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Jadwal nikahan keponakan minggu depan' : 'Cousin\'s wedding schedule next week'">Cousin's wedding schedule next week</a>
+                    </li>
+                    <li>
+                      <a href="#" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-400 transition hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Pembagian PIC untuk launching produk' : 'PIC split for product launch'">PIC split for product launch</a>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+
+              <!-- Show more (pagination affordance) -->
+              <div class="border-t border-gray-100 dark:border-gray-800">
+                <button type="button" class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-xs font-medium text-gray-500 transition hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5">
+                  <span x-text="lang === 'id' ? 'Lihat lebih banyak…' : 'Show more…'">Show more…</span>
+                  <i data-lucide="chevron-down" class="h-3.5 w-3.5"></i>
+                </button>
+              </div>
             </aside>
 
             <!-- ===== Chat Panel =====
@@ -286,64 +524,212 @@
                  so input bar stays in view without scrolling the whole page). -->
             <section class="flex h-[calc(100vh-220px)] min-h-[560px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
 
-              <!-- Chat header: scope chip + title + ASK FROM dropdown -->
-              <header class="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-gray-800 sm:flex-row sm:items-start sm:justify-between">
-                <div class="flex-1 min-w-0">
-                  <div class="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
-                    <i data-lucide="crosshair" class="h-3 w-3"></i>
-                    Connector Scope
+              <!-- Chat header: title + scope chip + tier-conditional filter UI -->
+              <header class="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-gray-800">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div class="flex-1 min-w-0">
+                    <div class="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                      <i data-lucide="crosshair" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Scope Connector' : 'Connector Scope'">Connector Scope</span>
+                    </div>
+                    <h2 class="mb-1 truncate text-lg font-semibold text-gray-900 dark:text-white md:text-xl" x-text="lang === 'id' ? 'Arisan bulan ini di mana ya?' : 'Where\'s arisan this month?'">Where's arisan this month?</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400" x-text="userTier === 'free' ? (freeScopes[freeScope][lang] + ' (' + freeScopes[freeScope].source + ') · ' + freeScopes[freeScope].messages + ' ' + (lang === 'id' ? 'pesan' : 'messages')) : (lang === 'id' ? 'Semua connector · 1,247 pesan' : 'All Connectors · 1,247 messages')">Family Arisan (WhatsApp) · 312 messages</p>
                   </div>
-                  <h2 class="mb-1 truncate text-lg font-semibold text-gray-900 dark:text-white md:text-xl">di bebenah ada topik apa ?</h2>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">All Connectors · 5 messages</p>
-                </div>
 
-                <!-- ASK FROM selector — connector scope filter for this chat -->
-                <div class="flex-shrink-0">
-                  <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Ask From</p>
-                  <div class="relative" @click.outside="scopeOpen = false">
-                    <button type="button" @click="scopeOpen = !scopeOpen" class="inline-flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
-                      <span class="flex items-center gap-2">
-                        <i data-lucide="layout-grid" class="h-4 w-4"></i>
-                        All · All Connectors
-                      </span>
-                      <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="scopeOpen ? 'rotate-180' : ''"></i>
-                    </button>
-                    <div x-show="scopeOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
-                      <button type="button" class="flex w-full items-center gap-3 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400">
-                        <i data-lucide="layout-grid" class="h-4 w-4"></i>
-                        All Connectors
+                  <!-- FREE: Single-connector picker (any single connector OK,
+                       only cross-connector All-search needs Spark). -->
+                  <div x-show="userTier === 'free'" class="flex-shrink-0">
+                    <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Tanya dari' : 'Ask From'">Ask From</p>
+                    <div class="relative" @click.outside="scopeOpen = false">
+                      <button type="button" @click="scopeOpen = !scopeOpen" class="inline-flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                        <span class="flex items-center gap-2">
+                          <img :src="freeScopes[freeScope].icon" class="h-4 w-4 rounded-full" alt="" />
+                          <span x-text="freeScopes[freeScope][lang]">Family Arisan</span>
+                        </span>
+                        <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="scopeOpen ? 'rotate-180' : ''"></i>
                       </button>
-                      <button type="button" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
-                        <img src="./assets/whatsapp.webp" class="h-4 w-4 rounded-full" alt="" />
-                        Bebenah
-                      </button>
-                      <button type="button" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
-                        <img src="./assets/discord.png" class="h-4 w-4 rounded-full" alt="" />
-                        general
-                      </button>
+                      <div x-show="scopeOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                        <!-- 3 single connector options, all unlocked for Free -->
+                        <template x-for="(scope, key) in freeScopes" :key="key">
+                          <button type="button" @click="freeScope = key; scopeOpen = false" class="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition" :class="freeScope === key ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                            <img :src="scope.icon" class="h-4 w-4 rounded-full" alt="" />
+                            <span x-text="scope[lang]"></span>
+                          </button>
+                        </template>
+                        <!-- ONLY 'All connectors' is locked — cross-source search = Spark feature -->
+                        <button type="button" @click="startTrial(); scopeOpen = false" class="flex w-full items-center justify-between gap-3 border-t border-gray-100 px-4 py-2.5 text-sm text-gray-500 opacity-70 transition hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5">
+                          <span class="flex items-center gap-3">
+                            <i data-lucide="layout-grid" class="h-4 w-4"></i>
+                            <span x-text="lang === 'id' ? 'Semua connector' : 'All connectors'">All connectors</span>
+                          </span>
+                          <span class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+                            <i data-lucide="lock" class="h-2.5 w-2.5"></i>
+                            Spark
+                          </span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- SPARK: Horizontal 4-dropdown filter bar (connector + type + sender + date) -->
+                <div x-show="userTier === 'spark'" x-cloak class="flex flex-wrap items-center gap-2">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Filter:' : 'Filter:'">Filter:</p>
+
+                  <!-- Connector -->
+                  <div class="relative" @click.outside="filterOpen.connector = false">
+                    <button type="button" @click="filterOpen.connector = !filterOpen.connector" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="layout-grid" class="h-3.5 w-3.5"></i>
+                      <span x-text="filters.connector === 'all' ? (lang === 'id' ? 'Semua connector' : 'All connectors') : filters.connector">All connectors</span>
+                      <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="filterOpen.connector ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="filterOpen.connector" x-cloak x-transition.opacity.duration.150ms class="absolute left-0 z-20 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                      <button type="button" @click="filters.connector = 'all'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'all' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                        <i data-lucide="layout-grid" class="h-4 w-4"></i>
+                        <span x-text="lang === 'id' ? 'Semua connector' : 'All connectors'">All connectors</span>
+                      </button>
+                      <button type="button" @click="filters.connector = 'Arisan Keluarga'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'Arisan Keluarga' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                        <img src="./assets/whatsapp.webp" class="h-4 w-4 rounded-full" alt="" />
+                        <span x-text="lang === 'id' ? 'Arisan Keluarga' : 'Family Arisan'">Family Arisan</span>
+                      </button>
+                      <button type="button" @click="filters.connector = 'Keluarga Besar'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'Keluarga Besar' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                        <img src="./assets/whatsapp.webp" class="h-4 w-4 rounded-full" alt="" />
+                        <span x-text="lang === 'id' ? 'Keluarga Besar' : 'Extended Family'">Extended Family</span>
+                      </button>
+                      <button type="button" @click="filters.connector = 'Tim Marketing'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'Tim Marketing' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                        <img src="./assets/discord.png" class="h-4 w-4 rounded-full" alt="" />
+                        <span x-text="lang === 'id' ? 'Tim Marketing' : 'Marketing Team'">Marketing Team</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Type -->
+                  <div class="relative" @click.outside="filterOpen.type = false">
+                    <button type="button" @click="filterOpen.type = !filterOpen.type" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="filter" class="h-3.5 w-3.5"></i>
+                      <span x-text="filters.type === 'any' ? (lang === 'id' ? 'Semua tipe' : 'Any type') : filters.type">Any type</span>
+                      <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="filterOpen.type ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="filterOpen.type" x-cloak x-transition.opacity.duration.150ms class="absolute left-0 z-20 mt-2 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                      <template x-for="opt in [
+                        { key: 'any',     icon: 'filter',      labelEn: 'Any type',  labelId: 'Semua tipe' },
+                        { key: 'links',   icon: 'link',        labelEn: 'Links',     labelId: 'Link' },
+                        { key: 'pdfs',    icon: 'file-text',   labelEn: 'PDFs',      labelId: 'PDF' },
+                        { key: 'images',  icon: 'image',       labelEn: 'Images',    labelId: 'Gambar' },
+                        { key: 'voice',   icon: 'mic',         labelEn: 'Voice',     labelId: 'Voice' }
+                      ]" :key="opt.key">
+                        <button type="button" @click="filters.type = opt.key; filterOpen.type = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.type === opt.key ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                          <i :data-lucide="opt.icon" class="h-4 w-4"></i>
+                          <span x-text="lang === 'id' ? opt.labelId : opt.labelEn"></span>
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Sender -->
+                  <div class="relative" @click.outside="filterOpen.sender = false">
+                    <button type="button" @click="filterOpen.sender = !filterOpen.sender" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="user" class="h-3.5 w-3.5"></i>
+                      <span x-text="filters.sender === 'any' ? (lang === 'id' ? 'Semua pengirim' : 'Any sender') : '@' + filters.sender">Any sender</span>
+                      <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="filterOpen.sender ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="filterOpen.sender" x-cloak x-transition.opacity.duration.150ms class="absolute left-0 z-20 mt-2 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                      <button type="button" @click="filters.sender = 'any'; filterOpen.sender = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.sender === 'any' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                        <i data-lucide="users" class="h-4 w-4"></i>
+                        <span x-text="lang === 'id' ? 'Semua pengirim' : 'Any sender'">Any sender</span>
+                      </button>
+                      <template x-for="s in senders" :key="s">
+                        <button type="button" @click="filters.sender = s; filterOpen.sender = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.sender === s ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                          <span class="flex h-5 w-5 items-center justify-center rounded-full bg-brand-500 text-[10px] font-semibold text-white" x-text="s[0]">A</span>
+                          <span x-text="'@' + s"></span>
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Date range -->
+                  <div class="relative" @click.outside="filterOpen.date = false">
+                    <button type="button" @click="filterOpen.date = !filterOpen.date" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                      <span x-text="({ today: lang === 'id' ? 'Hari ini' : 'Today', '7d': lang === 'id' ? '7 hari' : '7 days', '30d': lang === 'id' ? '30 hari' : '30 days', all: lang === 'id' ? 'Semua waktu' : 'All time' })[filters.dateRange]">30 days</span>
+                      <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="filterOpen.date ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="filterOpen.date" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+                      <template x-for="opt in [
+                        { key: 'today', labelEn: 'Today',     labelId: 'Hari ini' },
+                        { key: '7d',    labelEn: 'Last 7 days', labelId: '7 hari terakhir' },
+                        { key: '30d',   labelEn: 'Last 30 days', labelId: '30 hari terakhir' },
+                        { key: 'all',   labelEn: 'All time',   labelId: 'Semua waktu' }
+                      ]" :key="opt.key">
+                        <button type="button" @click="filters.dateRange = opt.key; filterOpen.date = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.dateRange === opt.key ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                          <i data-lucide="calendar" class="h-4 w-4"></i>
+                          <span x-text="lang === 'id' ? opt.labelId : opt.labelEn"></span>
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+
+                  <button type="button" @click="filters = { connector: 'all', type: 'any', sender: 'any', dateRange: '30d' }" class="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-gray-500 transition hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400">
+                    <i data-lucide="rotate-ccw" class="h-3.5 w-3.5"></i>
+                    <span x-text="lang === 'id' ? 'Reset' : 'Reset'">Reset</span>
+                  </button>
+                </div>
               </header>
 
-              <!-- Quick suggestion chips -->
+              <!-- Quick suggestion chips (tier-aware).
+                   Free: 4 summary-oriented + 1 locked retrieval (preview value).
+                   Spark: 4 retrieval-oriented chips, no locks. -->
               <div class="flex flex-wrap gap-2 border-b border-gray-100 px-5 py-3 dark:border-gray-800">
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
-                  <i data-lucide="sparkles" class="h-3 w-3"></i>
-                  What happened recently?
-                </button>
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
-                  <i data-lucide="list" class="h-3 w-3"></i>
-                  Key points
-                </button>
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
-                  <i data-lucide="check-square" class="h-3 w-3"></i>
-                  Action items
-                </button>
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
-                  <i data-lucide="trending-up" class="h-3 w-3"></i>
-                  Compared to last month
-                </button>
+
+                <!-- FREE chips (summary) -->
+                <template x-if="userTier === 'free'">
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="sparkles" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Apa yang baru?' : 'What happened recently?'">What happened recently?</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="list" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Poin penting' : 'Key points'">Key points</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="check-square" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Action items' : 'Action items'">Action items</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="trending-up" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Bandingkan bulan lalu' : 'Compared to last month'">Compared to last month</span>
+                    </button>
+                    <!-- Locked teaser — preview Spark capability, click triggers trial -->
+                    <button type="button" @click="startTrial()" class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sumrize/[0.08] to-brand-500/[0.08] px-3 py-1.5 text-xs font-medium text-gray-600 ring-1 ring-sumrize/30 transition hover:from-sumrize/[0.15] hover:to-brand-500/[0.15] dark:text-gray-300 dark:ring-sumrize/40">
+                      <i data-lucide="lock" class="h-3 w-3 text-sumrize"></i>
+                      <span x-text="lang === 'id' ? 'Cari PDF saja' : 'Find PDFs only'">Find PDFs only</span>
+                      <span class="rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">Spark</span>
+                    </button>
+                  </div>
+                </template>
+
+                <!-- SPARK chips (retrieval) -->
+                <template x-if="userTier === 'spark'">
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="link" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Link yang dishare minggu ini' : 'Links shared this week'">Links shared this week</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="file-text" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Semua PDF' : 'All PDFs'">All PDFs</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="quote" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Kutipan dari @Tante Sari' : 'Quotes from @Tante Sari'">Quotes from @Tante Sari</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
+                      <i data-lucide="target" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Cari keputusan…' : 'Find a decision…'">Find a decision…</span>
+                    </button>
+                  </div>
+                </template>
               </div>
 
               <!-- Thread (scrollable) -->
@@ -351,9 +737,7 @@
 
                 <!-- User message: right-aligned, brand-500 solid (max contrast vs AI) -->
                 <div class="flex justify-end">
-                  <div class="max-w-[80%] rounded-2xl rounded-tr-md bg-brand-500 px-4 py-3 text-sm text-white shadow-theme-sm">
-                    di bebenah ada topik apa ?
-                  </div>
+                  <div class="max-w-[80%] rounded-2xl rounded-tr-md bg-brand-500 px-4 py-3 text-sm text-white shadow-theme-sm" x-text="lang === 'id' ? 'Arisan bulan ini bahas apa aja?' : 'What did everyone discuss about this month\'s arisan?'">What did everyone discuss about this month's arisan?</div>
                 </div>
 
                 <!-- AI message: avatar + attribution + tool indicator + markdown card -->
@@ -378,28 +762,174 @@
                         <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="toolOpen ? 'rotate-180' : ''"></i>
                       </button>
                       <div x-show="toolOpen" x-cloak x-collapse class="border-t border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400">
-                        <p><span class="font-mono text-gray-500">connector:</span> Bebenah (WhatsApp Group)</p>
+                        <p><span class="font-mono text-gray-500">connector:</span> Arisan Keluarga (WhatsApp Group)</p>
                         <p><span class="font-mono text-gray-500">range:</span> last 24 hours</p>
                         <p><span class="font-mono text-gray-500">messages:</span> 312</p>
                       </div>
                     </div>
 
-                    <!-- Markdown-rendered response -->
-                    <div class="space-y-3 rounded-2xl rounded-tl-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
-                      <p>Di grup <strong class="font-semibold text-gray-900 dark:text-white">Bebenah</strong>, obrolannya hari ini cukup rame dan lompat-lompat, tapi garis besarnya begini:</p>
+                    <!-- ===== AI response body (tier-aware rendering) =====
+                         FREE: plain markdown text + soft upgrade hint footer.
+                         SPARK: same text + inline source numbers + artifact preview
+                                cards (link/PDF/image grid) + quoted message block
+                                + collapsible sources list. -->
 
+                    <!-- FREE: plain text response -->
+                    <div x-show="userTier === 'free'" class="space-y-3 rounded-2xl rounded-tl-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
+                      <p>Di grup <strong class="font-semibold text-gray-900 dark:text-white">Arisan Keluarga</strong>, obrolan hari ini lumayan rame ngomongin persiapan arisan bulan ini. Garis besarnya begini:</p>
                       <p class="font-semibold text-gray-900 dark:text-white">Topik utama yang muncul:</p>
-
                       <ul class="space-y-2 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
-                        <li>Bahas <strong class="font-semibold text-gray-900 dark:text-white">end user</strong> yang chat dan cara nanggapi/verify.</li>
-                        <li>Ngomongin <strong class="font-semibold text-gray-900 dark:text-white">server staging</strong>, build <strong class="font-semibold text-gray-900 dark:text-white">1.14.0-SNAPSHOT</strong>, admin console, dan deployment yang belum berhasil.</li>
-                        <li>Diskusi soal <strong class="font-semibold text-gray-900 dark:text-white">permission upload vs edit</strong> untuk submit.</li>
-                        <li>Ngirim <strong class="font-semibold text-gray-900 dark:text-white">laporan pentest MPN V1</strong> dengan 6 temuan dan rencana fixing.</li>
-                        <li>Testing login yang sempat error terus diperbaiki.</li>
-                        <li>Obrolan ringan: musik Dewa 19, MC gendut/hamil (candaan), coping stress kerja, pengamen, waffer, dan curhat IG pajak rame hujatan.</li>
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Tempat arisan:</strong> Tante Sari nawarin rumahnya di Pondok Indah.</li>
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Menu sepakat:</strong> rendang, opor ayam, sambel goreng kentang, kerupuk. Yang masak rendang masih dicari.</li>
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Iuran bulan ini Rp 100.000/orang</strong>, transfer ke rekening BCA atas nama Bunda Eli.</li>
+                        <li><strong>12 anggota</strong> sudah konfirmasi hadir, 3 belum balas (Tante Tini, Om Bambang, Bu Yati).</li>
+                        <li>Diskusi <strong class="font-semibold text-gray-900 dark:text-white">seragam batik</strong> — Om Yono kirim 3 opsi foto, voting di kolom komentar.</li>
+                        <li>Obrolan ringan: kabar Tante Linda baru pulang umrah, cucu Pak Yono lahir, dan rencana ngumpul makan-makan setelah arisan selesai.</li>
                       </ul>
+                      <p class="text-gray-500 dark:text-gray-400">Kalau mau Rizz fokus ke topik tertentu (misalnya menu, iuran, atau seragam), tinggal bilang ya.</p>
+                    </div>
 
-                      <p class="text-gray-500 dark:text-gray-400">Kalau mau Rizz ringkas lebih rapi atau fokus ke satu topik tertentu, tinggal bilang ya.</p>
+                    <!-- FREE: contextual upgrade hint (right under AI response) -->
+                    <div x-show="userTier === 'free'" class="flex items-start gap-2 rounded-xl border border-sumrize/20 bg-sumrize/[0.04] p-3 text-xs dark:bg-sumrize/[0.06]">
+                      <i data-lucide="sparkles" class="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-sumrize"></i>
+                      <div class="flex-1">
+                        <p class="text-gray-700 dark:text-gray-300">
+                          <strong class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Dengan Spark: ' : 'With Spark: '">With Spark: </strong>
+                          <span x-text="lang === 'id' ? 'lihat link, PDF, dan gambar yang disebut Rizz langsung di sini — plus kutipan persis dari pengirim aslinya.' : 'see links, PDFs, and images Rizz mentions right here — plus exact quotes from the original senders.'">see attached files and exact quotes inline.</span>
+                        </p>
+                        <button type="button" @click="startTrial()" class="mt-1 inline-flex items-center gap-1 text-xs font-bold text-sumrize hover:text-sumrize-hover">
+                          <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+                          <i data-lucide="arrow-right" class="h-3 w-3"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- SPARK: response with inline citations -->
+                    <div x-show="userTier === 'spark'" x-cloak class="space-y-3 rounded-2xl rounded-tl-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
+                      <p>Di grup <strong class="font-semibold text-gray-900 dark:text-white">Arisan Keluarga</strong>, obrolan hari ini ngomongin persiapan arisan bulan ini. Garis besarnya:</p>
+                      <p class="font-semibold text-gray-900 dark:text-white">Yang sudah diputuskan:</p>
+                      <ul class="space-y-2 border-l-2 border-gray-200 pl-4 dark:border-gray-700">
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Tempat:</strong> rumah Tante Sari di Pondok Indah — lokasi sudah di-share lewat Google Maps.<button type="button" @click="sourcesOpen = true" title="Lihat sumber [1]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">1</button></li>
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Menu:</strong> rendang, opor ayam, sambel goreng kentang, kerupuk.<button type="button" @click="sourcesOpen = true" title="Lihat sumber [2]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">2</button></li>
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Iuran Rp 100.000/orang</strong> transfer ke BCA an. Bunda Eli — rekap rincian disimpan di PDF.<button type="button" @click="sourcesOpen = true" title="Lihat sumber [3]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">3</button></li>
+                        <li><strong class="font-semibold text-gray-900 dark:text-white">Seragam batik</strong> — 3 opsi foto dishare, voting di kolom komentar.<button type="button" @click="sourcesOpen = true" title="Lihat sumber [4]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">4</button></li>
+                        <li>12 anggota konfirmasi hadir, 3 belum balas (Tante Tini, Om Bambang, Bu Yati).</li>
+                      </ul>
+                    </div>
+
+                    <!-- SPARK: artifact cards — links, PDFs, images Rizz pulled -->
+                    <div x-show="userTier === 'spark'" x-cloak class="space-y-2">
+                      <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Ditemukan di chat' : 'Found in chat'">Found in chat</p>
+
+                      <!-- Link card: Google Maps location -->
+                      <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                          <i data-lucide="map-pin" class="h-5 w-5"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">maps.google.com/…/PondokIndah</p>
+                          <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Rumah Tante Sari · Pondok Indah Selatan' : 'Tante Sari\'s house · Pondok Indah Selatan'">Tante Sari's house · Pondok Indah Selatan</p>
+                          <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? 'Dishare @Tante Sari · 13 Mei 14:32' : 'Shared by @Tante Sari · 13 May 14:32'">Shared by @Tante Sari · 13 May 14:32</p>
+                        </div>
+                        <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
+                      </a>
+
+                      <!-- PDF card: Arisan iuran rekap -->
+                      <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                          <i data-lucide="file-text" class="h-5 w-5"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Rekap-Iuran-Arisan-Mei-2026.pdf</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.2 MB · 4 halaman' : '1.2 MB · 4 pages'">1.2 MB · 4 pages</p>
+                          <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? 'Dishare @Bunda Eli · 13 Mei 11:08' : 'Shared by @Bunda Eli · 13 May 11:08'">Shared by @Bunda Eli · 13 May 11:08</p>
+                        </div>
+                        <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
+                          <i data-lucide="download" class="h-4 w-4"></i>
+                        </button>
+                      </a>
+
+                      <!-- Image grid: opsi seragam batik -->
+                      <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+                        <div class="mb-2 flex items-center justify-between">
+                          <p class="text-xs font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? '3 opsi seragam batik' : '3 batik uniform options'">3 batik uniform options</p>
+                          <p class="text-[10px] text-gray-400" x-text="lang === 'id' ? '@Om Yono · 13 Mei 09:45' : '@Om Yono · 13 May 09:45'">@Om Yono · 13 May 09:45</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-50 to-warning-500"></div>
+                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-200 to-brand-400"></div>
+                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-50 to-success-500"></div>
+                        </div>
+                      </div>
+
+                      <!-- Quoted original message.
+                           No "jump to chat" button — WhatsApp lacks message
+                           deep-links, so we offer copy-to-clipboard instead. -->
+                      <blockquote class="flex gap-3 rounded-xl border-l-2 border-brand-500 bg-brand-50/30 p-3 dark:bg-brand-500/[0.06]">
+                        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">S</div>
+                        <div class="min-w-0 flex-1">
+                          <div class="mb-1 flex items-center gap-2">
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">@Tante Sari</p>
+                            <p class="text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 14:30 · WhatsApp Arisan Keluarga' : '13 May 14:30 · WhatsApp Family Arisan'">13 May 14:30 · WhatsApp Family Arisan</p>
+                          </div>
+                          <p class="text-sm text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? '“Rumah Tante aja deh buat arisan bulan ini, di Pondok Indah. Gampang nyariin, parkir luas. Yang mau masak rendang langsung kontak Tante ya.”' : '“Let\'s use my house for arisan this month, at Pondok Indah. Easy to find, plenty of parking. Whoever wants to cook rendang, contact me directly.”'">"Rumah Tante aja deh buat arisan bulan ini, di Pondok Indah..."</p>
+                          <button type="button" class="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400">
+                            <i data-lucide="copy" class="h-3 w-3"></i>
+                            <span x-text="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">Copy quote</span>
+                          </button>
+                        </div>
+                      </blockquote>
+
+                      <!-- Sources collapsible footer.
+                           Each entry shows sender + time + snippet + Copy action.
+                           No external jump — quote alone is the verify proof. -->
+                      <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                        <button type="button" @click="sourcesOpen = !sourcesOpen" class="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium text-gray-600 transition hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/[0.03]">
+                          <span class="flex items-center gap-2">
+                            <i data-lucide="bookmark" class="h-3.5 w-3.5"></i>
+                            <span x-text="lang === 'id' ? 'Rizz baca 4 pesan ini untuk jawab' : 'Rizz read these 4 messages to answer'">Rizz read these 4 messages to answer</span>
+                          </span>
+                          <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="sourcesOpen ? 'rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="sourcesOpen" x-cloak x-collapse class="divide-y divide-gray-100 border-t border-gray-200 bg-gray-50/50 dark:divide-gray-800 dark:border-gray-700 dark:bg-white/[0.02]">
+                          <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
+                            <p class="flex items-center justify-between gap-2">
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[1] @Tante Sari · 14:30</span>
+                              <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
+                                <i data-lucide="copy" class="h-3 w-3"></i>
+                              </button>
+                            </p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Rumah Tante aja deh buat arisan, di Pondok Indah...”' : '“Let\'s use my house, at Pondok Indah...”'">"Rumah Tante aja deh buat arisan, di Pondok Indah..."</p>
+                          </div>
+                          <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
+                            <p class="flex items-center justify-between gap-2">
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[2] @Bunda Eli · 14:22</span>
+                              <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
+                                <i data-lucide="copy" class="h-3 w-3"></i>
+                              </button>
+                            </p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Menu fix ya: rendang, opor, sambel kentang. Yang masak rendang siapa nih?”' : '“Menu confirmed: rendang, opor, sambel kentang. Who\'s cooking rendang?”'">"Menu fix ya: rendang, opor, sambel kentang..."</p>
+                          </div>
+                          <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
+                            <p class="flex items-center justify-between gap-2">
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[3] @Bunda Eli · 11:08</span>
+                              <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
+                                <i data-lucide="copy" class="h-3 w-3"></i>
+                              </button>
+                            </p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Iuran 100rb ya, transfer BCA an. Bu Eli. Rekap PDF terlampir”' : '“Iuran 100k, transfer BCA Bu Eli. Recap PDF attached”'">"Iuran 100rb ya, transfer BCA Bu Eli..."</p>
+                          </div>
+                          <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
+                            <p class="flex items-center justify-between gap-2">
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[4] @Om Yono · 09:45</span>
+                              <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
+                                <i data-lucide="copy" class="h-3 w-3"></i>
+                              </button>
+                            </p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Nih 3 opsi batik buat seragam. Suara terbanyak yang menang”' : '“Here are 3 batik options for uniform. Most votes wins”'">"Nih 3 opsi batik buat seragam..."</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <!-- Message actions: copy, regenerate, feedback -->
@@ -442,8 +972,616 @@
             </section>
           </div>
 
+          <!-- Mockup demo control: flip tier for design review. Production: remove. -->
+          <div class="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
+            <i data-lucide="eye" class="h-3.5 w-3.5"></i>
+            <button type="button" @click="userTier === 'free' ? startTrial() : revertToFree()" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
+              <span x-show="userTier === 'free'" x-text="lang === 'id' ? 'Lihat dengan Spark Trial aktif' : 'View with Spark Trial active'">View with Spark Trial active</span>
+              <span x-show="userTier === 'spark'" x-cloak x-text="lang === 'id' ? 'Lihat sebagai user Free' : 'View as Free user'">View as Free user</span>
+            </button>
+          </div>
+
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- ===== Browse Modal =====
+       Click any clickable stat in the corpus bar (link / PDF / image / voice)
+       to open this modal. Tabs at top let user switch type. Per-type content
+       uses the optimal layout: list for links, grid for PDFs/images, audio
+       cards for voice. Backdrop + Escape + X all dismiss. -->
+  <div
+    x-show="browseOpen"
+    x-cloak
+    @keydown.escape.window="browseOpen = false"
+    x-transition:enter="ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="browse-modal-title"
+  >
+    <!-- Backdrop -->
+    <div @click="browseOpen = false" class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+
+    <!-- Panel -->
+    <div
+      x-transition:enter="ease-out duration-200"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="ease-in duration-150"
+      class="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
+    >
+      <!-- Close button -->
+      <button type="button" @click="browseOpen = false" aria-label="Close" class="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
+        <i data-lucide="x" class="h-5 w-5"></i>
+      </button>
+
+      <!-- Header with type tabs -->
+      <header class="border-b border-gray-100 p-5 dark:border-gray-800">
+        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Telusuri konten' : 'Browse content'">Browse content</p>
+        <h2 id="browse-modal-title" class="text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Konten di Arisan Keluarga' : 'Content in Family Arisan'">Content in Family Arisan</h2>
+
+        <!-- Type tabs -->
+        <nav class="mt-4 flex flex-wrap gap-1">
+          <button type="button" @click="browseType = 'links'" :class="browseType === 'links' ? 'bg-brand-500 text-white shadow-theme-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.08]'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition">
+            <i data-lucide="link" class="h-3.5 w-3.5"></i>
+            <span x-text="corpusStats.links + (lang === 'id' ? ' Link' : ' Links')">89 Links</span>
+          </button>
+          <button type="button" @click="browseType = 'pdfs'" :class="browseType === 'pdfs' ? 'bg-brand-500 text-white shadow-theme-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.08]'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition">
+            <i data-lucide="file-text" class="h-3.5 w-3.5"></i>
+            <span x-text="corpusStats.pdfs + ' PDF'">12 PDF</span>
+          </button>
+          <button type="button" @click="browseType = 'images'" :class="browseType === 'images' ? 'bg-brand-500 text-white shadow-theme-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.08]'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition">
+            <i data-lucide="image" class="h-3.5 w-3.5"></i>
+            <span x-text="corpusStats.images + (lang === 'id' ? ' Gambar' : ' Images')">34 Images</span>
+          </button>
+          <button type="button" @click="browseType = 'voice'" :class="browseType === 'voice' ? 'bg-brand-500 text-white shadow-theme-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.08]'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition">
+            <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+            <span x-text="corpusStats.voice + (lang === 'id' ? ' Voice' : ' Voice')">7 Voice</span>
+          </button>
+        </nav>
+      </header>
+
+      <!-- Search -->
+      <div class="border-b border-gray-100 p-3 dark:border-gray-800">
+        <div class="relative">
+          <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"></i>
+          <input
+            type="search"
+            :placeholder="(lang === 'id' ? 'Cari di ' : 'Search in ') + ({ links: lang === 'id' ? 'link' : 'links', pdfs: 'PDF', images: lang === 'id' ? 'gambar' : 'images', voice: 'voice notes' })[browseType] + '…'"
+            class="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-3 text-sm placeholder-gray-400 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          />
+        </div>
+      </div>
+
+      <!-- Content area (scrollable) -->
+      <div class="flex-1 overflow-y-auto p-5">
+
+        <!-- ===== LINKS list ===== -->
+        <div x-show="browseType === 'links'" class="space-y-2">
+          <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+              <i data-lucide="map-pin" class="h-5 w-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">maps.google.com/…/PondokIndah</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Rumah Tante Sari · Pondok Indah Selatan' : 'Tante Sari\'s house · Pondok Indah Selatan'">Tante Sari's house · Pondok Indah Selatan</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Tante Sari · 13 Mei 14:32</p>
+            </div>
+            <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
+          </a>
+
+          <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]">
+              <i data-lucide="shopping-bag" class="h-5 w-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">shopee.co.id/…/seragam-batik-XL</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Seragam batik motif parang ukuran XL' : 'Parang batik uniform · XL size'">Seragam batik motif parang ukuran XL</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Om Yono · 13 Mei 09:45</p>
+            </div>
+            <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
+          </a>
+
+          <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+              <i data-lucide="utensils" class="h-5 w-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">tokopedia.com/…/katering-bu-sumiati</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Katering paket lengkap arisan · untuk 20 orang' : 'Catering full package · for 20 people'">Katering paket lengkap arisan · untuk 20 orang</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Pak Budi · 13 Mei 16:20</p>
+            </div>
+            <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
+          </a>
+
+          <!-- Item 4 (Spark only) -->
+          <a x-show="userTier === 'spark'" x-cloak href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+              <i data-lucide="play" class="h-5 w-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">youtube.com/watch?v=resep-rendang</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Resep rendang Padang asli · Chef Ronaldo · 18 menit' : 'Authentic Padang rendang recipe · Chef Ronaldo · 18 min'">Resep rendang Padang asli · Chef Ronaldo · 18 menit</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Bunda Eli · 12 Mei 19:15</p>
+            </div>
+            <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
+          </a>
+
+          <!-- Item 5 (Spark only) -->
+          <a x-show="userTier === 'spark'" x-cloak href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15]">
+              <i data-lucide="instagram" class="h-5 w-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">instagram.com/p/foto-reuni-2025</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Album foto reuni keluarga Bandung 2025' : 'Family reunion Bandung 2025 photo album'">Album foto reuni keluarga Bandung 2025</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Tante Tini · 11 Mei 21:30</p>
+            </div>
+            <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
+          </a>
+
+          <!-- Spark: footer counter -->
+          <div x-show="userTier === 'spark'" x-cloak class="pt-3 text-center text-xs text-gray-400">
+            <span x-text="lang === 'id' ? '5 dari 89 link · scroll untuk lihat semua' : '5 of 89 links · scroll for more'">5 of 89 links · scroll for more</span>
+          </div>
+
+          <!-- Free: upgrade CTA card (replaces items 4+ with dual-CTA upsell) -->
+          <div x-show="userTier === 'free'" class="mt-2 overflow-hidden rounded-2xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.06] via-white to-brand-500/[0.06] dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1]">
+            <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-start gap-3">
+                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+                  <i data-lucide="sparkles" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="browseCta[browseType].title[lang]">Browse all 89 links</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400" x-text="browseCta[browseType].body[lang]">Filter by sender, domain, or date.</p>
+                  <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-500" x-text="lang === 'id' ? 'Preview · 3 dari 89 ditampilkan' : 'Preview · 3 of 89 shown'">Preview · 3 of 89 shown</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-shrink-0">
+                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+                </button>
+                <a href="pricing.html" class="rounded-full border border-gray-200 bg-white px-5 py-2 text-center text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                  <span x-text="lang === 'id' ? 'Beli Spark · Rp99.000/bulan' : 'Buy Spark · Rp99.000/month'">Buy Spark · Rp99.000/month</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== PDFs grid =====
+             For FREE: metadata visible (proves index works) but DOWNLOAD locked.
+             Communicates 'we index, we don't store' so user doesn't worry
+             Sumrize cloud-stores all WhatsApp files. -->
+        <div x-show="browseType === 'pdfs'" x-cloak class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <!-- PDF 1 (sample, always visible) -->
+          <div class="group relative rounded-xl border border-gray-200 bg-white p-4 transition dark:border-gray-700 dark:bg-white/[0.02]" :class="userTier === 'spark' ? 'hover:border-brand-500 hover:shadow-theme-sm' : ''">
+            <div class="mb-3 flex items-start justify-between">
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                <i data-lucide="file-text" class="h-6 w-6"></i>
+              </div>
+              <!-- Free: lock badge replaces download -->
+              <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
+                <i data-lucide="lock" class="h-3 w-3"></i>
+                Spark
+              </button>
+              <!-- Spark: download button -->
+              <button x-show="userTier === 'spark'" x-cloak type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
+                <i data-lucide="download" class="h-4 w-4"></i>
+              </button>
+            </div>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Rekap-Iuran-Arisan-Mei-2026.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.2 MB · 4 halaman' : '1.2 MB · 4 pages'">1.2 MB · 4 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Bunda Eli · 13 Mei 11:08</p>
+          </div>
+
+          <!-- PDF 2 (sample, always visible) -->
+          <div class="group relative rounded-xl border border-gray-200 bg-white p-4 transition dark:border-gray-700 dark:bg-white/[0.02]" :class="userTier === 'spark' ? 'hover:border-brand-500 hover:shadow-theme-sm' : ''">
+            <div class="mb-3 flex items-start justify-between">
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                <i data-lucide="file-text" class="h-6 w-6"></i>
+              </div>
+              <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
+                <i data-lucide="lock" class="h-3 w-3"></i>
+                Spark
+              </button>
+              <button x-show="userTier === 'spark'" x-cloak type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
+                <i data-lucide="download" class="h-4 w-4"></i>
+              </button>
+            </div>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Daftar-Hadir-Arisan-April.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '580 KB · 2 halaman' : '580 KB · 2 pages'">580 KB · 2 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Bunda Eli · 27 Apr 14:00</p>
+          </div>
+
+          <!-- PDF 3 (sample, always visible) -->
+          <div class="group relative rounded-xl border border-gray-200 bg-white p-4 transition dark:border-gray-700 dark:bg-white/[0.02]" :class="userTier === 'spark' ? 'hover:border-brand-500 hover:shadow-theme-sm' : ''">
+            <div class="mb-3 flex items-start justify-between">
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                <i data-lucide="file-text" class="h-6 w-6"></i>
+              </div>
+              <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center gap-1 rounded-lg bg-sumrize/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk download' : 'Try Spark to download'">
+                <i data-lucide="lock" class="h-3 w-3"></i>
+                Spark
+              </button>
+              <button x-show="userTier === 'spark'" x-cloak type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
+                <i data-lucide="download" class="h-4 w-4"></i>
+              </button>
+            </div>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Resep-Lebaran-Keluarga.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '3.4 MB · 12 halaman · resep rendang, opor, ketupat' : '3.4 MB · 12 pages · rendang, opor, ketupat recipes'">3.4 MB · 12 halaman</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Tante Eli · 8 Mei 10:20</p>
+          </div>
+
+          <!-- PDF 4 (Spark only) -->
+          <a x-show="userTier === 'spark'" x-cloak href="#" class="group rounded-xl border border-gray-200 bg-white p-4 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="mb-3 flex items-start justify-between">
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                <i data-lucide="file-text" class="h-6 w-6"></i>
+              </div>
+              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
+                <i data-lucide="download" class="h-4 w-4"></i>
+              </button>
+            </div>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Undangan-Nikahan-Dini.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '2.1 MB · 1 halaman · undangan digital' : '2.1 MB · 1 page · digital invitation'">2.1 MB · 1 page</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Pak Hendro · 5 Mei 09:00</p>
+          </a>
+
+          <!-- PDF 5 (Spark only) -->
+          <a x-show="userTier === 'spark'" x-cloak href="#" class="group rounded-xl border border-gray-200 bg-white p-4 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
+            <div class="mb-3 flex items-start justify-between">
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                <i data-lucide="file-text" class="h-6 w-6"></i>
+              </div>
+              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
+                <i data-lucide="download" class="h-4 w-4"></i>
+              </button>
+            </div>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Itinerary-Mudik-Lebaran.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '890 KB · 3 halaman · rute & jadwal' : '890 KB · 3 pages · route & schedule'">890 KB · 3 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Om Yono · 2 Mei 08:15</p>
+          </a>
+
+          <!-- Spark: footer counter -->
+          <div x-show="userTier === 'spark'" x-cloak class="col-span-full pt-2 text-center text-xs text-gray-400">
+            <span x-text="lang === 'id' ? '5 dari 12 PDF · scroll untuk lihat semua' : '5 of 12 PDFs · scroll for more'">5 of 12 PDFs · scroll for more</span>
+          </div>
+
+          <!-- Free: upgrade CTA card with privacy framing -->
+          <div x-show="userTier === 'free'" class="col-span-full mt-2 overflow-hidden rounded-2xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.06] via-white to-brand-500/[0.06] dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1]">
+            <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-start gap-3">
+                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+                  <i data-lucide="sparkles" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="browseCta.pdfs.title[lang]">Unlock all 12 PDFs</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400" x-text="browseCta.pdfs.body[lang]">Sumrize only indexes metadata · your files stay in WhatsApp.</p>
+                  <!-- Privacy reassurance pill -->
+                  <p class="mt-1.5 inline-flex items-center gap-1 rounded-md bg-success-50 px-1.5 py-0.5 text-[10px] font-medium text-success-600 dark:bg-success-500/[0.12] dark:text-success-500">
+                    <i data-lucide="shield-check" class="h-3 w-3"></i>
+                    <span x-text="lang === 'id' ? 'Index metadata · bukan storage cloud' : 'Metadata index · not cloud storage'">Metadata index · not cloud storage</span>
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-shrink-0">
+                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+                </button>
+                <a href="pricing.html" class="rounded-full border border-gray-200 bg-white px-5 py-2 text-center text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                  <span x-text="lang === 'id' ? 'Beli Spark · Rp99.000/bulan' : 'Buy Spark · Rp99.000/month'">Buy Spark · Rp99.000/month</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== IMAGES grid ===== -->
+        <div x-show="browseType === 'images'" x-cloak>
+          <!-- Type filter for images -->
+          <div class="mb-3 flex flex-wrap gap-1.5">
+            <button type="button" class="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" x-text="lang === 'id' ? 'Semua · 34' : 'All · 34'">All · 34</button>
+            <button type="button" class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300" x-text="lang === 'id' ? 'Foto · 22' : 'Photos · 22'">Photos · 22</button>
+            <button type="button" class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300" x-text="lang === 'id' ? 'Screenshot · 8' : 'Screenshots · 8'">Screenshots · 8</button>
+            <button type="button" class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-300" x-text="lang === 'id' ? 'Stiker · 4' : 'Stickers · 4'">Stickers · 4</button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            <!-- Each image: aspect-square thumbnail with label overlay on hover -->
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-50 to-warning-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Batik motif parang · @Om Yono · 09:45' : 'Parang batik · @Om Yono · 09:45'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Batik parang' : 'Parang batik'">Parang batik</p>
+              </div>
+            </button>
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-200 to-brand-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Batik motif kawung · @Om Yono · 09:46' : 'Kawung batik · @Om Yono · 09:46'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Batik kawung' : 'Kawung batik'">Kawung batik</p>
+              </div>
+            </button>
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-50 to-success-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Batik motif mega mendung · @Om Yono · 09:47' : 'Mega mendung batik · @Om Yono · 09:47'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Batik mega mendung' : 'Mega mendung'">Mega mendung</p>
+              </div>
+            </button>
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-error-100 to-error-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Rendang yang dimasak Bu Eli · 12 Mei' : 'Rendang cooked by Bu Eli · 12 May'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Rendang Bu Eli' : 'Bu Eli\'s rendang'">Bu Eli's rendang</p>
+              </div>
+            </button>
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-100 to-brand-300 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Foto reuni Bandung · @Tante Tini' : 'Reunion Bandung photo · @Tante Tini'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Reuni Bandung' : 'Bandung reunion'">Bandung reunion</p>
+              </div>
+            </button>
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-100 to-warning-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Cucu Pak Yono baru lahir · 11 Mei' : 'Pak Yono\'s newborn grandchild · 11 May'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Cucu Pak Yono' : 'Pak Yono\'s grandchild'">Pak Yono's grandchild</p>
+              </div>
+            </button>
+            <!-- Image 7 (Spark only) -->
+            <button x-show="userTier === 'spark'" x-cloak type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-100 to-success-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Foto undangan nikahan Dini' : 'Dini\'s wedding invitation'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Undangan Dini' : 'Dini\'s invitation'">Dini's invitation</p>
+              </div>
+            </button>
+            <!-- Image 8 (Spark only) -->
+            <button x-show="userTier === 'spark'" x-cloak type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Screenshot bukti transfer · @Tante Sari' : 'Transfer receipt screenshot · @Tante Sari'">
+              <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Bukti transfer' : 'Transfer receipt'">Transfer receipt</p>
+              </div>
+            </button>
+          </div>
+          <!-- Spark: counter -->
+          <div x-show="userTier === 'spark'" x-cloak class="pt-3 text-center text-xs text-gray-400">
+            <span x-text="lang === 'id' ? '8 dari 34 gambar · scroll untuk lihat semua' : '8 of 34 images · scroll for more'">8 of 34 images · scroll for more</span>
+          </div>
+
+          <!-- Free: upgrade CTA -->
+          <div x-show="userTier === 'free'" class="mt-3 overflow-hidden rounded-2xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.06] via-white to-brand-500/[0.06] dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1]">
+            <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-start gap-3">
+                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+                  <i data-lucide="sparkles" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="browseCta.images.title[lang]">View all 34 images</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400" x-text="browseCta.images.body[lang]">Full-resolution lightbox + download the whole album.</p>
+                  <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-500" x-text="lang === 'id' ? 'Preview · 6 dari 34 ditampilkan' : 'Preview · 6 of 34 shown'">Preview · 6 of 34 shown</p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-shrink-0">
+                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+                </button>
+                <a href="pricing.html" class="rounded-full border border-gray-200 bg-white px-5 py-2 text-center text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                  <span x-text="lang === 'id' ? 'Beli Spark · Rp99.000/bulan' : 'Buy Spark · Rp99.000/month'">Buy Spark · Rp99.000/month</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== VOICE notes list =====
+             For FREE: list visible (metadata: sender, duration, time) but
+             playback locked. Sumrize doesn't store audio content — only
+             indexes the fact a voice note exists. -->
+        <div x-show="browseType === 'voice'" x-cloak class="space-y-2">
+          <!-- Voice 1: sample, play locked for Free -->
+          <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+            <!-- Free: locked play button -->
+            <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/10 text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk putar' : 'Try Spark to play'">
+              <i data-lucide="lock" class="h-4 w-4"></i>
+            </button>
+            <!-- Spark: real play button -->
+            <button x-show="userTier === 'spark'" x-cloak type="button" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-sm transition hover:bg-brand-600" :aria-label="lang === 'id' ? 'Putar voice note' : 'Play voice note'">
+              <i data-lucide="play" class="h-4 w-4 ml-0.5"></i>
+            </button>
+            <div class="min-w-0 flex-1">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Tante Sari</p>
+                <p class="text-xs font-mono text-gray-500 dark:text-gray-400">2:34</p>
+              </div>
+              <!-- Static waveform visual using bars -->
+              <div class="flex items-center gap-0.5 text-brand-500">
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
+              </div>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 14:35 · tentang persiapan arisan' : '13 May 14:35 · about arisan prep'">13 Mei 14:35 · tentang persiapan arisan</p>
+            </div>
+          </div>
+
+          <!-- Voice 2: sample, play locked for Free -->
+          <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+            <button x-show="userTier === 'free'" type="button" @click="startTrial(); browseOpen = false" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/10 text-sumrize transition hover:bg-sumrize/20" :title="lang === 'id' ? 'Coba Spark untuk putar' : 'Try Spark to play'">
+              <i data-lucide="lock" class="h-4 w-4"></i>
+            </button>
+            <button x-show="userTier === 'spark'" x-cloak type="button" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-sm transition hover:bg-brand-600" :aria-label="lang === 'id' ? 'Putar voice note' : 'Play voice note'">
+              <i data-lucide="play" class="h-4 w-4 ml-0.5"></i>
+            </button>
+            <div class="min-w-0 flex-1">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Bunda Eli</p>
+                <p class="text-xs font-mono text-gray-500 dark:text-gray-400">1:12</p>
+              </div>
+              <div class="flex items-center gap-0.5 text-brand-500">
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+              </div>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 11:00 · konfirmasi menu masakan' : '13 May 11:00 · menu confirmation'">13 Mei 11:00 · konfirmasi menu</p>
+            </div>
+          </div>
+
+          <!-- Voice 3 (Spark only) -->
+          <div x-show="userTier === 'spark'" x-cloak class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+            <button type="button" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-sm transition hover:bg-brand-600" :aria-label="lang === 'id' ? 'Putar voice note' : 'Play voice note'">
+              <i data-lucide="play" class="h-4 w-4 ml-0.5"></i>
+            </button>
+            <div class="min-w-0 flex-1">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Om Yono</p>
+                <p class="text-xs font-mono text-gray-500 dark:text-gray-400">0:45</p>
+              </div>
+              <div class="flex items-center gap-0.5 text-brand-500">
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+              </div>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 09:42 · pilihan seragam batik' : '13 May 09:42 · batik uniform options'">13 Mei 09:42 · pilihan seragam batik</p>
+            </div>
+          </div>
+
+          <!-- Voice 4 (Spark only) -->
+          <div x-show="userTier === 'spark'" x-cloak class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+            <button type="button" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-white shadow-theme-sm transition hover:bg-brand-600" :aria-label="lang === 'id' ? 'Putar voice note' : 'Play voice note'">
+              <i data-lucide="play" class="h-4 w-4 ml-0.5"></i>
+            </button>
+            <div class="min-w-0 flex-1">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Tante Tini</p>
+                <p class="text-xs font-mono text-gray-500 dark:text-gray-400">3:20</p>
+              </div>
+              <div class="flex items-center gap-0.5 text-brand-500">
+                <span class="block h-3 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
+                <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
+              </div>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 20:15 · cerita cucu Pak Yono yang baru lahir' : '12 May 20:15 · story about Pak Yono\'s newborn grandchild'">12 Mei 20:15 · cerita cucu Pak Yono</p>
+            </div>
+          </div>
+
+          <!-- Spark: footer counter -->
+          <div x-show="userTier === 'spark'" x-cloak class="pt-3 text-center text-xs text-gray-400">
+            <span x-text="lang === 'id' ? '4 dari 7 voice note · scroll untuk lihat semua' : '4 of 7 voice notes · scroll for more'">4 of 7 voice notes · scroll for more</span>
+          </div>
+
+          <!-- Free: upgrade CTA with audio privacy framing -->
+          <div x-show="userTier === 'free'" class="mt-2 overflow-hidden rounded-2xl border border-sumrize/30 bg-gradient-to-br from-sumrize/[0.06] via-white to-brand-500/[0.06] dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1]">
+            <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-start gap-3">
+                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-sm">
+                  <i data-lucide="sparkles" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <p class="mb-1 text-sm font-bold text-gray-900 dark:text-white" x-text="browseCta.voice.title[lang]">Play all 7 voice notes</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400" x-text="browseCta.voice.body[lang]">Audio stays in WhatsApp · Sumrize only indexes duration & sender.</p>
+                  <p class="mt-1.5 inline-flex items-center gap-1 rounded-md bg-success-50 px-1.5 py-0.5 text-[10px] font-medium text-success-600 dark:bg-success-500/[0.12] dark:text-success-500">
+                    <i data-lucide="shield-check" class="h-3 w-3"></i>
+                    <span x-text="lang === 'id' ? 'Audio tidak disimpan Sumrize · cuma metadata' : 'Audio not stored by Sumrize · metadata only'">Audio not stored by Sumrize · metadata only</span>
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-shrink-0">
+                <button type="button" @click="startTrial(); browseOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
+                </button>
+                <a href="pricing.html" class="rounded-full border border-gray-200 bg-white px-5 py-2 text-center text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                  <span x-text="lang === 'id' ? 'Beli Spark · Rp99.000/bulan' : 'Buy Spark · Rp99.000/month'">Buy Spark · Rp99.000/month</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
