@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Invoice · Sumrize Dashboard</title>
 
-  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+  <link rel="icon" type="image/png" href="./assets/logo-black.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -89,8 +89,8 @@
     >
       <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
         <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
-          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
-          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+          <img src="./assets/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./assets/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
         </a>
         <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
         <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">

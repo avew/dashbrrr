@@ -28,12 +28,12 @@ All pages share a sidebar + topbar shell. Sidebar collapses on desktop and slide
 
 ## Assets
 
-`Sumrize — Because life's too short to scroll group chats_files/` contains brand-recognizable icons used as `<img>`:
+`assets/` contains brand-recognizable icons used as `<img>`:
 
 - `logo-black.png`, `logo-white.png` — Sumrize wordmark, theme-swapped via `dark:hidden` / `hidden dark:block`
 - `whatsapp.webp`, `discord.png`, `telegram.png`, `slack.png`, `notion.webp`, `Gmail_Icon.png` — connector logos for cards + modal tiles
 
-The folder name has a space, an em-dash (`—` U+2014), and a curly apostrophe (`'` U+2019). Quote it as `Sumrize*chats_files/` when shell-globbing, or quote the full path with double quotes. Renaming the folder requires updating ~50 `<img src=...>` references across all 6 pages.
+Folder was originally named `Sumrize — Because life's too short to scroll group chats_files/` (preserved from the saved-page snapshot) and renamed to `assets/` on 2026-05-13 with all `<img>` references updated in one pass.
 
 ## Patterns worth knowing
 

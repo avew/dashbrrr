@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sumrize Dashboard</title>
 
-  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+  <link rel="icon" type="image/png" href="./assets/logo-black.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -103,12 +103,12 @@
         <!-- Logo wordmark (visible when expanded / mobile drawer open) -->
         <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
           <img
-            src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png"
+            src="./assets/logo-black.png"
             class="h-12 w-auto dark:hidden"
             alt="Sumrize"
           />
           <img
-            src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png"
+            src="./assets/logo-white.png"
             class="hidden h-12 w-auto dark:block"
             alt="Sumrize"
           />
@@ -402,14 +402,14 @@
 
             <!-- Filter pill: WhatsApp Group -->
             <button type="button" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]">
-              <img src="./Sumrize — Because life’s too short to scroll group chats_files/whatsapp.webp" class="h-5 w-5 rounded-full object-cover" alt="" />
+              <img src="./assets/whatsapp.webp" class="h-5 w-5 rounded-full object-cover" alt="" />
               <span>WhatsApp Group</span>
               <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gray-100 px-1.5 text-xs font-semibold dark:bg-white/10">1</span>
             </button>
 
             <!-- Filter pill: Discord -->
             <button type="button" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]">
-              <img src="./Sumrize — Because life’s too short to scroll group chats_files/discord.png" class="h-5 w-5 rounded-full object-cover" alt="" />
+              <img src="./assets/discord.png" class="h-5 w-5 rounded-full object-cover" alt="" />
               <span>Discord</span>
               <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gray-100 px-1.5 text-xs font-semibold dark:bg-white/10">1</span>
             </button>
@@ -429,7 +429,7 @@
               <div class="p-6">
                 <header class="mb-8 flex items-start justify-between">
                   <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
-                    <img src="./Sumrize — Because life’s too short to scroll group chats_files/whatsapp.webp" class="h-3.5 w-3.5" alt="" />
+                    <img src="./assets/whatsapp.webp" class="h-3.5 w-3.5" alt="" />
                     WhatsApp Group
                   </span>
                   <button type="button" aria-label="Connector setting" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-white">
@@ -461,7 +461,7 @@
               <div class="p-6">
                 <header class="mb-8 flex items-start justify-between">
                   <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
-                    <img src="./Sumrize — Because life’s too short to scroll group chats_files/discord.png" class="h-3.5 w-3.5" alt="" />
+                    <img src="./assets/discord.png" class="h-3.5 w-3.5" alt="" />
                     Discord
                   </span>
                   <button type="button" aria-label="Connector setting" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-white">
@@ -554,42 +554,42 @@
              Inactive tile pattern = same surface, opacity-50, cursor-not-allowed, "Soon" badge top-right -->
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
 
-          <!-- Active: WhatsApp Group -->
-          <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
-            <img src="./Sumrize — Because life’s too short to scroll group chats_files/whatsapp.webp" class="h-10 w-10" alt="" />
+          <!-- Active: WhatsApp Group → launches the dedicated onboarding wizard -->
+          <a href="onboard-whatsapp.html" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
+            <img src="./assets/whatsapp.webp" class="h-10 w-10" alt="" />
             <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">WhatsApp Group</span>
-          </button>
+          </a>
 
           <!-- Active: Discord -->
           <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
-            <img src="./Sumrize — Because life’s too short to scroll group chats_files/discord.png" class="h-10 w-10 object-contain" alt="" />
+            <img src="./assets/discord.png" class="h-10 w-10 object-contain" alt="" />
             <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Discord</span>
           </button>
 
           <!-- Active: Slack -->
           <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
-            <img src="./Sumrize — Because life’s too short to scroll group chats_files/slack.png" class="h-10 w-10 object-contain" alt="" />
+            <img src="./assets/slack.png" class="h-10 w-10 object-contain" alt="" />
             <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Slack</span>
           </button>
 
           <!-- Coming soon: Telegram -->
           <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
             <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Soon</span>
-            <img src="./Sumrize — Because life’s too short to scroll group chats_files/telegram.png" class="h-10 w-10 object-contain" alt="" />
+            <img src="./assets/telegram.png" class="h-10 w-10 object-contain" alt="" />
             <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Telegram</span>
           </button>
 
           <!-- Coming soon: Notion -->
           <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
             <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Soon</span>
-            <img src="./Sumrize — Because life’s too short to scroll group chats_files/notion.webp" class="h-10 w-10 object-contain" alt="" />
+            <img src="./assets/notion.webp" class="h-10 w-10 object-contain" alt="" />
             <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Notion</span>
           </button>
 
           <!-- Coming soon: Gmail -->
           <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
             <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Soon</span>
-            <img src="./Sumrize — Because life’s too short to scroll group chats_files/Gmail_Icon.png" class="h-10 w-10 object-contain" alt="" />
+            <img src="./assets/Gmail_Icon.png" class="h-10 w-10 object-contain" alt="" />
             <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Gmail</span>
           </button>
 

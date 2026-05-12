@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Referral · Sumrize Dashboard</title>
 
-  <link rel="icon" type="image/png" href="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" />
+  <link rel="icon" type="image/png" href="./assets/logo-black.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -146,8 +146,8 @@
     >
       <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
         <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
-          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
-          <img src="./Sumrize — Because life’s too short to scroll group chats_files/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+          <img src="./assets/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./assets/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
         </a>
         <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
         <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
@@ -266,11 +266,11 @@
               <p class="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Atau bagikan via' : 'Or share via'">Or share via</p>
               <div class="grid grid-cols-4 gap-2">
                 <a :href="'https://wa.me/?text=' + encodeURIComponent('Cobain Sumrize, AI summary buat group chat. Pakai kode ' + referralCode + ': https://' + referralUrl)" target="_blank" rel="noopener" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-success-500 hover:bg-success-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-success-500 dark:hover:bg-success-500/10">
-                  <img src="./Sumrize — Because life’s too short to scroll group chats_files/whatsapp.webp" class="h-6 w-6" alt="" />
+                  <img src="./assets/whatsapp.webp" class="h-6 w-6" alt="" />
                   <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">WhatsApp</span>
                 </a>
                 <a :href="'https://t.me/share/url?url=' + encodeURIComponent('https://' + referralUrl) + '&text=' + encodeURIComponent('Cobain Sumrize! Kode: ' + referralCode)" target="_blank" rel="noopener" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-500 dark:hover:bg-brand-500/10">
-                  <img src="./Sumrize — Because life’s too short to scroll group chats_files/telegram.png" class="h-6 w-6 object-contain" alt="" />
+                  <img src="./assets/telegram.png" class="h-6 w-6 object-contain" alt="" />
                   <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">Telegram</span>
                 </a>
                 <a :href="'https://twitter.com/intent/tweet?text=' + encodeURIComponent('Sumrize AI summary buat group chat. Pakai kode ' + referralCode + ': https://' + referralUrl)" target="_blank" rel="noopener" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-white dark:hover:bg-white/5">
@@ -278,7 +278,7 @@
                   <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">X / Twitter</span>
                 </a>
                 <a :href="'mailto:?subject=' + encodeURIComponent('Coba Sumrize') + '&body=' + encodeURIComponent('Pakai kode ' + referralCode + ' di https://' + referralUrl)" class="flex flex-col items-center gap-1 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-error-500 hover:bg-error-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-error-500 dark:hover:bg-error-500/10">
-                  <img src="./Sumrize — Because life’s too short to scroll group chats_files/Gmail_Icon.png" class="h-6 w-6 object-contain" alt="" />
+                  <img src="./assets/Gmail_Icon.png" class="h-6 w-6 object-contain" alt="" />
                   <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">Email</span>
                 </a>
               </div>
