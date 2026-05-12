@@ -21,7 +21,15 @@ All pages share a sidebar + topbar shell. Sidebar collapses on desktop and slide
 
 ## Stack
 
-- **Tailwind v3 via CDN** (`cdn.tailwindcss.com`) — config inlined per page in a `<script>` tag. Brand tokens: `brand-500: #465fff` (TailAdmin indigo), `sumrize: #FF4438` (Sumrize red), Untitled UI gray palette, plus `success`/`warning`/`error` semantic colors.
+- **Tailwind v3 via CDN** (`cdn.tailwindcss.com`) — config inlined per page in a `<script>` tag. Brand palette extracted from the live sumrize.me marketing site (not TailAdmin defaults):
+  - `brand-50: #eaf4fb` → pale blue wash (sidebar active bg, card footer band)
+  - `brand-200: #b3dbff` → light blue accent (most frequent on sumrize.me)
+  - `brand-500: #26344a` → navy primary (text on brand-50, badges, focus rings)
+  - `brand-700: #1c1f2c` → deep navy
+  - `brand-950: #0f0e0e` → near-black
+  - `gray-700-950` shifted to Sumrize layered navy: `#3c3f4c` / `#26344a` / `#1c1f2c` / `#0f0e0e`
+  - `sumrize: #FF4438` → red, reserved for primary CTAs and destructive actions ONLY (high-attention)
+  - `success`/`warning`/`error` are still TailAdmin defaults; can swap success to mint `#3afcb8` later for closer brand match
 - **Alpine.js v3 via CDN** — state management. Body-level `x-data` holds shared state (`darkMode`, `lang`, `sidebarToggle`, `profileOpen`, etc.) with `localStorage` persistence on `darkMode` and `lang`.
 - **Lucide icons via CDN** — `<i data-lucide="name">` replaced with inline SVG by `lucide.createIcons()` on `DOMContentLoaded`. Style matches TailAdmin (thin outline). Replaced FontAwesome from the original snapshot which couldn't render locally (font files weren't part of the saved page).
 - **Outfit font** from Google Fonts.
