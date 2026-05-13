@@ -110,6 +110,12 @@
       this.trialJustStarted = true;
       setTimeout(() => this.trialJustStarted = false, 3500);
     },
+    /* Real trial CTA — production navigation. The in-page startTrial() above
+       is kept for the demo toggle at the page footer. */
+    goToTrial() {
+      const here = (window.location.pathname.split('/').pop() || 'index.html');
+      window.location.href = 'pricing.html?trial=1&from=' + encodeURIComponent(here);
+    },
     revertToFree() {
       this.userTier = 'free';
       this.schedule = 'evening'; /* force back to the only free option */
@@ -334,7 +340,7 @@
             </div>
           </div>
           <div class="flex flex-col items-stretch gap-1.5 md:items-end">
-            <button type="button" @click="startTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+            <button type="button" @click="goToTrial()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-bold text-white shadow-theme-md transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
               <i data-lucide="sparkles" class="h-4 w-4"></i>
               <span x-text="lang === 'id' ? 'Coba Gratis 14 Hari' : 'Try Free for 14 Days'">Try Free for 14 Days</span>
             </button>

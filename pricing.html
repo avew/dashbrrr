@@ -86,11 +86,27 @@
       this.checkoutStep = 1;
       this.checkoutOpen = true;
     },
+    /* Trial intent + return URL — set by query params when user lands here
+       from a trial CTA elsewhere. After checkout success the user gets a
+       primary button back to where they came from. */
+    returnTo: '',
+    trialIntent: false,
     init() {
       this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
       this.lang = localStorage.getItem('lang') || 'en';
       this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
       this.$watch('lang', v => localStorage.setItem('lang', v));
+
+      /* Read query params: trial=1 plus optional from=PAGE. When trial
+         intent is detected, treat the user as currently on Free (so Spark
+         is selectable) and auto-open the checkout flow targeting Spark. */
+      const params = new URLSearchParams(window.location.search);
+      this.trialIntent = params.get('trial') === '1';
+      this.returnTo = params.get('from') || '';
+      if (this.trialIntent) {
+        this.currentPlan = 'free';
+        this.$nextTick(() => this.openCheckout('spark'));
+      }
     }
   }"
   :class="{ 'dark bg-gray-900': darkMode }"
@@ -445,22 +461,30 @@
         <i data-lucide="x" class="h-5 w-5"></i>
       </button>
 
-      <!-- Step indicator -->
+      <!-- Step indicator — Payment step hidden when trialIntent (trial = free,
+           no payment required). Goes from 1 (Review) → 3 (Done) directly. -->
       <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-3 dark:border-gray-800">
         <span :class="checkoutStep >= 1 ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">1</span>
-        <span :class="checkoutStep >= 1 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Tinjau' : 'Review'">Review</span>
+        <span :class="checkoutStep >= 1 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'" class="text-xs font-medium" x-text="trialIntent ? (lang === 'id' ? 'Aktifkan' : 'Activate') : (lang === 'id' ? 'Tinjau' : 'Review')">Review</span>
+        <!-- Payment step: purchase only -->
+        <template x-if="!trialIntent">
+          <span class="inline-flex items-center gap-2">
+            <span class="mx-1 h-px w-6 bg-gray-200 dark:bg-gray-700"></span>
+            <span :class="checkoutStep >= 2 ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">2</span>
+            <span :class="checkoutStep >= 2 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Pembayaran' : 'Payment'">Payment</span>
+          </span>
+        </template>
         <span class="mx-1 h-px w-6 bg-gray-200 dark:bg-gray-700"></span>
-        <span :class="checkoutStep >= 2 ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">2</span>
-        <span :class="checkoutStep >= 2 ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Pembayaran' : 'Payment'">Payment</span>
-        <span class="mx-1 h-px w-6 bg-gray-200 dark:bg-gray-700"></span>
-        <span :class="checkoutStep >= 3 ? 'bg-success-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold">3</span>
+        <span :class="checkoutStep >= 3 ? 'bg-success-500 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'" class="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold" x-text="trialIntent ? '2' : '3'">3</span>
         <span :class="checkoutStep >= 3 ? 'text-success-600 dark:text-success-500' : 'text-gray-400'" class="text-xs font-medium" x-text="lang === 'id' ? 'Selesai' : 'Done'">Done</span>
       </div>
 
-      <!-- ===== Step 1: Review ===== -->
+      <!-- ===== Step 1: Review / Activate Trial =====
+           Dual-mode: trial intent → Rp0 today + auto-revert info, skip payment.
+           Purchase → full price breakdown + Continue to Payment. -->
       <div x-show="checkoutStep === 1" class="p-6">
-        <h2 id="checkout-modal-title" class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Konfirmasi Langganan' : 'Confirm Subscription'">Confirm Subscription</h2>
-        <p class="mb-5 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tinjau paket sebelum melanjutkan ke pembayaran.' : 'Review the plan before continuing to payment.'">Review the plan before continuing to payment.</p>
+        <h2 id="checkout-modal-title" class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="trialIntent ? (lang === 'id' ? 'Aktifkan Trial Spark' : 'Activate Spark Trial') : (lang === 'id' ? 'Konfirmasi Langganan' : 'Confirm Subscription')">Confirm Subscription</h2>
+        <p class="mb-5 text-sm text-gray-500 dark:text-gray-400" x-text="trialIntent ? (lang === 'id' ? '14 hari gratis · tidak perlu bayar sekarang.' : '14 days free · no payment required now.') : (lang === 'id' ? 'Tinjau paket sebelum melanjutkan ke pembayaran.' : 'Review the plan before continuing to payment.')">Review the plan before continuing to payment.</p>
 
         <!-- Plan summary -->
         <div class="mb-4 rounded-xl border border-brand-500 bg-brand-50/40 p-4 dark:bg-brand-500/[0.08]">
@@ -468,14 +492,37 @@
             <div>
               <p class="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-brand-500 dark:text-brand-400" x-text="lang === 'id' ? 'Paket' : 'Plan'">Plan</p>
               <p class="text-base font-semibold text-gray-900 dark:text-white" x-text="selectedPlan ? plans[selectedPlan].name : ''">—</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="billingCycle === 'monthly' ? (lang === 'id' ? 'Tagihan bulanan' : 'Billed monthly') : (lang === 'id' ? 'Tagihan tahunan (hemat 20%)' : 'Billed yearly (save 20%)')">Billed monthly</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="trialIntent ? (lang === 'id' ? '14 hari trial, lalu ' + (selectedPlan ? formatIDR(plans[selectedPlan].priceMonthly) : '') + '/bulan' : '14 days trial, then ' + (selectedPlan ? formatIDR(plans[selectedPlan].priceMonthly) : '') + '/month') : (billingCycle === 'monthly' ? (lang === 'id' ? 'Tagihan bulanan' : 'Billed monthly') : (lang === 'id' ? 'Tagihan tahunan (hemat 20%)' : 'Billed yearly (save 20%)'))">Billed monthly</p>
             </div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedPlan ? formatIDR(billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) : ''"></p>
+            <!-- Trial: Rp0 today (green success color). Purchase: full price. -->
+            <p x-show="trialIntent" class="text-2xl font-bold text-success-600 dark:text-success-500">Rp0</p>
+            <p x-show="!trialIntent" class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedPlan ? formatIDR(billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) : ''"></p>
           </div>
         </div>
 
-        <!-- Total breakdown -->
-        <dl class="space-y-2 border-t border-gray-100 pt-4 text-sm dark:border-gray-800">
+        <!-- TRIAL: benefits card replaces price breakdown -->
+        <div x-show="trialIntent" class="rounded-xl border border-success-500/30 bg-success-50/40 p-4 dark:bg-success-500/[0.08]">
+          <div class="flex items-start gap-3">
+            <i data-lucide="shield-check" class="mt-0.5 h-5 w-5 flex-shrink-0 text-success-600 dark:text-success-500"></i>
+            <ul class="space-y-1 text-xs text-gray-700 dark:text-gray-300">
+              <li class="flex items-center gap-1.5">
+                <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                <span x-text="lang === 'id' ? 'Akses penuh Spark selama 14 hari' : 'Full Spark access for 14 days'">Full Spark access for 14 days</span>
+              </li>
+              <li class="flex items-center gap-1.5">
+                <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                <span x-text="lang === 'id' ? 'Tanpa kartu kredit · tanpa pembayaran sekarang' : 'No credit card · no payment now'">No credit card · no payment now</span>
+              </li>
+              <li class="flex items-center gap-1.5">
+                <i data-lucide="check" class="h-3 w-3 text-success-500"></i>
+                <span x-text="lang === 'id' ? 'Auto-revert ke Free pada 27 Mei 2026 jika tidak diperpanjang' : 'Auto-reverts to Free on 27 May 2026 unless renewed'">Auto-reverts to Free on 27 May 2026 unless renewed</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PURCHASE: total breakdown -->
+        <dl x-show="!trialIntent" class="space-y-2 border-t border-gray-100 pt-4 text-sm dark:border-gray-800">
           <div class="flex justify-between text-gray-500 dark:text-gray-400">
             <dt x-text="lang === 'id' ? 'Subtotal' : 'Subtotal'">Subtotal</dt>
             <dd x-text="selectedPlan ? formatIDR(billingCycle === 'monthly' ? plans[selectedPlan].priceMonthly : plans[selectedPlan].priceYearly) : ''"></dd>
@@ -492,7 +539,10 @@
 
         <div class="mt-6 flex gap-3">
           <button type="button" @click="checkoutOpen = false" class="flex-1 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700" x-text="lang === 'id' ? 'Batal' : 'Cancel'">Cancel</button>
-          <button type="button" @click="checkoutStep = 2" class="flex-1 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover" x-text="lang === 'id' ? 'Lanjut ke Pembayaran' : 'Continue to Payment'">Continue to Payment</button>
+          <!-- Trial: skip to step 3 success immediately -->
+          <button x-show="trialIntent" type="button" @click="checkoutStep = 3" class="flex-1 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover" x-text="lang === 'id' ? 'Aktifkan Trial Gratis' : 'Activate Free Trial'">Activate Free Trial</button>
+          <!-- Purchase: go to payment step -->
+          <button x-show="!trialIntent" type="button" @click="checkoutStep = 2" class="flex-1 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover" x-text="lang === 'id' ? 'Lanjut ke Pembayaran' : 'Continue to Payment'">Continue to Payment</button>
         </div>
       </div>
 
@@ -553,18 +603,28 @@
         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-50 text-success-500 dark:bg-success-500/[0.15]">
           <i data-lucide="check" class="h-8 w-8"></i>
         </div>
-        <h2 class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Berlangganan Berhasil!' : 'Subscription Active!'">Subscription Active!</h2>
-        <p class="mx-auto mb-5 max-w-sm text-sm text-gray-500 dark:text-gray-400">
+        <h2 class="mb-1 text-xl font-semibold text-gray-900 dark:text-white" x-text="trialIntent ? (lang === 'id' ? 'Trial Spark Aktif!' : 'Spark Trial Active!') : (lang === 'id' ? 'Berlangganan Berhasil!' : 'Subscription Active!')">Subscription Active!</h2>
+        <!-- Trial-specific message: highlight free period + auto-revert date -->
+        <p x-show="trialIntent" class="mx-auto mb-5 max-w-sm text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Akses penuh Spark selama 14 hari. Auto-revert ke Free pada 27 Mei 2026 kecuali Anda perpanjang.' : 'Full Spark access for 14 days. Auto-reverts to Free on 27 May 2026 unless you renew.'">Full Spark access for 14 days.</p>
+        <!-- Purchase message -->
+        <p x-show="!trialIntent" class="mx-auto mb-5 max-w-sm text-sm text-gray-500 dark:text-gray-400">
           <span x-text="lang === 'id' ? 'Selamat menggunakan paket ' : 'Welcome to your '"></span>
           <span class="font-semibold text-gray-900 dark:text-white" x-text="selectedPlan ? plans[selectedPlan].name : ''"></span>
           <span x-text="lang === 'id' ? '. Invoice sudah dikirim ke email Anda.' : ' plan. Invoice sent to your email.'"></span>
         </p>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <a href="invoice.html" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+          <!-- Primary: return to originating page if user came from a trial CTA elsewhere -->
+          <a x-show="returnTo" :href="returnTo" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span x-text="lang === 'id' ? 'Lanjutkan di halaman sebelumnya' : 'Continue where you left off'">Continue where you left off</span>
+          </a>
+          <!-- Fallback primary when user came directly to pricing (no returnTo) -->
+          <a x-show="!returnTo" href="invoice.html" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover">
             <i data-lucide="file-text" class="h-4 w-4"></i>
             <span x-text="lang === 'id' ? 'Lihat Invoice' : 'View Invoice'">View Invoice</span>
           </a>
+          <!-- Secondary always visible -->
           <a href="index.html" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
             <i data-lucide="home" class="h-4 w-4"></i>
             <span x-text="lang === 'id' ? 'Ke Beranda' : 'Go to Home'">Go to Home</span>
