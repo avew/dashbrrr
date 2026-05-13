@@ -114,8 +114,8 @@
     },
     sampleQuestions: [
       { icon: 'messages-square', en: 'What did everyone discuss today?',  id: 'Apa yang dibahas di grup hari ini?' },
-      { icon: 'wallet',          en: 'How much is the arisan fee this month?', id: 'Berapa iuran arisan bulan ini?' },
-      { icon: 'calendar',        en: 'When is the next arisan event?',   id: 'Kapan jadwal arisan berikutnya?' },
+      { icon: 'wallet',          en: 'How much is the meetup fee this month?', id: 'Berapa iuran kopdar bulan ini?' },
+      { icon: 'calendar',        en: 'When is the next meetup?',         id: 'Kapan kopdar berikutnya?' },
       { icon: 'users',           en: 'Who has not confirmed attendance?', id: 'Siapa yang belum konfirmasi hadir?' }
     ],
     /* Browse modal: click stat → see actual examples by content type */
@@ -148,18 +148,18 @@
     trialJustStarted: false,
     /* Free user can pick ANY single connector. Only cross-connector
        (All connectors) search is gated behind Spark. */
-    freeScope: 'arisan',
+    freeScope: 'bmw',
     freeScopes: {
-      arisan:    { en: 'Family Arisan',    id: 'Arisan Keluarga', icon: './assets/whatsapp.webp', source: 'WhatsApp', messages: 312 },
-      keluarga:  { en: 'Extended Family',  id: 'Keluarga Besar',  icon: './assets/whatsapp.webp', source: 'WhatsApp', messages: 587 },
-      marketing: { en: 'Marketing Team',   id: 'Tim Marketing',   icon: './assets/discord.png',   source: 'Discord',  messages: 348 }
+      bmw:       { en: 'BMW Community',    id: 'Komunitas Mobil BMW', icon: './assets/whatsapp.webp', source: 'WhatsApp', messages: 487 },
+      keluarga:  { en: 'Extended Family',  id: 'Keluarga Besar',      icon: './assets/whatsapp.webp', source: 'WhatsApp', messages: 587 },
+      marketing: { en: 'Marketing Team',   id: 'Tim Marketing',       icon: './assets/discord.png',   source: 'Discord',  messages: 348 }
     },
     /* Spark-only filters */
     filters: { connector: 'all', type: 'any', sender: 'any', dateRange: '30d' },
     filterOpen: { connector: false, type: false, sender: false, date: false },
     /* Mock corpus stats — would come from API in production */
     corpusStats: { messages: 1247, links: 89, pdfs: 12, images: 34, voice: 7, connectors: 2 },
-    senders: ['Tante Sari', 'Bunda Eli', 'Om Yono', 'Tante Tini', 'Pak Budi'],
+    senders: ['Bro Adit', 'Mas Reza', 'Om Andre', 'Pak Hendra', 'Bro Doni'],
     languages: {
       en: { label: 'English', flag: '🇬🇧' },
       id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
@@ -535,15 +535,16 @@
 
               <!-- Date-grouped list -->
               <nav x-show="hasChats" class="flex-1 space-y-4 overflow-y-auto px-2 pb-2">
-                <!-- TODAY (mix: arisan / family / office) -->
+                <!-- TODAY (mix: BMW community / family / office) -->
+
                 <div>
                   <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Hari ini' : 'Today'">Today</h3>
                   <ul class="space-y-0.5">
                     <li>
-                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" x-text="lang === 'id' ? 'Arisan bulan ini di mana ya?' : 'Where\'s arisan this month?'">Where's arisan this month?</a>
+                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" x-text="lang === 'id' ? 'Kopdar bulan ini di mana?' : 'Where\'s this month\'s meetup?'">Where's this month's meetup?</a>
                     </li>
                     <li>
-                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Resep rendang dari Tante Eli' : 'Tante Eli\'s rendang recipe'">Tante Eli's rendang recipe</a>
+                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Bengkel BMW rekomendasi di Jakarta' : 'Recommended BMW workshops in Jakarta'">Recommended BMW workshops in Jakarta</a>
                     </li>
                     <li>
                       <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Meeting client besok jam berapa?' : 'What time is the client meeting tomorrow?'">What time is the client meeting tomorrow?</a>
@@ -559,10 +560,10 @@
                   <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Kemarin' : 'Yesterday'">Yesterday</h3>
                   <ul class="space-y-0.5">
                     <li>
-                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Bayar iuran arisan ke rekening mana?' : 'Which account for arisan payment?'">Which account for arisan payment?</a>
+                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Transfer iuran kopdar ke rekening mana?' : 'Which account for the meetup fee?'">Which account for the meetup fee?</a>
                     </li>
                     <li>
-                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Tante Tini mau dijemput jam berapa?' : 'When to pick up Tante Tini?'">When to pick up Tante Tini?</a>
+                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Harga genuine oil filter F10 berapa?' : 'Price of a genuine F10 oil filter?'">Price of a genuine F10 oil filter?</a>
                     </li>
                     <li>
                       <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Deadline laporan bulanan kapan?' : 'When is monthly report deadline?'">When is monthly report deadline?</a>
@@ -575,10 +576,10 @@
                   <h3 class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? '7 hari terakhir' : 'Last 7 days'">Last 7 days</h3>
                   <ul class="space-y-0.5">
                     <li>
-                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'List belanja kondangan Dini' : 'Shopping list for Dini\'s wedding'">Shopping list for Dini's wedding</a>
+                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Rute touring Puncak via Sentul' : 'Touring route to Puncak via Sentul'">Touring route to Puncak via Sentul</a>
                     </li>
                     <li>
-                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Jadwal nikahan keponakan minggu depan' : 'Cousin\'s wedding schedule next week'">Cousin's wedding schedule next week</a>
+                      <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Spesifikasi E36 jualan Om Doni' : 'Om Doni\'s E36 listing specs'">Om Doni's E36 listing specs</a>
                     </li>
                     <li>
                       <a href="#" @click="chatDrawerOpen = false" class="block truncate rounded-lg px-3 py-1.5 text-sm text-gray-400 transition hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-white/5" x-text="lang === 'id' ? 'Pembagian PIC untuk launching produk' : 'PIC split for product launch'">PIC split for product launch</a>
@@ -614,8 +615,8 @@
                       <i data-lucide="crosshair" class="h-3 w-3"></i>
                       <span x-text="lang === 'id' ? 'Scope Connector' : 'Connector Scope'">Connector Scope</span>
                     </div>
-                    <h2 class="mb-1 truncate text-lg font-semibold text-gray-900 dark:text-white md:text-xl" x-text="lang === 'id' ? 'Arisan bulan ini di mana ya?' : 'Where\'s arisan this month?'">Where's arisan this month?</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400" x-text="userTier === 'free' ? (freeScopes[freeScope][lang] + ' (' + freeScopes[freeScope].source + ') · ' + freeScopes[freeScope].messages + ' ' + (lang === 'id' ? 'pesan' : 'messages')) : (lang === 'id' ? 'Semua connector · 1,247 pesan' : 'All Connectors · 1,247 messages')">Family Arisan (WhatsApp) · 312 messages</p>
+                    <h2 class="mb-1 truncate text-lg font-semibold text-gray-900 dark:text-white md:text-xl" x-text="lang === 'id' ? 'Kopdar bulan ini di mana?' : 'Where\'s this month\'s meetup?'">Where's this month's meetup?</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400" x-text="userTier === 'free' ? (freeScopes[freeScope][lang] + ' (' + freeScopes[freeScope].source + ') · ' + freeScopes[freeScope].messages + ' ' + (lang === 'id' ? 'pesan' : 'messages')) : (lang === 'id' ? 'Semua connector · 1,247 pesan' : 'All Connectors · 1,247 messages')">BMW Community (WhatsApp) · 487 messages</p>
                     </div>
                   </div>
 
@@ -627,7 +628,7 @@
                       <button type="button" @click="scopeOpen = !scopeOpen" class="inline-flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
                         <span class="flex items-center gap-2">
                           <img :src="freeScopes[freeScope].icon" class="h-4 w-4 rounded-full" alt="" />
-                          <span x-text="freeScopes[freeScope][lang]">Family Arisan</span>
+                          <span x-text="freeScopes[freeScope][lang]">BMW Community</span>
                         </span>
                         <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="scopeOpen ? 'rotate-180' : ''"></i>
                       </button>
@@ -671,9 +672,9 @@
                         <i data-lucide="layout-grid" class="h-4 w-4"></i>
                         <span x-text="lang === 'id' ? 'Semua connector' : 'All connectors'">All connectors</span>
                       </button>
-                      <button type="button" @click="filters.connector = 'Arisan Keluarga'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'Arisan Keluarga' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                      <button type="button" @click="filters.connector = 'Komunitas Mobil BMW'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'Komunitas Mobil BMW' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
                         <img src="./assets/whatsapp.webp" class="h-4 w-4 rounded-full" alt="" />
-                        <span x-text="lang === 'id' ? 'Arisan Keluarga' : 'Family Arisan'">Family Arisan</span>
+                        <span x-text="lang === 'id' ? 'Komunitas Mobil BMW' : 'BMW Community'">BMW Community</span>
                       </button>
                       <button type="button" @click="filters.connector = 'Keluarga Besar'; filterOpen.connector = false" class="flex w-full items-center gap-3 px-4 py-2 text-sm transition" :class="filters.connector === 'Keluarga Besar' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12]' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
                         <img src="./assets/whatsapp.webp" class="h-4 w-4 rounded-full" alt="" />
@@ -804,7 +805,7 @@
                     </button>
                     <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
                       <i data-lucide="quote" class="h-3 w-3"></i>
-                      <span x-text="lang === 'id' ? 'Kutipan dari @Tante Sari' : 'Quotes from @Tante Sari'">Quotes from @Tante Sari</span>
+                      <span x-text="lang === 'id' ? 'Kutipan dari @Bro Adit' : 'Quotes from @Bro Adit'">Quotes from @Bro Adit</span>
                     </button>
                     <button type="button" class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-brand-50 hover:text-brand-500 hover:ring-brand-200 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-brand-500/[0.12] dark:hover:text-brand-400">
                       <i data-lucide="target" class="h-3 w-3"></i>
@@ -848,7 +849,7 @@
 
                 <!-- User message: right-aligned, brand-500 solid (max contrast vs AI) -->
                 <div class="flex justify-end">
-                  <div class="max-w-[80%] rounded-2xl rounded-tr-md bg-brand-500 px-4 py-3 text-sm text-white shadow-theme-sm" x-text="lang === 'id' ? 'Arisan bulan ini bahas apa aja?' : 'What did everyone discuss about this month\'s arisan?'">What did everyone discuss about this month's arisan?</div>
+                  <div class="max-w-[80%] rounded-2xl rounded-tr-md bg-brand-500 px-4 py-3 text-sm text-white shadow-theme-sm" x-text="lang === 'id' ? 'Kopdar bulan ini bahas apa aja?' : 'What did everyone discuss about this month\'s meetup?'">What did everyone discuss about this month's meetup?</div>
                 </div>
 
                 <!-- ===== Streaming "thinking" placeholder =====
@@ -867,7 +868,7 @@
                       <i x-show="streamPhase === 1" data-lucide="search" class="h-3.5 w-3.5"></i>
                       <i x-show="streamPhase === 2" x-cloak data-lucide="wrench" class="h-3.5 w-3.5"></i>
                       <span x-show="streamPhase === 1" x-text="lang === 'id' ? 'Mencari pesan terkait…' : 'Searching for relevant messages…'">Searching for relevant messages…</span>
-                      <span x-show="streamPhase === 2" x-cloak x-text="lang === 'id' ? 'Membaca dari Arisan Keluarga (312 pesan)…' : 'Reading from Family Arisan (312 messages)…'">Reading from Family Arisan (312 messages)…</span>
+                      <span x-show="streamPhase === 2" x-cloak x-text="lang === 'id' ? 'Membaca dari Komunitas Mobil BMW (487 pesan)…' : 'Reading from BMW Community (487 messages)…'">Reading from BMW Community (487 messages)…</span>
                       <span class="ml-1 flex gap-0.5">
                         <span class="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce"></span>
                         <span class="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay: 150ms"></span>
@@ -900,9 +901,9 @@
                         <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="toolOpen ? 'rotate-180' : ''"></i>
                       </button>
                       <div x-show="toolOpen" x-cloak x-collapse class="border-t border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400">
-                        <p><span class="font-mono text-gray-500">connector:</span> Arisan Keluarga (WhatsApp Group)</p>
+                        <p><span class="font-mono text-gray-500">connector:</span> Komunitas Mobil BMW (WhatsApp Group)</p>
                         <p><span class="font-mono text-gray-500">range:</span> last 24 hours</p>
-                        <p><span class="font-mono text-gray-500">messages:</span> 312</p>
+                        <p><span class="font-mono text-gray-500">messages:</span> 487</p>
                       </div>
                     </div>
 
@@ -913,36 +914,36 @@
                                 + collapsible sources list. -->
 
                     <!-- FREE: structured "Sumrize summary" template applied to
-                         Arisan Keluarga content. Same template format used in
+                         BMW Community content. Same template format used in
                          WhatsApp-distributed digests. Phased reveal via
                          streamPhase so the demo animation feels alive. -->
                     <div x-show="userTier === 'free'" class="space-y-4 rounded-2xl rounded-tl-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
                       <!-- Header: title + date range -->
                       <div class="border-b border-gray-200 pb-3 dark:border-gray-700">
-                        <p class="text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan — Arisan Keluarga' : 'Summary — Family Arisan'">Summary — Family Arisan</p>
-                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">13 Mei 2026, 09:12 — 13 Mei 2026, 17:48</p>
+                        <p class="text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan — Komunitas Mobil BMW' : 'Summary — BMW Community'">Summary — BMW Community</p>
+                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">13 Mei 2026, 09:12 — 13 Mei 2026, 22:48</p>
                       </div>
 
                       <!-- Headline bullets -->
                       <ul class="space-y-1.5 pl-1">
-                        <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Persiapan arisan bulan ini cukup ramai di grup, fokus ke tempat, menu, iuran, kehadiran, dan seragam batik.' : 'Preparations for this month\'s arisan filled the group — focus on venue, menu, dues, attendance, and the batik uniform.'">Preparations for this month's arisan filled the group — focus on venue, menu, dues, attendance, and the batik uniform.</span></li>
-                        <li x-show="!streamActive || streamPhase >= 4" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tante Sari menawarkan rumahnya di Pondok Indah sebagai tempat arisan bulan ini.' : 'Tante Sari offered her house in Pondok Indah as this month\'s arisan venue.'">Tante Sari offered her house in Pondok Indah as this month's arisan venue.</span></li>
-                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Menu sepakat: rendang, opor ayam, sambel goreng kentang, dan kerupuk — yang masak rendang masih dicari.' : 'Menu agreed: rendang, chicken opor, sambel goreng kentang, and kerupuk — someone is still needed to cook rendang.'">Menu agreed: rendang, chicken opor, sambel goreng kentang, and kerupuk — rendang cook still TBD.</span></li>
-                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Iuran bulan ini Rp 100.000/orang, transfer ke BCA an. Bunda Eli.' : 'Dues this month are Rp 100,000/person, transfer to BCA in Bunda Eli\'s name.'">Dues this month are Rp 100,000/person, transfer to BCA under Bunda Eli's name.</span></li>
-                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? '12 anggota sudah konfirmasi hadir, 3 belum balas (Tante Tini, Om Bambang, Bu Yati).' : '12 members confirmed attending, 3 haven\'t replied (Tante Tini, Om Bambang, Bu Yati).'">12 members confirmed attending, 3 haven't replied (Tante Tini, Om Bambang, Bu Yati).</span></li>
-                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Diskusi seragam batik: Om Yono kirim 3 opsi foto, voting di kolom komentar.' : 'Batik uniform discussion: Om Yono shared 3 photo options, voting in the comments.'">Batik uniform discussion: Om Yono shared 3 photo options, voting in the comments.</span></li>
+                        <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Persiapan kopdar bulan ini ramai di grup, fokus ke lokasi, tema sharing, iuran, RSVP, dan rekomendasi bengkel/parts.' : 'This month\'s meetup prep filled the group — focus on venue, sharing theme, dues, RSVP, and workshop/parts recommendations.'">This month's meetup prep filled the group — focus on venue, sharing theme, dues, RSVP, and workshop/parts recs.</span></li>
+                        <li x-show="!streamActive || streamPhase >= 4" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Bro Adit menawarkan Bengkel Auto Bavarian, Kemang Selatan sebagai lokasi kopdar Sabtu malam 19:00.' : 'Bro Adit offered Auto Bavarian workshop in Kemang Selatan as the Saturday 19:00 meetup venue.'">Bro Adit offered Auto Bavarian workshop in Kemang Selatan as the Saturday 19:00 meetup venue.</span></li>
+                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tema sharing: “Maintenance Tips Series 5 F10” oleh mekanik Auto Bavarian — slot tanya jawab disediakan.' : 'Sharing theme: "Maintenance Tips for Series 5 F10" by an Auto Bavarian mechanic — Q&A slot included.'">Sharing theme: "Maintenance Tips for Series 5 F10" by an Auto Bavarian mechanic — Q&A slot included.</span></li>
+                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Iuran konsumsi Rp 75.000/orang, transfer ke BCA an. Mas Reza — rekap kas terlampir PDF.' : 'Catering dues Rp 75,000/person, transfer to BCA in Mas Reza\'s name — kas recap PDF attached.'">Catering dues Rp 75,000/person, transfer to BCA Mas Reza — kas recap PDF attached.</span></li>
+                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? '18 anggota konfirmasi hadir, 5 belum balas (Bro Doni, Pak Hendra, Om Yusuf, Mas Galih, Bro Faisal).' : '18 members confirmed attending, 5 haven\'t replied (Bro Doni, Pak Hendra, Om Yusuf, Mas Galih, Bro Faisal).'">18 members confirmed attending, 5 haven't replied (Bro Doni, Pak Hendra, Om Yusuf, Mas Galih, Bro Faisal).</span></li>
+                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Rekomendasi parts & bengkel: Om Andre share link Tokopedia genuine oil filter F10 (Rp 350K), Om Reza rekomen bengkel CC Motor BSD. Pak Hendra cerita error EML, Om Doni listing E36 buat dijual.' : 'Parts & workshop recs: Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K); Om Reza recommended CC Motor in BSD. Pak Hendra reported an EML error; Om Doni listed his E36 for sale.'">Parts & workshop recs: Om Andre shared a Tokopedia link for genuine F10 oil filter (Rp 350K); Om Reza recommended CC Motor BSD. Pak Hendra reported an EML error; Om Doni listed his E36 for sale.</span></li>
                       </ul>
 
                       <!-- Topics -->
                       <div x-show="!streamActive || streamPhase >= 7">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Topics</p>
                         <div class="flex flex-wrap gap-1.5">
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Tempat & lokasi arisan' : 'Arisan venue & location'">Arisan venue & location</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Menu masakan' : 'Menu & cooking'">Menu & cooking</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Iuran bulanan & pembayaran' : 'Monthly dues & payment'">Monthly dues & payment</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Lokasi & jadwal kopdar' : 'Meetup venue & schedule'">Meetup venue & schedule</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Tema sharing maintenance' : 'Maintenance sharing theme'">Maintenance sharing theme</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Iuran konsumsi' : 'Catering dues'">Catering dues</span>
                           <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Konfirmasi kehadiran' : 'Attendance confirmation'">Attendance confirmation</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Pemilihan seragam batik' : 'Batik uniform selection'">Batik uniform selection</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Kabar keluarga' : 'Family updates'">Family updates</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Rekomendasi parts & bengkel' : 'Parts & workshop recs'">Parts & workshop recs</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Troubleshooting & jual-beli' : 'Troubleshooting & for-sale'">Troubleshooting & for-sale</span>
                         </div>
                       </div>
 
@@ -950,11 +951,11 @@
                       <div x-show="!streamActive || streamPhase >= 7">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Points</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tempat arisan disepakati di rumah Tante Sari, Pondok Indah.' : 'Arisan venue agreed at Tante Sari\'s house in Pondok Indah.'">Arisan venue agreed at Tante Sari's house in Pondok Indah.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Menu sepakat: rendang, opor ayam, sambel goreng kentang, kerupuk.' : 'Menu agreed: rendang, chicken opor, sambel goreng kentang, kerupuk.'">Menu agreed: rendang, chicken opor, sambel goreng kentang, kerupuk.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Iuran Rp 100.000/orang, transfer BCA an. Bunda Eli — rekap PDF terlampir di chat.' : 'Dues Rp 100,000/person, transfer BCA under Bunda Eli — recap PDF attached in chat.'">Dues Rp 100,000/person, transfer BCA Bunda Eli — recap PDF attached.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Om Yono mengirim 3 opsi foto seragam batik — voting masih berjalan di kolom komentar.' : 'Om Yono sent 3 batik uniform photo options — voting is open in the comments.'">Om Yono sent 3 batik uniform photo options — voting open in comments.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Kabar keluarga: Tante Linda baru pulang umrah, cucu Pak Yono lahir, rencana ngumpul makan setelah arisan.' : 'Family news: Tante Linda just returned from umrah, Pak Yono\'s grandchild was born, plans to gather for a meal after the arisan.'">Family news: Tante Linda returned from umrah, Pak Yono's grandchild born, group meal planned after arisan.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Lokasi kopdar disepakati di Bengkel Auto Bavarian, Kemang Selatan, Sabtu 19:00.' : 'Meetup venue agreed: Auto Bavarian workshop, Kemang Selatan, Saturday 19:00.'">Meetup venue agreed: Auto Bavarian workshop, Kemang Selatan, Saturday 19:00.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tema sharing: Maintenance Tips Series 5 F10 oleh mekanik Auto Bavarian.' : 'Sharing theme: Maintenance Tips for Series 5 F10 by an Auto Bavarian mechanic.'">Sharing theme: Maintenance Tips for Series 5 F10 by an Auto Bavarian mechanic.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Iuran Rp 75.000/orang, transfer BCA an. Mas Reza — PDF rekap kas terlampir.' : 'Dues Rp 75,000/person, transfer to BCA Mas Reza — kas recap PDF attached.'">Dues Rp 75,000/person, transfer BCA Mas Reza — kas recap PDF attached.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Om Andre share link Tokopedia genuine oil filter F10 (Rp 350K). Om Reza rekomen bengkel alternatif CC Motor BSD.' : 'Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K). Om Reza recommended CC Motor BSD as an alternative workshop.'">Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K). Om Reza recommended CC Motor BSD.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pak Hendra laporkan error EML pada F10-nya — beberapa member kasih saran scan diagnostic. Om Doni listing E36 dijual.' : 'Pak Hendra reported an EML error on his F10 — several members suggested running a diagnostic scan. Om Doni listed his E36 for sale.'">Pak Hendra reported an EML error on his F10 — diagnostic scan suggested. Om Doni listed his E36 for sale.</span></li>
                         </ul>
                       </div>
 
@@ -962,9 +963,9 @@
                       <div x-show="!streamActive || streamPhase >= 8">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Open Questions</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Siapa yang akan masak rendang untuk acara arisan bulan ini?' : 'Who will cook the rendang for this month\'s arisan?'">Who will cook the rendang for this month's arisan?</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tante Tini, Om Bambang, dan Bu Yati belum konfirmasi kehadiran — perlu di-follow up.' : 'Tante Tini, Om Bambang, and Bu Yati haven\'t confirmed attendance — needs follow-up.'">Tante Tini, Om Bambang, and Bu Yati haven't confirmed — needs follow-up.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Motif batik yang dipilih untuk seragam yang mana? Voting belum ditutup.' : 'Which batik motif will be picked for the uniform? Voting hasn\'t closed yet.'">Which batik motif wins for the uniform? Voting hasn't closed yet.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Berapa kapasitas seat di Auto Bavarian untuk kopdar — perlu konfirmasi ke admin bengkel.' : 'What\'s the seating capacity at Auto Bavarian for the meetup — needs confirmation from the workshop admin.'">What's the seating capacity at Auto Bavarian — confirmation needed.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tema sharing kopdar bulan depan: M-series tuning atau audio upgrade?' : 'Next month\'s sharing theme: M-series tuning or audio upgrade?'">Next month's sharing theme: M-series tuning or audio upgrade?</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Apakah komunitas mau urunan buat banner/plang untuk acara?' : 'Should the community chip in for an event banner/sign?'">Should the community chip in for an event banner/sign?</span></li>
                         </ul>
                       </div>
 
@@ -972,10 +973,10 @@
                       <div x-show="!streamActive || streamPhase >= 8">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Next Step</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Cari relawan untuk masak rendang sebelum acara.' : 'Find a volunteer to cook the rendang before the event.'">Find a volunteer to cook the rendang before the event.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Follow up 3 anggota yang belum balas konfirmasi kehadiran.' : 'Follow up with the 3 members who haven\'t confirmed attendance.'">Follow up with the 3 members who haven't confirmed attendance.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tutup voting seragam batik dan umumkan pilihan terbanyak.' : 'Close the batik uniform voting and announce the winner.'">Close the batik uniform voting and announce the winner.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Konfirmasi pembayaran iuran ke Bunda Eli sebelum hari H.' : 'Confirm dues payment to Bunda Eli before the event day.'">Confirm dues payment to Bunda Eli before the event day.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Bro Adit konfirmasi kapasitas Auto Bavarian ke admin bengkel.' : 'Bro Adit to confirm Auto Bavarian capacity with the workshop admin.'">Bro Adit to confirm Auto Bavarian capacity with the workshop admin.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Mas Reza share rekap kas terbaru dan deadline transfer iuran.' : 'Mas Reza to share the latest kas recap and the dues transfer deadline.'">Mas Reza to share the latest kas recap and dues deadline.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Follow up 5 anggota yang belum balas konfirmasi kehadiran.' : 'Follow up with the 5 members who haven\'t confirmed attendance.'">Follow up with the 5 members who haven't confirmed attendance.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tutup voting tema kopdar bulan depan minggu ini.' : 'Close the voting for next month\'s meetup theme this week.'">Close the voting for next month's meetup theme this week.</span></li>
                         </ul>
                       </div>
 
@@ -983,9 +984,9 @@
                       <div x-show="!streamActive || streamPhase >= 8">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Recommendation</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pasang deadline jelas untuk konfirmasi kehadiran dan voting batik (mis. H-3) supaya tidak menggantung.' : 'Set a clear deadline for attendance confirmation and batik voting (e.g. 3 days before) so things don\'t drag.'">Set a clear deadline for attendance confirmation and batik voting (e.g. 3 days before).</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Kalau pemasak rendang sulit didapat, siapkan opsi katering sebagai cadangan.' : 'If a rendang cook is hard to find, line up a catering option as backup.'">If a rendang cook is hard to find, line up a catering option as backup.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pin pesan info rekening dan PDF rekap iuran biar mudah dicari anggota.' : 'Pin the bank info message and the dues recap PDF so members can find them easily.'">Pin the bank info message and the dues recap PDF so members can find them easily.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pasang deadline RSVP H-3 supaya gampang lapor head count ke bengkel.' : 'Set an RSVP deadline 3 days before so reporting head-count to the workshop is easy.'">Set an RSVP deadline 3 days before so reporting head-count to the workshop is easy.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Bikin album foto kopdar di Google Drive supaya semua member bisa upload kenang-kenangan.' : 'Set up a Google Drive meetup album so every member can upload their photos.'">Set up a Google Drive meetup album so every member can upload their photos.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pin pesan info rekening dan link parts trusted biar gampang dicari anggota baru.' : 'Pin the bank info message and trusted parts links so new members can find them easily.'">Pin the bank info message and trusted parts links so new members can find them easily.</span></li>
                         </ul>
                       </div>
 
@@ -995,7 +996,7 @@
                           <p class="text-sm font-bold text-gray-900 dark:text-white">Sentiment</p>
                           <span class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[11px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
                             <i data-lucide="smile" class="h-3 w-3"></i>
-                            <span x-text="lang === 'id' ? 'Positif & hangat' : 'Positive & warm'">Positive & warm</span>
+                            <span x-text="lang === 'id' ? 'Positif & antusias' : 'Positive & enthusiastic'">Positive & enthusiastic</span>
                           </span>
                         </div>
                         <p class="text-[11px] italic text-gray-400">— Powered by Sumrize · sumrize.me</p>
@@ -1022,30 +1023,30 @@
                     <div x-show="userTier === 'spark'" x-cloak class="space-y-4 rounded-2xl rounded-tl-md bg-gray-50 p-4 text-sm text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
                       <!-- Header: title + date range -->
                       <div class="border-b border-gray-200 pb-3 dark:border-gray-700">
-                        <p class="text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan — Arisan Keluarga' : 'Summary — Family Arisan'">Summary — Family Arisan</p>
-                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">13 Mei 2026, 09:12 — 13 Mei 2026, 17:48</p>
+                        <p class="text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan — Komunitas Mobil BMW' : 'Summary — BMW Community'">Summary — BMW Community</p>
+                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">13 Mei 2026, 09:12 — 13 Mei 2026, 22:48</p>
                       </div>
 
                       <!-- Headline bullets with inline citations -->
                       <ul class="space-y-1.5 pl-1">
-                        <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Persiapan arisan bulan ini cukup ramai di grup, fokus ke tempat, menu, iuran, kehadiran, dan seragam batik.' : 'Preparations for this month\'s arisan filled the group — focus on venue, menu, dues, attendance, and the batik uniform.'">Preparations for this month's arisan filled the group — focus on venue, menu, dues, attendance, and the batik uniform.</span></li>
-                        <li x-show="!streamActive || streamPhase >= 4" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Tante Sari menawarkan rumahnya di Pondok Indah sebagai tempat arisan bulan ini.' : 'Tante Sari offered her house in Pondok Indah as this month\'s arisan venue.'">Tante Sari offered her house in Pondok Indah as this month's arisan venue.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [1]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">1</button></span></li>
-                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Menu sepakat: rendang, opor ayam, sambel goreng kentang, dan kerupuk — yang masak rendang masih dicari.' : 'Menu agreed: rendang, chicken opor, sambel goreng kentang, and kerupuk — someone is still needed to cook rendang.'">Menu agreed: rendang, chicken opor, sambel goreng kentang, and kerupuk — rendang cook still TBD.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [2]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">2</button></span></li>
-                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Iuran bulan ini Rp 100.000/orang, transfer ke BCA an. Bunda Eli.' : 'Dues this month are Rp 100,000/person, transfer to BCA in Bunda Eli\'s name.'">Dues this month are Rp 100,000/person, transfer to BCA under Bunda Eli's name.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [3]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">3</button></span></li>
-                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? '12 anggota sudah konfirmasi hadir, 3 belum balas (Tante Tini, Om Bambang, Bu Yati).' : '12 members confirmed attending, 3 haven\'t replied (Tante Tini, Om Bambang, Bu Yati).'">12 members confirmed attending, 3 haven't replied (Tante Tini, Om Bambang, Bu Yati).</span></li>
-                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Diskusi seragam batik: Om Yono kirim 3 opsi foto, voting di kolom komentar.' : 'Batik uniform discussion: Om Yono shared 3 photo options, voting in the comments.'">Batik uniform discussion: Om Yono shared 3 photo options, voting in the comments.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [4]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">4</button></span></li>
+                        <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Persiapan kopdar bulan ini ramai di grup, fokus ke lokasi, tema sharing, iuran, RSVP, dan rekomendasi bengkel/parts.' : 'This month\'s meetup prep filled the group — focus on venue, sharing theme, dues, RSVP, and workshop/parts recommendations.'">This month's meetup prep filled the group — focus on venue, sharing theme, dues, RSVP, and workshop/parts recs.</span></li>
+                        <li x-show="!streamActive || streamPhase >= 4" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Bro Adit menawarkan Bengkel Auto Bavarian, Kemang Selatan sebagai lokasi kopdar Sabtu malam 19:00.' : 'Bro Adit offered Auto Bavarian workshop in Kemang Selatan as the Saturday 19:00 meetup venue.'">Bro Adit offered Auto Bavarian workshop in Kemang Selatan as the Saturday 19:00 meetup venue.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [1]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">1</button></span></li>
+                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Tema sharing: “Maintenance Tips Series 5 F10” oleh mekanik Auto Bavarian — slot tanya jawab disediakan.' : 'Sharing theme: "Maintenance Tips for Series 5 F10" by an Auto Bavarian mechanic — Q&A slot included.'">Sharing theme: "Maintenance Tips for Series 5 F10" by an Auto Bavarian mechanic — Q&A slot included.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [2]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">2</button></span></li>
+                        <li x-show="!streamActive || streamPhase >= 5" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Iuran konsumsi Rp 75.000/orang, transfer ke BCA an. Mas Reza.' : 'Catering dues Rp 75,000/person, transfer to BCA in Mas Reza\'s name.'">Catering dues Rp 75,000/person, transfer to BCA Mas Reza.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [3]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">3</button></span></li>
+                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? '18 anggota konfirmasi hadir, 5 belum balas (Bro Doni, Pak Hendra, Om Yusuf, Mas Galih, Bro Faisal).' : '18 members confirmed attending, 5 haven\'t replied (Bro Doni, Pak Hendra, Om Yusuf, Mas Galih, Bro Faisal).'">18 members confirmed attending, 5 haven't replied (Bro Doni, Pak Hendra, Om Yusuf, Mas Galih, Bro Faisal).</span></li>
+                        <li x-show="!streamActive || streamPhase >= 6" class="flex gap-2"><span class="select-none text-gray-400">•</span><span><span x-text="lang === 'id' ? 'Om Andre share link Tokopedia genuine oil filter F10 (Rp 350K); Om Reza rekomen bengkel CC Motor BSD.' : 'Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K); Om Reza recommended CC Motor BSD.'">Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K); Om Reza recommended CC Motor BSD.</span><button type="button" @click="sourcesOpen = true" title="Lihat sumber [4]" class="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded bg-brand-100 px-1 text-[10px] font-bold text-brand-700 hover:bg-brand-200 dark:bg-brand-500/20 dark:text-brand-400 dark:hover:bg-brand-500/30">4</button></span></li>
                       </ul>
 
                       <!-- Topics -->
                       <div x-show="!streamActive || streamPhase >= 7">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Topics</p>
                         <div class="flex flex-wrap gap-1.5">
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Tempat & lokasi arisan' : 'Arisan venue & location'">Arisan venue & location</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Menu masakan' : 'Menu & cooking'">Menu & cooking</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Iuran bulanan & pembayaran' : 'Monthly dues & payment'">Monthly dues & payment</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Lokasi & jadwal kopdar' : 'Meetup venue & schedule'">Meetup venue & schedule</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Tema sharing maintenance' : 'Maintenance sharing theme'">Maintenance sharing theme</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Iuran konsumsi' : 'Catering dues'">Catering dues</span>
                           <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Konfirmasi kehadiran' : 'Attendance confirmation'">Attendance confirmation</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Pemilihan seragam batik' : 'Batik uniform selection'">Batik uniform selection</span>
-                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Kabar keluarga' : 'Family updates'">Family updates</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Rekomendasi parts & bengkel' : 'Parts & workshop recs'">Parts & workshop recs</span>
+                          <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="lang === 'id' ? 'Troubleshooting & jual-beli' : 'Troubleshooting & for-sale'">Troubleshooting & for-sale</span>
                         </div>
                       </div>
 
@@ -1053,11 +1054,11 @@
                       <div x-show="!streamActive || streamPhase >= 7">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Points</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tempat arisan disepakati di rumah Tante Sari, Pondok Indah.' : 'Arisan venue agreed at Tante Sari\'s house in Pondok Indah.'">Arisan venue agreed at Tante Sari's house in Pondok Indah.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Menu sepakat: rendang, opor ayam, sambel goreng kentang, kerupuk.' : 'Menu agreed: rendang, chicken opor, sambel goreng kentang, kerupuk.'">Menu agreed: rendang, chicken opor, sambel goreng kentang, kerupuk.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Iuran Rp 100.000/orang, transfer BCA an. Bunda Eli — rekap PDF terlampir di chat.' : 'Dues Rp 100,000/person, transfer BCA under Bunda Eli — recap PDF attached in chat.'">Dues Rp 100,000/person, transfer BCA Bunda Eli — recap PDF attached.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Om Yono mengirim 3 opsi foto seragam batik — voting masih berjalan di kolom komentar.' : 'Om Yono sent 3 batik uniform photo options — voting is open in the comments.'">Om Yono sent 3 batik uniform photo options — voting open in comments.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Kabar keluarga: Tante Linda baru pulang umrah, cucu Pak Yono lahir, rencana ngumpul makan setelah arisan.' : 'Family news: Tante Linda just returned from umrah, Pak Yono\'s grandchild was born, plans to gather for a meal after the arisan.'">Family news: Tante Linda returned from umrah, Pak Yono's grandchild born, group meal planned after arisan.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Lokasi kopdar disepakati di Bengkel Auto Bavarian, Kemang Selatan, Sabtu 19:00.' : 'Meetup venue agreed: Auto Bavarian workshop, Kemang Selatan, Saturday 19:00.'">Meetup venue agreed: Auto Bavarian workshop, Kemang Selatan, Saturday 19:00.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tema sharing: Maintenance Tips Series 5 F10 oleh mekanik Auto Bavarian.' : 'Sharing theme: Maintenance Tips for Series 5 F10 by an Auto Bavarian mechanic.'">Sharing theme: Maintenance Tips for Series 5 F10 by an Auto Bavarian mechanic.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Iuran Rp 75.000/orang, transfer BCA an. Mas Reza — PDF rekap kas terlampir.' : 'Dues Rp 75,000/person, transfer to BCA Mas Reza — kas recap PDF attached.'">Dues Rp 75,000/person, transfer BCA Mas Reza — kas recap PDF attached.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Om Andre share link Tokopedia genuine oil filter F10 (Rp 350K). Om Reza rekomen bengkel CC Motor BSD.' : 'Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K). Om Reza recommended CC Motor BSD.'">Om Andre shared a Tokopedia link for a genuine F10 oil filter (Rp 350K). Om Reza recommended CC Motor BSD.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pak Hendra laporkan error EML pada F10-nya — beberapa member kasih saran scan diagnostic. Om Doni listing E36 dijual.' : 'Pak Hendra reported an EML error on his F10 — several members suggested running a diagnostic scan. Om Doni listed his E36 for sale.'">Pak Hendra reported an EML error on his F10 — diagnostic scan suggested. Om Doni listed his E36 for sale.</span></li>
                         </ul>
                       </div>
 
@@ -1065,9 +1066,9 @@
                       <div x-show="!streamActive || streamPhase >= 8">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Open Questions</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Siapa yang akan masak rendang untuk acara arisan bulan ini?' : 'Who will cook the rendang for this month\'s arisan?'">Who will cook the rendang for this month's arisan?</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tante Tini, Om Bambang, dan Bu Yati belum konfirmasi kehadiran — perlu di-follow up.' : 'Tante Tini, Om Bambang, and Bu Yati haven\'t confirmed attendance — needs follow-up.'">Tante Tini, Om Bambang, and Bu Yati haven't confirmed — needs follow-up.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Motif batik yang dipilih untuk seragam yang mana? Voting belum ditutup.' : 'Which batik motif will be picked for the uniform? Voting hasn\'t closed yet.'">Which batik motif wins for the uniform? Voting hasn't closed yet.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Berapa kapasitas seat di Auto Bavarian untuk kopdar — perlu konfirmasi ke admin bengkel.' : 'What\'s the seating capacity at Auto Bavarian for the meetup — needs confirmation from the workshop admin.'">What's the seating capacity at Auto Bavarian — confirmation needed.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tema sharing kopdar bulan depan: M-series tuning atau audio upgrade?' : 'Next month\'s sharing theme: M-series tuning or audio upgrade?'">Next month's sharing theme: M-series tuning or audio upgrade?</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Apakah komunitas mau urunan buat banner/plang untuk acara?' : 'Should the community chip in for an event banner/sign?'">Should the community chip in for an event banner/sign?</span></li>
                         </ul>
                       </div>
 
@@ -1075,10 +1076,10 @@
                       <div x-show="!streamActive || streamPhase >= 8">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Next Step</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Cari relawan untuk masak rendang sebelum acara.' : 'Find a volunteer to cook the rendang before the event.'">Find a volunteer to cook the rendang before the event.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Follow up 3 anggota yang belum balas konfirmasi kehadiran.' : 'Follow up with the 3 members who haven\'t confirmed attendance.'">Follow up with the 3 members who haven't confirmed attendance.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tutup voting seragam batik dan umumkan pilihan terbanyak.' : 'Close the batik uniform voting and announce the winner.'">Close the batik uniform voting and announce the winner.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Konfirmasi pembayaran iuran ke Bunda Eli sebelum hari H.' : 'Confirm dues payment to Bunda Eli before the event day.'">Confirm dues payment to Bunda Eli before the event day.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Bro Adit konfirmasi kapasitas Auto Bavarian ke admin bengkel.' : 'Bro Adit to confirm Auto Bavarian capacity with the workshop admin.'">Bro Adit to confirm Auto Bavarian capacity with the workshop admin.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Mas Reza share rekap kas terbaru dan deadline transfer iuran.' : 'Mas Reza to share the latest kas recap and the dues transfer deadline.'">Mas Reza to share the latest kas recap and dues deadline.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Follow up 5 anggota yang belum balas konfirmasi kehadiran.' : 'Follow up with the 5 members who haven\'t confirmed attendance.'">Follow up with the 5 members who haven't confirmed attendance.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Tutup voting tema kopdar bulan depan minggu ini.' : 'Close the voting for next month\'s meetup theme this week.'">Close the voting for next month's meetup theme this week.</span></li>
                         </ul>
                       </div>
 
@@ -1086,9 +1087,9 @@
                       <div x-show="!streamActive || streamPhase >= 8">
                         <p class="mb-1.5 text-sm font-bold text-gray-900 dark:text-white">Recommendation</p>
                         <ul class="space-y-1.5 pl-1">
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pasang deadline jelas untuk konfirmasi kehadiran dan voting batik (mis. H-3) supaya tidak menggantung.' : 'Set a clear deadline for attendance confirmation and batik voting (e.g. 3 days before) so things don\'t drag.'">Set a clear deadline for attendance confirmation and batik voting (e.g. 3 days before).</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Kalau pemasak rendang sulit didapat, siapkan opsi katering sebagai cadangan.' : 'If a rendang cook is hard to find, line up a catering option as backup.'">If a rendang cook is hard to find, line up a catering option as backup.</span></li>
-                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pin pesan info rekening dan PDF rekap iuran biar mudah dicari anggota.' : 'Pin the bank info message and the dues recap PDF so members can find them easily.'">Pin the bank info message and the dues recap PDF so members can find them easily.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pasang deadline RSVP H-3 supaya gampang lapor head count ke bengkel.' : 'Set an RSVP deadline 3 days before so reporting head-count to the workshop is easy.'">Set an RSVP deadline 3 days before so reporting head-count to the workshop is easy.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Bikin album foto kopdar di Google Drive supaya semua member bisa upload kenang-kenangan.' : 'Set up a Google Drive meetup album so every member can upload their photos.'">Set up a Google Drive meetup album so every member can upload their photos.</span></li>
+                          <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? 'Pin pesan info rekening dan link parts trusted biar gampang dicari anggota baru.' : 'Pin the bank info message and trusted parts links so new members can find them easily.'">Pin the bank info message and trusted parts links so new members can find them easily.</span></li>
                         </ul>
                       </div>
 
@@ -1098,7 +1099,7 @@
                           <p class="text-sm font-bold text-gray-900 dark:text-white">Sentiment</p>
                           <span class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[11px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
                             <i data-lucide="smile" class="h-3 w-3"></i>
-                            <span x-text="lang === 'id' ? 'Positif & hangat' : 'Positive & warm'">Positive & warm</span>
+                            <span x-text="lang === 'id' ? 'Positif & antusias' : 'Positive & enthusiastic'">Positive & enthusiastic</span>
                           </span>
                         </div>
                         <p class="text-[11px] italic text-gray-400">— Powered by Sumrize · sumrize.me</p>
@@ -1115,38 +1116,38 @@
                           <i data-lucide="map-pin" class="h-5 w-5"></i>
                         </div>
                         <div class="min-w-0 flex-1">
-                          <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">maps.google.com/…/PondokIndah</p>
-                          <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Rumah Tante Sari · Pondok Indah Selatan' : 'Tante Sari\'s house · Pondok Indah Selatan'">Tante Sari's house · Pondok Indah Selatan</p>
-                          <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? 'Dishare @Tante Sari · 13 Mei 14:32' : 'Shared by @Tante Sari · 13 May 14:32'">Shared by @Tante Sari · 13 May 14:32</p>
+                          <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">maps.google.com/…/AutoBavarian</p>
+                          <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bengkel Auto Bavarian · Kemang Selatan' : 'Auto Bavarian workshop · Kemang Selatan'">Auto Bavarian workshop · Kemang Selatan</p>
+                          <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? 'Dishare @Bro Adit · 12 Mei 20:35' : 'Shared by @Bro Adit · 12 May 20:35'">Shared by @Bro Adit · 12 May 20:35</p>
                         </div>
                         <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
                       </a>
 
-                      <!-- PDF card: Arisan iuran rekap -->
+                      <!-- PDF card: kas komunitas rekap -->
                       <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
                         <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
                           <i data-lucide="file-text" class="h-5 w-5"></i>
                         </div>
                         <div class="min-w-0 flex-1">
-                          <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Rekap-Iuran-Arisan-Mei-2026.pdf</p>
-                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.2 MB · 4 halaman' : '1.2 MB · 4 pages'">1.2 MB · 4 pages</p>
-                          <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? 'Dishare @Bunda Eli · 13 Mei 11:08' : 'Shared by @Bunda Eli · 13 May 11:08'">Shared by @Bunda Eli · 13 May 11:08</p>
+                          <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Rekap-Kas-Komunitas-BMW-Mei-2026.pdf</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.4 MB · 5 halaman' : '1.4 MB · 5 pages'">1.4 MB · 5 pages</p>
+                          <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? 'Dishare @Mas Reza · 13 Mei 11:08' : 'Shared by @Mas Reza · 13 May 11:08'">Shared by @Mas Reza · 13 May 11:08</p>
                         </div>
                         <button type="button" class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200" aria-label="Download">
                           <i data-lucide="download" class="h-4 w-4"></i>
                         </button>
                       </a>
 
-                      <!-- Image grid: opsi seragam batik -->
+                      <!-- Image grid: opsi desain kaos kopdar -->
                       <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-white/[0.02]">
                         <div class="mb-2 flex items-center justify-between">
-                          <p class="text-xs font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? '3 opsi seragam batik' : '3 batik uniform options'">3 batik uniform options</p>
-                          <p class="text-[10px] text-gray-400" x-text="lang === 'id' ? '@Om Yono · 13 Mei 09:45' : '@Om Yono · 13 May 09:45'">@Om Yono · 13 May 09:45</p>
+                          <p class="text-xs font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? '3 desain kaos kopdar' : '3 meetup t-shirt designs'">3 meetup t-shirt designs</p>
+                          <p class="text-[10px] text-gray-400" x-text="lang === 'id' ? '@Om Andre · 12 Mei 22:14' : '@Om Andre · 12 May 22:14'">@Om Andre · 12 May 22:14</p>
                         </div>
                         <div class="grid grid-cols-3 gap-2">
-                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-50 to-warning-500"></div>
-                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-200 to-brand-400"></div>
-                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-50 to-success-500"></div>
+                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-gray-700 to-gray-950"></div>
+                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-300 to-brand-600"></div>
+                          <div class="aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-sumrize/40 to-sumrize"></div>
                         </div>
                       </div>
 
@@ -1154,13 +1155,13 @@
                            No "jump to chat" button — WhatsApp lacks message
                            deep-links, so we offer copy-to-clipboard instead. -->
                       <blockquote class="flex gap-3 rounded-xl border-l-2 border-brand-500 bg-brand-50/30 p-3 dark:bg-brand-500/[0.06]">
-                        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">S</div>
+                        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</div>
                         <div class="min-w-0 flex-1">
                           <div class="mb-1 flex items-center gap-2">
-                            <p class="text-xs font-semibold text-gray-900 dark:text-white">@Tante Sari</p>
-                            <p class="text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 14:30 · WhatsApp Arisan Keluarga' : '13 May 14:30 · WhatsApp Family Arisan'">13 May 14:30 · WhatsApp Family Arisan</p>
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">@Bro Adit</p>
+                            <p class="text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 20:35 · WhatsApp Komunitas Mobil BMW' : '12 May 20:35 · WhatsApp BMW Community'">12 May 20:35 · WhatsApp BMW Community</p>
                           </div>
-                          <p class="text-sm text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? '“Rumah Tante aja deh buat arisan bulan ini, di Pondok Indah. Gampang nyariin, parkir luas. Yang mau masak rendang langsung kontak Tante ya.”' : '“Let\'s use my house for arisan this month, at Pondok Indah. Easy to find, plenty of parking. Whoever wants to cook rendang, contact me directly.”'">"Rumah Tante aja deh buat arisan bulan ini, di Pondok Indah..."</p>
+                          <p class="text-sm text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? '“Kopdar bulan ini di Auto Bavarian aja deh, Kemang Selatan. Sabtu malam jam 19:00. Mekaniknya udah confirm bisa sharing maintenance tips Series 5 F10. Parkir luas, ada lift bengkel buat liat sasis.”' : '“Let\'s do this month\'s meetup at Auto Bavarian, Kemang Selatan. Saturday 19:00. The mechanic confirmed he\'ll share Series 5 F10 maintenance tips. Plenty of parking, plus a lift to inspect the chassis.”'">"Kopdar bulan ini di Auto Bavarian aja deh, Kemang Selatan..."</p>
                           <button type="button" class="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400">
                             <i data-lucide="copy" class="h-3 w-3"></i>
                             <span x-text="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">Copy quote</span>
@@ -1180,39 +1181,39 @@
                         <div x-show="sourcesOpen" x-cloak x-collapse class="divide-y divide-gray-100 border-t border-gray-200 bg-gray-50/50 dark:divide-gray-800 dark:border-gray-700 dark:bg-white/[0.02]">
                           <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
                             <p class="flex items-center justify-between gap-2">
-                              <span class="font-medium text-brand-500 dark:text-brand-400">[1] @Tante Sari · 14:30</span>
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[1] @Bro Adit · 20:35</span>
                               <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
                                 <i data-lucide="copy" class="h-3 w-3"></i>
                               </button>
                             </p>
-                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Rumah Tante aja deh buat arisan, di Pondok Indah...”' : '“Let\'s use my house, at Pondok Indah...”'">"Rumah Tante aja deh buat arisan, di Pondok Indah..."</p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Kopdar bulan ini di Auto Bavarian aja deh, Kemang Selatan...”' : '“Let\'s do this month\'s meetup at Auto Bavarian, Kemang Selatan...”'">"Kopdar bulan ini di Auto Bavarian aja deh..."</p>
                           </div>
                           <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
                             <p class="flex items-center justify-between gap-2">
-                              <span class="font-medium text-brand-500 dark:text-brand-400">[2] @Bunda Eli · 14:22</span>
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[2] @Bro Adit · 20:48</span>
                               <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
                                 <i data-lucide="copy" class="h-3 w-3"></i>
                               </button>
                             </p>
-                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Menu fix ya: rendang, opor, sambel kentang. Yang masak rendang siapa nih?”' : '“Menu confirmed: rendang, opor, sambel kentang. Who\'s cooking rendang?”'">"Menu fix ya: rendang, opor, sambel kentang..."</p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Mekanik Auto Bavarian bakal sharing maintenance tips Series 5 F10, ada slot Q&A juga.”' : '“The Auto Bavarian mechanic will share Series 5 F10 maintenance tips with a Q&A slot.”'">"Mekanik Auto Bavarian bakal sharing maintenance tips Series 5..."</p>
                           </div>
                           <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
                             <p class="flex items-center justify-between gap-2">
-                              <span class="font-medium text-brand-500 dark:text-brand-400">[3] @Bunda Eli · 11:08</span>
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[3] @Mas Reza · 21:12</span>
                               <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
                                 <i data-lucide="copy" class="h-3 w-3"></i>
                               </button>
                             </p>
-                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Iuran 100rb ya, transfer BCA an. Bu Eli. Rekap PDF terlampir”' : '“Iuran 100k, transfer BCA Bu Eli. Recap PDF attached”'">"Iuran 100rb ya, transfer BCA Bu Eli..."</p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Iuran konsumsi 75rb/orang, transfer BCA an. Mas Reza. Rekap kas PDF tak share”' : '“Catering dues 75k/person, transfer to BCA Mas Reza. Sharing the kas recap PDF.”'">"Iuran konsumsi 75rb/orang, transfer BCA Mas Reza..."</p>
                           </div>
                           <div class="group block px-3 py-2 text-xs transition hover:bg-white dark:hover:bg-white/[0.04]">
                             <p class="flex items-center justify-between gap-2">
-                              <span class="font-medium text-brand-500 dark:text-brand-400">[4] @Om Yono · 09:45</span>
+                              <span class="font-medium text-brand-500 dark:text-brand-400">[4] @Om Andre · 21:34</span>
                               <button type="button" class="text-gray-400 opacity-0 transition hover:text-gray-700 group-hover:opacity-100 dark:hover:text-gray-200" :title="lang === 'id' ? 'Salin kutipan' : 'Copy quote'">
                                 <i data-lucide="copy" class="h-3 w-3"></i>
                               </button>
                             </p>
-                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Nih 3 opsi batik buat seragam. Suara terbanyak yang menang”' : '“Here are 3 batik options for uniform. Most votes wins”'">"Nih 3 opsi batik buat seragam..."</p>
+                            <p class="mt-0.5 truncate text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Genuine oil filter F10 Rp 350K seller trusted, gw kasih link Tokopedia ya”' : '“Genuine F10 oil filter Rp 350K from a trusted seller, Tokopedia link here”'">"Genuine oil filter F10 Rp 350K seller trusted..."</p>
                           </div>
                         </div>
                       </div>
@@ -1326,7 +1327,7 @@
       <!-- Header with type tabs -->
       <header class="border-b border-gray-100 p-5 dark:border-gray-800">
         <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Telusuri konten' : 'Browse content'">Browse content</p>
-        <h2 id="browse-modal-title" class="text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Konten di Arisan Keluarga' : 'Content in Family Arisan'">Content in Family Arisan</h2>
+        <h2 id="browse-modal-title" class="text-xl font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Konten di Komunitas Mobil BMW' : 'Content in BMW Community'">Content in BMW Community</h2>
 
         <!-- Type tabs -->
         <nav class="mt-4 flex flex-wrap gap-1">
@@ -1371,9 +1372,9 @@
               <i data-lucide="map-pin" class="h-5 w-5"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">maps.google.com/…/PondokIndah</p>
-              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Rumah Tante Sari · Pondok Indah Selatan' : 'Tante Sari\'s house · Pondok Indah Selatan'">Tante Sari's house · Pondok Indah Selatan</p>
-              <p class="mt-1 text-[10px] text-gray-400">@Tante Sari · 13 Mei 14:32</p>
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">maps.google.com/…/AutoBavarian</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bengkel Auto Bavarian · Kemang Selatan' : 'Auto Bavarian workshop · Kemang Selatan'">Auto Bavarian workshop · Kemang Selatan</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Bro Adit · 12 Mei 20:35</p>
             </div>
             <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
           </a>
@@ -1383,21 +1384,21 @@
               <i data-lucide="shopping-bag" class="h-5 w-5"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">shopee.co.id/…/seragam-batik-XL</p>
-              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Seragam batik motif parang ukuran XL' : 'Parang batik uniform · XL size'">Seragam batik motif parang ukuran XL</p>
-              <p class="mt-1 text-[10px] text-gray-400">@Om Yono · 13 Mei 09:45</p>
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">tokopedia.com/…/oil-filter-F10-genuine</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Genuine BMW oil filter F10 · Rp 350.000' : 'Genuine BMW F10 oil filter · Rp 350,000'">Genuine BMW oil filter F10 · Rp 350.000</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Om Andre · 12 Mei 21:34</p>
             </div>
             <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
           </a>
 
           <a href="#" class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02]">
             <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
-              <i data-lucide="utensils" class="h-5 w-5"></i>
+              <i data-lucide="wrench" class="h-5 w-5"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">tokopedia.com/…/katering-bu-sumiati</p>
-              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Katering paket lengkap arisan · untuk 20 orang' : 'Catering full package · for 20 people'">Katering paket lengkap arisan · untuk 20 orang</p>
-              <p class="mt-1 text-[10px] text-gray-400">@Pak Budi · 13 Mei 16:20</p>
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">g.page/CCMotorBSD</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bengkel CC Motor · spesialis BMW · BSD' : 'CC Motor workshop · BMW specialist · BSD'">Bengkel CC Motor · spesialis BMW · BSD</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Om Reza · 12 Mei 21:50</p>
             </div>
             <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
           </a>
@@ -1408,9 +1409,9 @@
               <i data-lucide="play" class="h-5 w-5"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">youtube.com/watch?v=resep-rendang</p>
-              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Resep rendang Padang asli · Chef Ronaldo · 18 menit' : 'Authentic Padang rendang recipe · Chef Ronaldo · 18 min'">Resep rendang Padang asli · Chef Ronaldo · 18 menit</p>
-              <p class="mt-1 text-[10px] text-gray-400">@Bunda Eli · 12 Mei 19:15</p>
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">youtube.com/watch?v=F10-EML-reset</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Tutorial reset EML error Series 5 F10 · 14 menit' : 'Tutorial: reset EML error on Series 5 F10 · 14 min'">Tutorial reset EML error Series 5 F10 · 14 menit</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Mas Reza · 12 Mei 22:08</p>
             </div>
             <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
           </a>
@@ -1421,9 +1422,9 @@
               <i data-lucide="instagram" class="h-5 w-5"></i>
             </div>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">instagram.com/p/foto-reuni-2025</p>
-              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Album foto reuni keluarga Bandung 2025' : 'Family reunion Bandung 2025 photo album'">Album foto reuni keluarga Bandung 2025</p>
-              <p class="mt-1 text-[10px] text-gray-400">@Tante Tini · 11 Mei 21:30</p>
+              <p class="truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">instagram.com/p/kopdar-bmw-april</p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Album foto kopdar BMW April 2026 · Bintaro Plaza' : 'BMW meetup April 2026 photo album · Bintaro Plaza'">Album foto kopdar BMW April 2026 · Bintaro Plaza</p>
+              <p class="mt-1 text-[10px] text-gray-400">@Bro Doni · 11 Mei 21:30</p>
             </div>
             <i data-lucide="external-link" class="h-4 w-4 text-gray-400"></i>
           </a>
@@ -1480,9 +1481,9 @@
                 <i data-lucide="download" class="h-4 w-4"></i>
               </button>
             </div>
-            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Rekap-Iuran-Arisan-Mei-2026.pdf</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.2 MB · 4 halaman' : '1.2 MB · 4 pages'">1.2 MB · 4 pages</p>
-            <p class="mt-2 text-[10px] text-gray-400">@Bunda Eli · 13 Mei 11:08</p>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Rekap-Kas-Komunitas-BMW-Mei-2026.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.4 MB · 5 halaman' : '1.4 MB · 5 pages'">1.4 MB · 5 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Mas Reza · 13 Mei 11:08</p>
           </div>
 
           <!-- PDF 2 (sample, always visible) -->
@@ -1499,9 +1500,9 @@
                 <i data-lucide="download" class="h-4 w-4"></i>
               </button>
             </div>
-            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Daftar-Hadir-Arisan-April.pdf</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '580 KB · 2 halaman' : '580 KB · 2 pages'">580 KB · 2 pages</p>
-            <p class="mt-2 text-[10px] text-gray-400">@Bunda Eli · 27 Apr 14:00</p>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Daftar-RSVP-Kopdar-April.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '620 KB · 2 halaman' : '620 KB · 2 pages'">620 KB · 2 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Mas Reza · 27 Apr 14:00</p>
           </div>
 
           <!-- PDF 3 (sample, always visible) -->
@@ -1518,9 +1519,9 @@
                 <i data-lucide="download" class="h-4 w-4"></i>
               </button>
             </div>
-            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">Resep-Lebaran-Keluarga.pdf</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '3.4 MB · 12 halaman · resep rendang, opor, ketupat' : '3.4 MB · 12 pages · rendang, opor, ketupat recipes'">3.4 MB · 12 halaman</p>
-            <p class="mt-2 text-[10px] text-gray-400">@Tante Eli · 8 Mei 10:20</p>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 dark:text-white">BMW-F10-Service-Manual.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '4.2 MB · 28 halaman · maintenance schedule & torque spec' : '4.2 MB · 28 pages · maintenance schedule & torque spec'">4.2 MB · 28 halaman</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Bro Adit · 8 Mei 10:20</p>
           </div>
 
           <!-- PDF 4 (Spark only) -->
@@ -1533,9 +1534,9 @@
                 <i data-lucide="download" class="h-4 w-4"></i>
               </button>
             </div>
-            <p class="mb-1 truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Undangan-Nikahan-Dini.pdf</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '2.1 MB · 1 halaman · undangan digital' : '2.1 MB · 1 page · digital invitation'">2.1 MB · 1 page</p>
-            <p class="mt-2 text-[10px] text-gray-400">@Pak Hendro · 5 Mei 09:00</p>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Touring-Puncak-Itinerary.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '1.6 MB · 4 halaman · rute via Sentul + rest area' : '1.6 MB · 4 pages · route via Sentul + rest areas'">1.6 MB · 4 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Pak Hendra · 5 Mei 09:00</p>
           </a>
 
           <!-- PDF 5 (Spark only) -->
@@ -1548,9 +1549,9 @@
                 <i data-lucide="download" class="h-4 w-4"></i>
               </button>
             </div>
-            <p class="mb-1 truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">Itinerary-Mudik-Lebaran.pdf</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '890 KB · 3 halaman · rute & jadwal' : '890 KB · 3 pages · route & schedule'">890 KB · 3 pages</p>
-            <p class="mt-2 text-[10px] text-gray-400">@Om Yono · 2 Mei 08:15</p>
+            <p class="mb-1 truncate text-sm font-semibold text-gray-900 group-hover:text-brand-500 dark:text-white">BMW-Genuine-Parts-Pricelist.pdf</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '2.8 MB · 16 halaman · harga genuine parts Series 3/5/7' : '2.8 MB · 16 pages · genuine parts pricing for Series 3/5/7'">2.8 MB · 16 pages</p>
+            <p class="mt-2 text-[10px] text-gray-400">@Om Andre · 2 Mei 08:15</p>
           </a>
 
           <!-- Spark: footer counter -->
@@ -1600,44 +1601,44 @@
 
           <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
             <!-- Each image: aspect-square thumbnail with label overlay on hover -->
-            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-50 to-warning-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Batik motif parang · @Om Yono · 09:45' : 'Parang batik · @Om Yono · 09:45'">
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-gray-700 to-gray-950 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Desain kaos hitam · @Om Andre · 22:14' : 'Black t-shirt design · @Om Andre · 22:14'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Batik parang' : 'Parang batik'">Parang batik</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Kaos hitam' : 'Black tee'">Black tee</p>
               </div>
             </button>
-            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-200 to-brand-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Batik motif kawung · @Om Yono · 09:46' : 'Kawung batik · @Om Yono · 09:46'">
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-300 to-brand-600 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Desain kaos navy · @Om Andre · 22:15' : 'Navy t-shirt design · @Om Andre · 22:15'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Batik kawung' : 'Kawung batik'">Kawung batik</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Kaos navy' : 'Navy tee'">Navy tee</p>
               </div>
             </button>
-            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-50 to-success-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Batik motif mega mendung · @Om Yono · 09:47' : 'Mega mendung batik · @Om Yono · 09:47'">
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-sumrize/40 to-sumrize transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Desain kaos merah · @Om Andre · 22:16' : 'Red t-shirt design · @Om Andre · 22:16'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Batik mega mendung' : 'Mega mendung'">Mega mendung</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Kaos merah' : 'Red tee'">Red tee</p>
               </div>
             </button>
-            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-error-100 to-error-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Rendang yang dimasak Bu Eli · 12 Mei' : 'Rendang cooked by Bu Eli · 12 May'">
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-error-100 to-error-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Error EML F10 Pak Hendra · 12 Mei' : 'Pak Hendra\'s F10 EML error · 12 May'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Rendang Bu Eli' : 'Bu Eli\'s rendang'">Bu Eli's rendang</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Error EML F10' : 'F10 EML error'">F10 EML error</p>
               </div>
             </button>
-            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-100 to-brand-300 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Foto reuni Bandung · @Tante Tini' : 'Reunion Bandung photo · @Tante Tini'">
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-brand-100 to-brand-300 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Foto kopdar April di Bintaro · @Bro Doni' : 'April meetup at Bintaro · @Bro Doni'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Reuni Bandung' : 'Bandung reunion'">Bandung reunion</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Kopdar Bintaro' : 'Bintaro meetup'">Bintaro meetup</p>
               </div>
             </button>
-            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-100 to-warning-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Cucu Pak Yono baru lahir · 11 Mei' : 'Pak Yono\'s newborn grandchild · 11 May'">
+            <button type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-warning-100 to-warning-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'E36 Om Doni yang dijual · 11 Mei' : 'Om Doni\'s E36 for sale · 11 May'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Cucu Pak Yono' : 'Pak Yono\'s grandchild'">Pak Yono's grandchild</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'E36 Om Doni' : 'Om Doni\'s E36'">Om Doni's E36</p>
               </div>
             </button>
             <!-- Image 7 (Spark only) -->
-            <button x-show="userTier === 'spark'" x-cloak type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-100 to-success-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Foto undangan nikahan Dini' : 'Dini\'s wedding invitation'">
+            <button x-show="userTier === 'spark'" x-cloak type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-success-100 to-success-400 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Velg M-sport rekomen Om Andre' : 'M-sport wheel rec by Om Andre'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
-                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Undangan Dini' : 'Dini\'s invitation'">Dini's invitation</p>
+                <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Velg M-sport' : 'M-sport wheel'">M-sport wheel</p>
               </div>
             </button>
             <!-- Image 8 (Spark only) -->
-            <button x-show="userTier === 'spark'" x-cloak type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Screenshot bukti transfer · @Tante Sari' : 'Transfer receipt screenshot · @Tante Sari'">
+            <button x-show="userTier === 'spark'" x-cloak type="button" class="group relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-gray-300 to-gray-500 transition hover:ring-2 hover:ring-brand-500" :title="lang === 'id' ? 'Screenshot bukti transfer · @Bro Adit' : 'Transfer receipt screenshot · @Bro Adit'">
               <div class="absolute inset-0 flex items-end bg-gradient-to-t from-gray-900/80 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100">
                 <p class="text-[10px] text-white" x-text="lang === 'id' ? 'Bukti transfer' : 'Transfer receipt'">Transfer receipt</p>
               </div>
@@ -1691,7 +1692,7 @@
             </button>
             <div class="min-w-0 flex-1">
               <div class="mb-1 flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Tante Sari</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Bro Adit</p>
                 <p class="text-xs font-mono text-gray-500 dark:text-gray-400">2:34</p>
               </div>
               <!-- Static waveform visual using bars -->
@@ -1721,7 +1722,7 @@
                 <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
                 <span class="block h-6 w-0.5 rounded-full bg-current opacity-30"></span>
               </div>
-              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 14:35 · tentang persiapan arisan' : '13 May 14:35 · about arisan prep'">13 Mei 14:35 · tentang persiapan arisan</p>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 20:40 · soal lokasi kopdar Auto Bavarian' : '12 May 20:40 · about the Auto Bavarian meetup venue'">12 Mei 20:40 · soal lokasi kopdar Auto Bavarian</p>
             </div>
           </div>
 
@@ -1735,7 +1736,7 @@
             </button>
             <div class="min-w-0 flex-1">
               <div class="mb-1 flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Bunda Eli</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Mas Reza</p>
                 <p class="text-xs font-mono text-gray-500 dark:text-gray-400">1:12</p>
               </div>
               <div class="flex items-center gap-0.5 text-brand-500">
@@ -1764,7 +1765,7 @@
                 <span class="block h-3 w-0.5 rounded-full bg-current opacity-30"></span>
                 <span class="block h-5 w-0.5 rounded-full bg-current opacity-30"></span>
               </div>
-              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 11:00 · konfirmasi menu masakan' : '13 May 11:00 · menu confirmation'">13 Mei 11:00 · konfirmasi menu</p>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 21:18 · detail iuran konsumsi & rekening' : '12 May 21:18 · catering dues & account details'">12 Mei 21:18 · detail iuran konsumsi & rekening</p>
             </div>
           </div>
 
@@ -1775,7 +1776,7 @@
             </button>
             <div class="min-w-0 flex-1">
               <div class="mb-1 flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Om Yono</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Om Andre</p>
                 <p class="text-xs font-mono text-gray-500 dark:text-gray-400">0:45</p>
               </div>
               <div class="flex items-center gap-0.5 text-brand-500">
@@ -1804,7 +1805,7 @@
                 <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
                 <span class="block h-2 w-0.5 rounded-full bg-current opacity-30"></span>
               </div>
-              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '13 Mei 09:42 · pilihan seragam batik' : '13 May 09:42 · batik uniform options'">13 Mei 09:42 · pilihan seragam batik</p>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 22:14 · pilihan desain kaos kopdar' : '12 May 22:14 · meetup t-shirt design options'">12 Mei 22:14 · pilihan desain kaos kopdar</p>
             </div>
           </div>
 
@@ -1815,7 +1816,7 @@
             </button>
             <div class="min-w-0 flex-1">
               <div class="mb-1 flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Tante Tini</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">@Pak Hendra</p>
                 <p class="text-xs font-mono text-gray-500 dark:text-gray-400">3:20</p>
               </div>
               <div class="flex items-center gap-0.5 text-brand-500">
@@ -1844,7 +1845,7 @@
                 <span class="block h-7 w-0.5 rounded-full bg-current opacity-30"></span>
                 <span class="block h-4 w-0.5 rounded-full bg-current opacity-30"></span>
               </div>
-              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 20:15 · cerita cucu Pak Yono yang baru lahir' : '12 May 20:15 · story about Pak Yono\'s newborn grandchild'">12 Mei 20:15 · cerita cucu Pak Yono</p>
+              <p class="mt-1 text-[10px] text-gray-400" x-text="lang === 'id' ? '12 Mei 22:38 · cerita gejala EML error pada F10' : '12 May 22:38 · explaining the EML error symptoms on his F10'">12 Mei 22:38 · cerita gejala EML error F10</p>
             </div>
           </div>
 
