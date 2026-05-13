@@ -65,7 +65,6 @@
     langOpen: false,
     notifOpen: false,
     profileOpen: false,
-    connectorModalOpen: false,
     /* First-time empty state — toggle via demo control at page footer.
        When false: hero CTA + connector picker inline + sample preview.
        When true: filled workspace (greeting, summary, filter, cards). */
@@ -332,15 +331,14 @@
                 </div>
               </div>
 
-              <!-- Primary action: opens the connector picker modal -->
-              <button
-                type="button"
-                @click="connectorModalOpen = true"
+              <!-- Primary action: navigates to the dedicated picker page -->
+              <a
+                href="add-connector.html"
                 class="inline-flex items-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30"
               >
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 <span x-text="lang === 'id' ? 'Tambah Konektor' : 'Add Connector'">Add Connector</span>
-              </button>
+              </a>
 
               <!-- Notification dropdown — surfaces account/billing/referral events.
                    Items link to relevant pages. NOT chat or summary content. -->
@@ -955,106 +953,6 @@
   </div>
   <!-- ===== Page Wrapper End ===== -->
 
-  <!-- ===== Connector Picker Modal =====
-       Opened by the "Add Connector" topbar button (`connectorModalOpen = true`).
-       Backdrop click + Escape key + close button all dismiss.
-       Tile pattern is duplicated by hand so a frontend dev can see active vs
-       coming-soon states side-by-side. -->
-  <div
-    x-show="connectorModalOpen"
-    x-cloak
-    @keydown.escape.window="connectorModalOpen = false"
-    x-transition:enter="ease-out duration-200"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="ease-in duration-150"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-[60] flex items-center justify-center p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="connector-modal-title"
-  >
-    <!-- Backdrop (click to dismiss) -->
-    <div @click="connectorModalOpen = false" class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
-
-    <!-- Modal panel -->
-    <div
-      x-transition:enter="ease-out duration-200"
-      x-transition:enter-start="opacity-0 scale-95"
-      x-transition:enter-end="opacity-100 scale-100"
-      x-transition:leave="ease-in duration-150"
-      x-transition:leave-start="opacity-100 scale-100"
-      x-transition:leave-end="opacity-0 scale-95"
-      class="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
-    >
-      <!-- Close button -->
-      <button
-        type="button"
-        @click="connectorModalOpen = false"
-        aria-label="Close"
-        class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200"
-      >
-        <i data-lucide="x" class="h-5 w-5"></i>
-      </button>
-
-      <div class="p-6 md:p-7">
-        <!-- Header -->
-        <header class="mb-6 pr-10">
-          <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Choose Connector</p>
-          <h2 id="connector-modal-title" class="text-xl font-semibold text-gray-900 dark:text-white md:text-2xl">
-            Start a new onboarding flow
-          </h2>
-        </header>
-
-        <!-- Connector tile grid.
-             Active tile pattern   = white surface, brand-500 border + lift on hover
-             Inactive tile pattern = same surface, opacity-50, cursor-not-allowed, "Soon" badge top-right -->
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-
-          <!-- Active: WhatsApp Group → launches the dedicated onboarding wizard -->
-          <a href="onboard-whatsapp.html" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
-            <img src="./assets/whatsapp.webp" class="h-10 w-10" alt="" />
-            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">WhatsApp Group</span>
-          </a>
-
-          <!-- Active: Discord -->
-          <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
-            <img src="./assets/discord.png" class="h-10 w-10 object-contain" alt="" />
-            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Discord</span>
-          </button>
-
-          <!-- Active: Slack -->
-          <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
-            <img src="./assets/slack.png" class="h-10 w-10 object-contain" alt="" />
-            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Slack</span>
-          </button>
-
-          <!-- Coming soon: Telegram -->
-          <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
-            <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Soon</span>
-            <img src="./assets/telegram.png" class="h-10 w-10 object-contain" alt="" />
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Telegram</span>
-          </button>
-
-          <!-- Coming soon: Notion -->
-          <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
-            <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Soon</span>
-            <img src="./assets/notion.webp" class="h-10 w-10 object-contain" alt="" />
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Notion</span>
-          </button>
-
-          <!-- Coming soon: Gmail -->
-          <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
-            <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Soon</span>
-            <img src="./assets/Gmail_Icon.png" class="h-10 w-10 object-contain" alt="" />
-            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Gmail</span>
-          </button>
-
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script>
     // Render Lucide icons after DOM ready. Re-run after Alpine toggles to catch

@@ -158,8 +158,8 @@
         </div>
       </div>
 
-      <!-- Close / exit affordance — critical for trust -->
-      <a href="index.html" class="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" aria-label="Close">
+      <!-- Close / exit affordance — back to picker (user came from there) -->
+      <a href="add-connector.html" class="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" aria-label="Close">
         <i data-lucide="x" class="h-5 w-5"></i>
       </a>
     </div>
@@ -601,7 +601,7 @@
           <i data-lucide="arrow-left" class="h-4 w-4"></i>
           <span x-text="lang === 'id' ? 'Kembali' : 'Back'">Back</span>
         </button>
-        <a x-show="step === 1" href="index.html" class="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        <a x-show="step === 1" href="add-connector.html" class="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
           <span x-text="lang === 'id' ? 'Batal' : 'Cancel'">Cancel</span>
         </a>
       </div>
