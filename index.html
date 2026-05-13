@@ -106,47 +106,15 @@
              the right edge so it doesn't bias the wordmark centering.
            Collapsed (lg): wordmark hidden, compact "S" mark + toggle stack
              vertically (lg:flex-col), both centered. -->
-      <div
-        class="relative flex items-center justify-center pt-8 pb-7"
-        :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''"
-      >
+      <!-- Sidebar brand only — toggle button moved to topbar as hamburger -->
+      <div class="flex items-center justify-center pt-8 pb-7">
         <!-- Logo wordmark (visible when expanded / mobile drawer open) -->
         <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
-          <img
-            src="./assets/logo-black.png"
-            class="h-12 w-auto dark:hidden"
-            alt="Sumrize"
-          />
-          <img
-            src="./assets/logo-white.png"
-            class="hidden h-12 w-auto dark:block"
-            alt="Sumrize"
-          />
+          <img src="./assets/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./assets/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
         </a>
-
-        <!-- Compact brand mark (visible only when collapsed on lg).
-             Replaces the wordmark in the narrow 90px sidebar so we get a clean
-             square icon instead of a cropped PNG. -->
-        <a
-          href="index.html"
-          class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm"
-          :class="sidebarToggle ? 'lg:flex' : ''"
-          aria-label="Sumrize"
-        >
-          S
-        </a>
-
-        <!-- Sidebar collapse toggle -->
-        <button
-          type="button"
-          @click="sidebarToggle = !sidebarToggle"
-          aria-label="Toggle sidebar"
-          class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
-          :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'"
-        >
-          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
-          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
-        </button>
+        <!-- Compact brand mark (visible only when collapsed on lg) -->
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
       </div>
 
       <!-- Nav + footer (profile moved to topbar dropdown, TailAdmin-style) -->
@@ -262,14 +230,15 @@
           <!-- ===== Topbar (Section 2) Start ===== -->
           <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div class="flex items-center gap-3">
-              <!-- Mobile-only hamburger (sidebar drawer is offscreen on <lg by default) -->
+              <!-- Hamburger menu — always visible on all viewports, toggles sidebar -->
               <button
                 type="button"
-                @click="sidebarToggle = true"
-                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5"
-                aria-label="Open sidebar"
+                @click="sidebarToggle = !sidebarToggle"
+                class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5"
+                aria-label="Toggle menu"
               >
-                <i data-lucide="menu" class="h-5 w-5"></i>
+                <i data-lucide="menu" class="h-5 w-5" x-show="!sidebarToggle"></i>
+                <i data-lucide="x" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
               </button>
 
               <div>
