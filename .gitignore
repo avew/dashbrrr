@@ -1,1 +1,11 @@
 *.pdf
+
+*.docx
+
+*.md
+
+*.pptx
+
+docs/
+
+.DS_Store

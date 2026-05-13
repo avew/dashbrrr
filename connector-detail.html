@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Komunitas Mobil BMW · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./assets/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f8fbfd', 50: '#eaf4fb', 100: '#d4e8f7', 200: '#b3dbff',
+              300: '#7eb5e8', 400: '#4d6996', 500: '#26344a', 600: '#1c2738',
+              700: '#1c1f2c', 800: '#171a23', 900: '#101421', 950: '#0f0e0e'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#3c3f4c', 800: '#26344a', 900: '#1c1f2c', 950: '#0f0e0e'
+            },
+            success: { 50: '#ecfdf3', 500: '#12b76a', 600: '#039855' },
+            warning: { 50: '#fffaeb', 500: '#f79009', 600: '#dc6803' },
+            error: { 50: '#fef3f2', 500: '#f04438', 600: '#d92d20' },
+            sumrize: { DEFAULT: '#FF4438', hover: '#e63b30' }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    /* Shell state */
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    notifOpen: false,
+    profileOpen: false,
+
+    /* Tab state. Default opens directly to Audiens (the feature focus). */
+    activeTab: 'audiens',
+
+    /* Connector data (hardcoded for mockup). */
+    connector: {
+      id: 'whatsapp_bmw',
+      name: 'Komunitas Mobil BMW',
+      type: 'whatsapp',
+      typeLabel: { en: 'WhatsApp Group', id: 'Grup WhatsApp' },
+      icon: './assets/whatsapp.webp',
+      admin: 'Asep',
+      memberCount: 48,
+      lastActivity: { en: 'Active 2h ago', id: 'Aktif 2 jam lalu' },
+      newMessages: 47
+    },
+
+    /* User context */
+    userTier: 'free',
+    tierLimits: { free: 5, spark: 25, pro: Infinity },
+
+    /* Demo stage cycler: 0=filled (3 audiens), 1=empty, 2=at-limit (5 audiens) */
+    demoStage: 0,
+    demoStageLabels: ['Filled (3)', 'Empty', 'At limit (5)'],
+
+    /* Audiens datasets per stage */
+    audiensFilled: [
+      { id: 1, name: 'Pak Budi', phone: '+62 812 9999 8888', status: 'active', invitedAt: 3, expiresIn: null, resendCount: 0 },
+      { id: 2, name: 'Bu Sari', phone: '+62 813 1111 2222', status: 'pending', invitedAt: 1, expiresIn: 6, resendCount: 0 },
+      { id: 3, name: 'Mas Joko', phone: '+62 821 7777 3333', status: 'expired', invitedAt: 9, expiresIn: 0, resendCount: 1 }
+    ],
+    audiensAtLimit: [
+      { id: 1, name: 'Pak Budi', phone: '+62 812 9999 8888', status: 'active', invitedAt: 3, expiresIn: null, resendCount: 0 },
+      { id: 2, name: 'Bu Sari', phone: '+62 813 1111 2222', status: 'active', invitedAt: 5, expiresIn: null, resendCount: 0 },
+      { id: 3, name: 'Mas Joko', phone: '+62 821 7777 3333', status: 'active', invitedAt: 7, expiresIn: null, resendCount: 0 },
+      { id: 4, name: 'Bu Rina', phone: '+62 856 4444 5555', status: 'pending', invitedAt: 2, expiresIn: 5, resendCount: 0 },
+      { id: 5, name: 'Pak Heri', phone: '+62 878 3333 1111', status: 'active', invitedAt: 12, expiresIn: null, resendCount: 0 }
+    ],
+    get audiens() {
+      if (this.demoStage === 1) return [];
+      if (this.demoStage === 2) return this.audiensAtLimit;
+      return this.audiensFilled;
+    },
+
+    /* Audiens computed */
+    get audiensActive() { return this.audiens.filter(a => a.status === 'active').length; },
+    get audiensPending() { return this.audiens.filter(a => a.status === 'pending').length; },
+    get audiensExpired() { return this.audiens.filter(a => a.status === 'expired').length; },
+    get audiensTotal() { return this.audiens.length; },
+    get tierLimit() { return this.tierLimits[this.userTier]; },
+    get isAtLimit() { return this.audiensTotal >= this.tierLimit; },
+    get progressPercent() {
+      if (this.tierLimit === Infinity) return 100;
+      return Math.min(100, Math.round((this.audiensTotal / this.tierLimit) * 100));
+    },
+    get nextTierName() { return this.userTier === 'free' ? 'Spark' : 'Pro'; },
+    get nextTierLimit() { return this.userTier === 'free' ? '25' : (this.lang === 'id' ? 'tanpa batas' : 'unlimited'); },
+
+    /* Modal: Undang */
+    inviteModalOpen: false,
+    inviteTab: 'phone',
+    phoneNumbers: [{ code: '62', number: '' }],
+    personalMessage: '',
+
+    /* Invite link (Tab 2) */
+    inviteLink: {
+      token: 'bmw-xK9p2mQ',
+      expiresInDays: 7,
+      maxUses: 10,
+      currentUses: 3
+    },
+
+    /* Modal: Confirm remove */
+    confirmRemoveOpen: false,
+    removingAudiens: null,
+
+    /* Toast */
+    toast: { open: false, message: '', type: 'success' },
+
+    /* Country picker (per row). Small popular list to avoid DOM bloat. */
+    countries: [
+      { code: '62', name: 'Indonesia', flag: '🇮🇩' },
+      { code: '60', name: 'Malaysia', flag: '🇲🇾' },
+      { code: '65', name: 'Singapore', flag: '🇸🇬' },
+      { code: '66', name: 'Thailand', flag: '🇹🇭' },
+      { code: '63', name: 'Philippines', flag: '🇵🇭' },
+      { code: '84', name: 'Vietnam', flag: '🇻🇳' },
+      { code: '1', name: 'United States', flag: '🇺🇸' },
+      { code: '44', name: 'United Kingdom', flag: '🇬🇧' },
+      { code: '91', name: 'India', flag: '🇮🇳' },
+      { code: '61', name: 'Australia', flag: '🇦🇺' }
+    ],
+    openCountryIdx: -1,
+    getCountryFlag(code) { return (this.countries.find(c => c.code === code) || {}).flag || '🌐'; },
+
+    /* Computed: status meta per audiens row */
+    statusMeta(status) {
+      const meta = {
+        active: { bg: 'bg-success-50 dark:bg-success-500/[0.12]', text: 'text-success-600 dark:text-success-500', dot: 'bg-success-500', en: 'Active', id: 'Aktif' },
+        pending: { bg: 'bg-warning-50 dark:bg-warning-500/[0.12]', text: 'text-warning-600 dark:text-warning-500', dot: 'bg-warning-500', en: 'Pending', id: 'Menunggu' },
+        expired: { bg: 'bg-gray-100 dark:bg-white/[0.05]', text: 'text-gray-500 dark:text-gray-400', dot: 'bg-gray-400', en: 'Expired', id: 'Kedaluwarsa' },
+        rejected: { bg: 'bg-gray-100 dark:bg-white/[0.05]', text: 'text-gray-500 dark:text-gray-400', dot: 'bg-gray-400', en: 'Rejected', id: 'Ditolak' },
+        stopped: { bg: 'bg-gray-100 dark:bg-white/[0.05]', text: 'text-gray-500 dark:text-gray-400', dot: 'bg-gray-400', en: 'Stopped', id: 'Berhenti' }
+      };
+      return meta[status] || meta.expired;
+    },
+
+    /* WA Preview computed (real-time) */
+    get previewIntro() {
+      return `Halo! Aku Rizz dari Sumrize. ${this.connector.admin} mengundang kamu untuk dapat summary dari grup ${this.connector.name}.`;
+    },
+
+    /* Languages */
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Workspace', rizz: 'Ask Rizz', analytics: 'Analytics', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Workspace', rizz: 'Rizz', analytics: 'Analytics', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+
+    /* Actions */
+    openInvite() {
+      if (this.isAtLimit) return;
+      this.inviteModalOpen = true;
+      this.inviteTab = 'phone';
+      this.phoneNumbers = [{ code: '62', number: '' }];
+      this.personalMessage = '';
+    },
+    closeInvite() {
+      this.inviteModalOpen = false;
+      this.openCountryIdx = -1;
+    },
+    addPhoneRow() {
+      if (this.phoneNumbers.length >= 10) return;
+      this.phoneNumbers.push({ code: '62', number: '' });
+      this.$nextTick(() => lucide.createIcons());
+    },
+    removePhoneRow(idx) {
+      if (this.phoneNumbers.length === 1) {
+        this.phoneNumbers = [{ code: '62', number: '' }];
+        return;
+      }
+      this.phoneNumbers.splice(idx, 1);
+    },
+    get validPhoneCount() {
+      return this.phoneNumbers.filter(p => p.number && p.number.replace(/\D/g, '').length >= 8).length;
+    },
+    submitInvite() {
+      const count = this.validPhoneCount;
+      if (count === 0) return;
+      this.closeInvite();
+      this.showToast(this.lang === 'id'
+        ? `${count} undangan terkirim. Audiens harus reply Approve di WA dalam 7 hari.`
+        : `${count} invitation(s) sent. Audience must reply Approve on WA within 7 days.`);
+    },
+    askRemove(audiens) {
+      this.removingAudiens = audiens;
+      this.confirmRemoveOpen = true;
+    },
+    confirmRemove() {
+      this.confirmRemoveOpen = false;
+      this.showToast(this.lang === 'id'
+        ? `${this.removingAudiens.name} sudah dihapus dari audiens.`
+        : `${this.removingAudiens.name} removed from audience.`);
+      this.removingAudiens = null;
+    },
+    resendInvite(audiens) {
+      if (audiens.resendCount >= 3) {
+        this.showToast(this.lang === 'id'
+          ? 'Sudah 3x kirim ulang. Tunggu 30 hari sebelum invite ulang nomor ini.'
+          : 'Already resent 3 times. Wait 30 days before re-inviting this number.', 'warning');
+        return;
+      }
+      this.showToast(this.lang === 'id'
+        ? `Undangan dikirim ulang ke ${audiens.name}.`
+        : `Invitation resent to ${audiens.name}.`);
+    },
+    copyLink() {
+      const url = `sumrize.me/join/${this.inviteLink.token}`;
+      if (navigator.clipboard) navigator.clipboard.writeText(url);
+      this.showToast(this.lang === 'id' ? 'Link disalin.' : 'Link copied.');
+    },
+    regenerateLink() {
+      const rand = Math.random().toString(36).substring(2, 9);
+      this.inviteLink.token = 'bmw-' + rand;
+      this.inviteLink.currentUses = 0;
+      this.showToast(this.lang === 'id' ? 'Link baru dibuat. Link lama tidak berlaku.' : 'New link generated. Old link invalid.');
+    },
+    showToast(message, type = 'success') {
+      this.toast = { open: true, message, type };
+      setTimeout(() => { this.toast.open = false; }, 3500);
+    },
+    cycleDemoStage() {
+      this.demoStage = (this.demoStage + 1) % 3;
+      this.$nextTick(() => lucide.createIcons());
+    },
+    cycleTier() {
+      const order = ['free', 'spark', 'pro'];
+      const idx = order.indexOf(this.userTier);
+      this.userTier = order[(idx + 1) % order.length];
+    },
+
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (Workspace active as parent) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img src="./assets/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./assets/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+        </a>
+
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
+
+        <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a href="index.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="rizz.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="analytics.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="bar-chart-3" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].analytics" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span>
+            </button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile backdrop -->
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- ===== Topbar (Breadcrumb + Lang/Notif/Profile) ===== -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+              <!-- Breadcrumb -->
+              <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <a href="index.html" class="font-medium hover:text-brand-500 dark:hover:text-brand-400" x-text="t[lang].home">Workspace</a>
+                <i data-lucide="chevron-right" class="h-4 w-4 text-gray-300 dark:text-gray-700"></i>
+                <span class="font-semibold text-gray-900 dark:text-white" x-text="connector.name">Komunitas Mobil BMW</span>
+              </nav>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-haspopup="listbox" :aria-expanded="langOpen.toString()">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span class="text-base leading-none" x-text="languages[lang].flag"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="listbox">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'" role="option" :aria-selected="(lang === code).toString()">
+                      <span class="flex items-center gap-3">
+                        <span class="text-lg leading-none" x-text="meta.flag"></span>
+                        <span x-text="meta.label"></span>
+                      </span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Profile dropdown -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button type="button" @click="profileOpen = !profileOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-haspopup="menu" :aria-expanded="profileOpen.toString()">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="menu">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="userTier === 'pro' ? 'Pro' : (userTier === 'spark' ? 'Spark' : 'Free')">Free</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="settings" class="h-4 w-4"></i>
+                      <span x-text="lang === 'id' ? 'Pengaturan' : 'Settings'">Settings</span>
+                    </a>
+                  </div>
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800">
+                    <a href="login.html" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10">
+                      <i data-lucide="log-out" class="h-4 w-4"></i>
+                      <span x-text="lang === 'id' ? 'Keluar' : 'Sign out'">Sign out</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Connector Header Card =====
+               Primary card (border-brand-500) with icon + name + admin + member count. -->
+          <section class="mb-6 overflow-hidden rounded-2xl border border-brand-500 bg-white shadow-theme-sm dark:bg-white/[0.03]">
+            <div class="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center">
+              <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-500/[0.15]">
+                <img :src="connector.icon" class="h-7 w-7" alt="" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="mb-1 flex flex-wrap items-center gap-2">
+                  <h1 class="text-2xl font-bold text-gray-900 dark:text-white" x-text="connector.name">Komunitas Mobil BMW</h1>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white/[0.05] dark:text-gray-300 dark:ring-gray-700">
+                    <img :src="connector.icon" class="h-3.5 w-3.5" alt="" />
+                    <span x-text="connector.typeLabel[lang]">WhatsApp Group</span>
+                  </span>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <span x-text="(lang === 'id' ? 'Admin: ' : 'Admin: ') + connector.admin"></span>
+                  <span> · </span>
+                  <span><strong class="text-gray-700 dark:text-gray-300" x-text="connector.memberCount"></strong> <span x-text="lang === 'id' ? 'anggota grup' : 'group members'">members</span></span>
+                  <span> · </span>
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                    <span x-text="connector.lastActivity[lang]">Active 2h ago</span>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Tab switcher -->
+            <nav class="flex gap-1 border-t border-gray-100 px-3 dark:border-gray-800">
+              <button type="button" @click="activeTab = 'overview'" :class="activeTab === 'overview' ? 'border-brand-500 text-brand-500 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'" class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition">
+                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Ringkasan' : 'Overview'">Overview</span>
+              </button>
+              <button type="button" @click="activeTab = 'audiens'" :class="activeTab === 'audiens' ? 'border-brand-500 text-brand-500 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'" class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition">
+                <i data-lucide="users" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Audiens' : 'Audience'">Audience</span>
+                <span x-show="audiensTotal > 0" class="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-600 dark:bg-white/[0.08] dark:text-gray-400" x-text="audiensTotal"></span>
+              </button>
+              <button type="button" @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'border-brand-500 text-brand-500 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'" class="flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition">
+                <i data-lucide="settings" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Pengaturan' : 'Settings'">Settings</span>
+              </button>
+            </nav>
+          </section>
+
+          <!-- ===== TAB: Overview ===== -->
+          <section x-show="activeTab === 'overview'" x-cloak>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="message-square" class="h-5 w-5"></i>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="connector.newMessages">47</p>
+                <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Pesan baru hari ini' : 'New messages today'">New messages today</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="users" class="h-5 w-5"></i>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="connector.memberCount">48</p>
+                <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Anggota grup' : 'Group members'">Group members</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="user-check" class="h-5 w-5"></i>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white" x-text="audiensActive"></p>
+                <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Audiens aktif' : 'Active audience'">Active audience</p>
+              </div>
+            </div>
+
+            <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <h3 class="mb-2 text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Tentang konektor ini' : 'About this connector'">About this connector</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Rizz memantau grup ini dan kirim summary harian. Bagikan summary ke audiens di luar grup tanpa mereka harus join.' : 'Rizz monitors this group and sends daily summaries. Share summaries with audience outside the group without them having to join.'"></p>
+            </div>
+          </section>
+
+          <!-- ===== TAB: Audiens ===== -->
+          <section x-show="activeTab === 'audiens'">
+            <!-- Header + counter -->
+            <div class="mb-4 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm sm:flex-row sm:items-center sm:justify-between dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="flex-1">
+                <div class="mb-1 flex items-center gap-2">
+                  <h2 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Audiens' : 'Audience'">Audience</h2>
+                  <!-- Tier pill -->
+                  <span x-show="userTier === 'free'" class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-400">Free</span>
+                  <span x-show="userTier === 'spark'" x-cloak class="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Spark</span>
+                  <span x-show="userTier === 'pro'" x-cloak class="rounded-full bg-gradient-to-r from-sumrize to-brand-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Pro</span>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <strong class="text-gray-900 dark:text-white" x-text="audiensTotal"></strong>
+                  <span x-text="lang === 'id' ? ' dari ' : ' of '"></span>
+                  <span x-text="tierLimit === Infinity ? (lang === 'id' ? 'tanpa batas' : 'unlimited') : tierLimit"></span>
+                  <span x-text="lang === 'id' ? ' audiens' : ' audience'"></span>
+                </p>
+                <!-- Progress bar -->
+                <div x-show="tierLimit !== Infinity" class="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                  <div class="h-full rounded-full transition-all" :class="progressPercent >= 100 ? 'bg-error-500' : (progressPercent >= 80 ? 'bg-warning-500' : 'bg-brand-500')" :style="`width: ${progressPercent}%`"></div>
+                </div>
+              </div>
+              <!-- Primary CTA -->
+              <div class="flex flex-col items-stretch gap-2 sm:items-end">
+                <button type="button" @click="openInvite()" :disabled="isAtLimit" :class="isAtLimit ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-white/[0.05] dark:text-gray-600' : 'bg-sumrize text-white shadow-theme-sm hover:bg-sumrize-hover focus:ring-4 focus:ring-sumrize/30'" class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition focus:outline-none" :title="isAtLimit ? (lang === 'id' ? 'Sudah penuh — upgrade ' + nextTierName + ' untuk lebih banyak audiens' : 'At limit — upgrade ' + nextTierName + ' for more audience') : ''">
+                  <i data-lucide="user-plus" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Undang Audiens' : 'Invite Audience'">Invite Audience</span>
+                </button>
+                <!-- Upgrade nudge when at limit -->
+                <a x-show="isAtLimit" href="pricing.html" class="inline-flex items-center gap-1.5 text-xs font-semibold text-sumrize hover:text-sumrize-hover">
+                  <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
+                  <span x-text="lang === 'id' ? 'Upgrade ' + nextTierName + ' · ' + nextTierLimit + ' audiens' : 'Upgrade ' + nextTierName + ' · ' + nextTierLimit + ' audience'"></span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Stats inline -->
+            <div x-show="audiensTotal > 0" class="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <span class="inline-flex items-center gap-1.5 text-sm">
+                <span class="inline-block h-2 w-2 rounded-full bg-success-500"></span>
+                <strong class="text-gray-900 dark:text-white" x-text="audiensActive"></strong>
+                <span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Aktif' : 'Active'">Active</span>
+              </span>
+              <span x-show="audiensPending > 0" class="inline-flex items-center gap-1.5 text-sm">
+                <span class="inline-block h-2 w-2 rounded-full bg-warning-500"></span>
+                <strong class="text-gray-900 dark:text-white" x-text="audiensPending"></strong>
+                <span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Menunggu' : 'Pending'">Pending</span>
+              </span>
+              <span x-show="audiensExpired > 0" class="inline-flex items-center gap-1.5 text-sm">
+                <span class="inline-block h-2 w-2 rounded-full bg-gray-400"></span>
+                <strong class="text-gray-900 dark:text-white" x-text="audiensExpired"></strong>
+                <span class="text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Kedaluwarsa' : 'Expired'">Expired</span>
+              </span>
+            </div>
+
+            <!-- Audiens table -->
+            <div x-show="audiensTotal > 0" class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-gray-50 dark:bg-white/[0.02]">
+                    <tr>
+                      <th class="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Nama / Nomor WA' : 'Name / WA Number'">Name / WA Number</th>
+                      <th class="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                      <th class="hidden px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 sm:table-cell dark:text-gray-400" x-text="lang === 'id' ? 'Diundang' : 'Invited'">Invited</th>
+                      <th class="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Aksi' : 'Action'">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    <template x-for="row in audiens" :key="row.id">
+                      <tr class="transition hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                        <!-- Name + phone -->
+                        <td class="px-5 py-4">
+                          <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="row.name"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="row.phone"></p>
+                        </td>
+                        <!-- Status -->
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold" :class="statusMeta(row.status).bg + ' ' + statusMeta(row.status).text">
+                            <span class="inline-block h-1.5 w-1.5 rounded-full" :class="statusMeta(row.status).dot"></span>
+                            <span x-text="statusMeta(row.status)[lang]"></span>
+                          </span>
+                          <!-- Sub-info -->
+                          <p x-show="row.status === 'pending' && row.expiresIn !== null" class="mt-1 text-[10px] text-gray-400" x-text="(lang === 'id' ? 'Berakhir ' : 'Expires in ') + row.expiresIn + (lang === 'id' ? ' hari' : 'd')"></p>
+                          <p x-show="row.resendCount > 0" class="mt-1 text-[10px] text-gray-400" x-text="(lang === 'id' ? 'Kirim ulang ' : 'Resent ') + row.resendCount + '/3'"></p>
+                        </td>
+                        <!-- Invited at -->
+                        <td class="hidden px-5 py-4 sm:table-cell">
+                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="row.invitedAt + (lang === 'id' ? ' hari lalu' : 'd ago')"></p>
+                        </td>
+                        <!-- Action -->
+                        <td class="px-5 py-4 text-right">
+                          <div class="inline-flex items-center gap-2">
+                            <!-- Resend button (for pending/expired/rejected/stopped) -->
+                            <button x-show="['pending', 'expired', 'rejected', 'stopped'].includes(row.status)" type="button" @click="resendInvite(row)" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                              <i data-lucide="send" class="h-3.5 w-3.5"></i>
+                              <span x-text="lang === 'id' ? 'Kirim Ulang' : 'Resend'">Resend</span>
+                            </button>
+                            <!-- Remove button (for active only) -->
+                            <button x-show="row.status === 'active'" type="button" @click="askRemove(row)" class="inline-flex items-center gap-1.5 rounded-lg border border-error-500/30 bg-error-500/[0.04] px-3 py-1.5 text-xs font-medium text-error-500 transition hover:bg-error-500/10">
+                              <i data-lucide="user-minus" class="h-3.5 w-3.5"></i>
+                              <span x-text="lang === 'id' ? 'Hapus' : 'Remove'">Remove</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div x-show="audiensTotal === 0" x-cloak class="rounded-2xl border border-dashed border-gray-300 bg-white px-8 py-12 text-center dark:border-gray-700 dark:bg-white/[0.02]">
+              <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                <i data-lucide="mail-plus" class="h-7 w-7"></i>
+              </div>
+              <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Belum ada audiens' : 'No audience yet'">No audience yet</h3>
+              <p class="mx-auto mb-4 max-w-md text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bagikan summary grup ini ke siapa saja via WhatsApp — tanpa mereka harus join grup.' : 'Share this group summary with anyone via WhatsApp — without them having to join the group.'"></p>
+              <ul class="mx-auto mb-6 max-w-md space-y-2 text-left text-sm text-gray-600 dark:text-gray-400">
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Bos minta update mingguan? Undang dia tanpa add ke grup.' : 'Manager wants weekly update? Invite them without adding to the group.'"></span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Klien ingin progress report? Bagikan summary tanpa kasih akses chat.' : 'Client wants progress report? Share summary without giving chat access.'"></span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-500"></i>
+                  <span x-text="lang === 'id' ? 'Tim eksternal? Undang tanpa mereka harus install app.' : 'External team? Invite them without installing any app.'"></span>
+                </li>
+              </ul>
+              <button type="button" @click="openInvite()" class="inline-flex items-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+                <i data-lucide="user-plus" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Undang Audiens Pertama' : 'Invite First Audience'">Invite First Audience</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- ===== TAB: Settings (placeholder) ===== -->
+          <section x-show="activeTab === 'settings'" x-cloak class="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-white/[0.05]">
+              <i data-lucide="settings" class="h-7 w-7"></i>
+            </div>
+            <h3 class="mb-1 text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Pengaturan konektor' : 'Connector settings'">Connector settings</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Schedule, format, dan delivery preferences akan datang di update berikutnya.' : 'Schedule, format, and delivery preferences coming in next update.'"></p>
+          </section>
+
+          <!-- ===== Demo control footer ===== -->
+          <footer class="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-gray-400 dark:text-gray-600">
+            <span x-text="lang === 'id' ? 'Demo mockup ·' : 'Demo mockup ·'">Demo mockup ·</span>
+            <button type="button" @click="cycleDemoStage()" class="inline-flex items-center gap-1 underline-offset-2 transition hover:text-gray-600 hover:underline dark:hover:text-gray-400">
+              <i data-lucide="repeat" class="h-3 w-3"></i>
+              <span x-text="(lang === 'id' ? 'Stage: ' : 'Stage: ') + demoStageLabels[demoStage]"></span>
+            </button>
+            <span>·</span>
+            <button type="button" @click="cycleTier()" class="inline-flex items-center gap-1 underline-offset-2 transition hover:text-gray-600 hover:underline dark:hover:text-gray-400">
+              <i data-lucide="zap" class="h-3 w-3"></i>
+              <span x-text="(lang === 'id' ? 'Tier: ' : 'Tier: ') + (userTier === 'pro' ? 'Pro' : (userTier === 'spark' ? 'Spark' : 'Free'))"></span>
+            </button>
+          </footer>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== Modal: Undang Audiens ===== -->
+  <div x-show="inviteModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div @click="closeInvite()" x-transition.opacity.duration.200ms class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+
+    <!-- Panel -->
+    <div x-show="inviteModalOpen" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+
+      <!-- Header -->
+      <header class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="(lang === 'id' ? 'Undang Audiens · ' : 'Invite Audience · ') + connector.name"></h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bagikan summary ke nomor WhatsApp lain — tanpa mereka harus join grup.' : 'Share summary with other WhatsApp numbers — without them joining the group.'"></p>
+        </div>
+        <button type="button" @click="closeInvite()" :aria-label="lang === 'id' ? 'Tutup' : 'Close'" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </header>
+
+      <!-- Tab switcher -->
+      <nav class="flex gap-1 border-b border-gray-100 bg-gray-50/50 px-6 dark:border-gray-800 dark:bg-white/[0.02]">
+        <button type="button" @click="inviteTab = 'phone'" :class="inviteTab === 'phone' ? 'border-brand-500 text-brand-500 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'" class="flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition">
+          <i data-lucide="phone" class="h-4 w-4"></i>
+          <span x-text="lang === 'id' ? 'Via Nomor WA' : 'Via WA Number'">Via WA Number</span>
+        </button>
+        <button type="button" @click="inviteTab = 'link'" :class="inviteTab === 'link' ? 'border-brand-500 text-brand-500 dark:text-brand-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'" class="flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition">
+          <i data-lucide="link" class="h-4 w-4"></i>
+          <span x-text="lang === 'id' ? 'Via Link' : 'Via Link'">Via Link</span>
+        </button>
+      </nav>
+
+      <!-- Body (2-col: form + WA preview) -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+
+          <!-- LEFT: Form -->
+          <div class="border-b border-gray-100 px-6 py-5 lg:border-b-0 lg:border-r dark:border-gray-800">
+
+            <!-- Tab Phone content -->
+            <div x-show="inviteTab === 'phone'">
+              <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Nomor WhatsApp' : 'WhatsApp Number'">WhatsApp Number</label>
+
+              <!-- Phone input rows -->
+              <div class="space-y-2">
+                <template x-for="(row, idx) in phoneNumbers" :key="idx">
+                  <div class="flex items-center gap-2">
+                    <!-- Country code dropdown -->
+                    <div class="relative" @click.outside="if (openCountryIdx === idx) openCountryIdx = -1">
+                      <button type="button" @click="openCountryIdx = (openCountryIdx === idx ? -1 : idx)" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        <span class="text-base leading-none" x-text="getCountryFlag(row.code)"></span>
+                        <span x-text="'+' + row.code"></span>
+                        <i data-lucide="chevron-down" class="h-3.5 w-3.5"></i>
+                      </button>
+                      <div x-show="openCountryIdx === idx" x-cloak x-transition.opacity.duration.150ms class="absolute left-0 top-full z-30 mt-1.5 max-h-64 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-700 dark:bg-gray-800">
+                        <template x-for="country in countries" :key="country.code + country.name">
+                          <button type="button" @click="row.code = country.code; openCountryIdx = -1" class="flex w-full items-center gap-2.5 px-3 py-2 text-sm transition" :class="row.code === country.code ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'">
+                            <span class="text-base leading-none" x-text="country.flag"></span>
+                            <span class="flex-1 text-left" x-text="country.name"></span>
+                            <span class="text-xs text-gray-400" x-text="'+' + country.code"></span>
+                          </button>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- Number input -->
+                    <input
+                      type="tel"
+                      x-model="row.number"
+                      :placeholder="lang === 'id' ? '812 9999 8888' : '812 9999 8888'"
+                      class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    />
+
+                    <!-- Remove row -->
+                    <button type="button" @click="removePhoneRow(idx)" :class="phoneNumbers.length === 1 && !row.number ? 'invisible' : ''" :aria-label="lang === 'id' ? 'Hapus nomor' : 'Remove number'" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-error-50 hover:text-error-500 dark:hover:bg-error-500/10">
+                      <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Add row -->
+              <button type="button" @click="addPhoneRow()" :disabled="phoneNumbers.length >= 10" :class="phoneNumbers.length >= 10 ? 'cursor-not-allowed text-gray-300 dark:text-gray-700' : 'text-brand-500 hover:text-brand-600 dark:text-brand-400'" class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium transition">
+                <i data-lucide="plus-circle" class="h-4 w-4"></i>
+                <span x-text="lang === 'id' ? 'Tambah nomor' : 'Add number'">Add number</span>
+                <span class="text-xs text-gray-400" x-text="'(' + phoneNumbers.length + '/10)'"></span>
+              </button>
+
+              <!-- Personal message -->
+              <div class="mt-5">
+                <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <span x-text="lang === 'id' ? 'Pesan personal' : 'Personal message'">Personal message</span>
+                  <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? '(opsional)' : '(optional)'">(optional)</span>
+                </label>
+                <textarea
+                  x-model="personalMessage"
+                  maxlength="200"
+                  rows="3"
+                  :placeholder="lang === 'id' ? 'Hi pak, summary dari rapat tim minggu ini...' : 'Hi sir, weekly team summary...'"
+                  class="w-full resize-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                ></textarea>
+                <p class="mt-1 text-right text-xs text-gray-400" x-text="personalMessage.length + '/200'"></p>
+              </div>
+
+              <!-- Disclaimer -->
+              <div class="mt-4 flex items-start gap-2 rounded-xl bg-warning-50 px-3 py-2.5 dark:bg-warning-500/[0.08]">
+                <i data-lucide="info" class="mt-0.5 h-4 w-4 flex-shrink-0 text-warning-500"></i>
+                <p class="text-xs text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Audiens harus reply Approve di WhatsApp dalam 7 hari. Tanpa approve, status jadi Kedaluwarsa.' : 'Audience must reply Approve on WhatsApp within 7 days. Without approval, status becomes Expired.'"></p>
+              </div>
+            </div>
+
+            <!-- Tab Link content -->
+            <div x-show="inviteTab === 'link'" x-cloak>
+              <label class="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Link Undangan' : 'Invitation Link'">Invitation Link</label>
+
+              <!-- Current link display -->
+              <div class="mb-3 flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-700 dark:bg-gray-800">
+                <i data-lucide="link" class="h-4 w-4 flex-shrink-0 text-gray-400"></i>
+                <span class="flex-1 truncate font-mono text-sm text-gray-700 dark:text-gray-300" x-text="'sumrize.me/join/' + inviteLink.token"></span>
+                <button type="button" @click="copyLink()" :aria-label="lang === 'id' ? 'Salin link' : 'Copy link'" class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 transition hover:bg-white hover:text-brand-500 dark:hover:bg-white/5">
+                  <i data-lucide="copy" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <!-- Link usage info -->
+              <div class="mb-4 grid grid-cols-2 gap-2">
+                <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Sudah dipakai' : 'Used'">Used</p>
+                  <p class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">
+                    <span x-text="inviteLink.currentUses"></span> / <span x-text="inviteLink.maxUses"></span>
+                  </p>
+                </div>
+                <div class="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+                  <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Berakhir dalam' : 'Expires in'">Expires in</p>
+                  <p class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white" x-text="inviteLink.expiresInDays + (lang === 'id' ? ' hari' : 'd')"></p>
+                </div>
+              </div>
+
+              <!-- Settings -->
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Berlaku' : 'Expiry'">Expiry</label>
+                  <select x-model.number="inviteLink.expiresInDays" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    <option :value="1" x-text="lang === 'id' ? '1 hari' : '1 day'"></option>
+                    <option :value="3" x-text="lang === 'id' ? '3 hari' : '3 days'"></option>
+                    <option :value="7" x-text="lang === 'id' ? '7 hari' : '7 days'"></option>
+                    <option :value="30" x-text="lang === 'id' ? '30 hari' : '30 days'"></option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Maks penggunaan' : 'Max uses'">Max uses</label>
+                  <select x-model.number="inviteLink.maxUses" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    <option :value="1">1</option>
+                    <option :value="5">5</option>
+                    <option :value="10">10</option>
+                    <option :value="50">50</option>
+                    <option :value="9999" :disabled="userTier === 'free'" x-text="(lang === 'id' ? 'Tanpa batas' : 'Unlimited') + (userTier === 'free' ? ' (Spark+)' : '')"></option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Regenerate -->
+              <button type="button" @click="regenerateLink()" class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-error-500 transition hover:text-error-600">
+                <i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>
+                <span x-text="lang === 'id' ? 'Regenerate link · link lama tidak berlaku' : 'Regenerate link · old link invalid'">Regenerate link</span>
+              </button>
+
+              <!-- Disclaimer -->
+              <div class="mt-4 flex items-start gap-2 rounded-xl bg-brand-50 px-3 py-2.5 dark:bg-brand-500/[0.08]">
+                <i data-lucide="info" class="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-500"></i>
+                <p class="text-xs text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Siapapun dengan link ini bisa minta jadi audiens — mereka tetap diarahkan ke WhatsApp untuk approve.' : 'Anyone with this link can request audience access — they still go through WhatsApp approval.'"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: WA Preview -->
+          <div class="bg-gray-50 px-6 py-5 dark:bg-white/[0.02]">
+            <div class="mb-3 flex items-center gap-2">
+              <i data-lucide="smartphone" class="h-4 w-4 text-gray-400"></i>
+              <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Preview pesan untuk audiens' : 'Preview message to audience'">Preview message to audience</p>
+            </div>
+
+            <!-- WhatsApp chat bubble mockup -->
+            <div class="space-y-2 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/[0.04]">
+              <!-- Bot header -->
+              <div class="mb-2 flex items-center gap-2 pb-2 border-b border-emerald-100 dark:border-emerald-500/20">
+                <div class="flex h-7 w-7 items-center justify-center rounded-full bg-sumrize text-white">
+                  <i data-lucide="bot" class="h-3.5 w-3.5"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-gray-900 dark:text-white">Rizz</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'sekarang' : 'now'">now</p>
+                </div>
+              </div>
+
+              <!-- Bubble 1: Intro -->
+              <div class="rounded-xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm dark:bg-gray-800">
+                <p class="text-xs text-gray-700 dark:text-gray-300" x-text="previewIntro"></p>
+              </div>
+
+              <!-- Bubble 2: Personal message (only if filled) -->
+              <div x-show="personalMessage.trim().length > 0" class="rounded-xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm dark:bg-gray-800">
+                <p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400" x-text="(lang === 'id' ? 'Pesan dari ' : 'Message from ') + connector.admin"></p>
+                <p class="border-l-2 border-emerald-300 pl-2 text-xs italic text-gray-700 dark:text-gray-300" x-text="'“' + personalMessage + '”'"></p>
+              </div>
+
+              <!-- Bubble 3: Benefit -->
+              <div class="rounded-xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm dark:bg-gray-800">
+                <p class="mb-1.5 text-xs font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Apa yang akan kamu dapat:' : 'What you will get:'">What you will get:</p>
+                <ul class="space-y-1 text-xs text-gray-700 dark:text-gray-300">
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-success-500">✓</span>
+                    <span x-text="lang === 'id' ? 'Ringkasan harian dari grup' : 'Daily summary from the group'"></span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-success-500">✓</span>
+                    <span x-text="lang === 'id' ? 'Topik utama, action items, keputusan' : 'Main topics, action items, decisions'"></span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="text-success-500">✓</span>
+                    <span x-text="lang === 'id' ? 'Tidak perlu buat akun atau install app' : 'No account or app install needed'"></span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Bubble 4: CTA -->
+              <div class="rounded-xl rounded-tl-sm bg-white px-3 py-2.5 shadow-sm dark:bg-gray-800">
+                <p class="text-xs text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Mau approve undangan ini? Balas Approve untuk mulai, atau Tolak untuk menolak.' : 'Want to approve this invitation? Reply Approve to start, or Reject to decline.'"></p>
+                <div class="mt-2 flex gap-2">
+                  <span class="rounded-lg bg-success-50 px-2.5 py-1 text-[10px] font-semibold text-success-600 dark:bg-success-500/[0.15]">Approve</span>
+                  <span class="rounded-lg bg-gray-100 px-2.5 py-1 text-[10px] font-semibold text-gray-600 dark:bg-white/[0.08] dark:text-gray-400" x-text="lang === 'id' ? 'Tolak' : 'Reject'">Reject</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="mt-3 text-center text-[10px] text-gray-400" x-text="lang === 'id' ? 'Preview real-time · update saat kamu ketik' : 'Live preview · updates as you type'">Live preview · updates as you type</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="flex flex-shrink-0 flex-col-reverse gap-2 border-t border-gray-100 bg-gray-50/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800 dark:bg-white/[0.02]">
+        <button type="button" @click="closeInvite()" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+          <span x-text="lang === 'id' ? 'Batal' : 'Cancel'">Cancel</span>
+        </button>
+
+        <button x-show="inviteTab === 'phone'" type="button" @click="submitInvite()" :disabled="validPhoneCount === 0" :class="validPhoneCount === 0 ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-white/[0.05] dark:text-gray-600' : 'bg-sumrize text-white shadow-theme-sm hover:bg-sumrize-hover focus:ring-4 focus:ring-sumrize/30'" class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition focus:outline-none">
+          <i data-lucide="send" class="h-4 w-4"></i>
+          <span x-text="lang === 'id' ? `Kirim Undangan${validPhoneCount > 0 ? ' (' + validPhoneCount + ')' : ''}` : `Send Invitation${validPhoneCount > 0 ? ' (' + validPhoneCount + ')' : ''}`">Send Invitation</span>
+        </button>
+
+        <button x-show="inviteTab === 'link'" x-cloak type="button" @click="copyLink()" class="inline-flex items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30">
+          <i data-lucide="copy" class="h-4 w-4"></i>
+          <span x-text="lang === 'id' ? 'Salin Link' : 'Copy Link'">Copy Link</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===== Modal: Confirm Remove ===== -->
+  <div x-show="confirmRemoveOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div @click="confirmRemoveOpen = false" x-transition.opacity.duration.200ms class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+    <div x-show="confirmRemoveOpen" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="relative w-full max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900">
+      <div class="p-6">
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+          <i data-lucide="user-minus" class="h-6 w-6"></i>
+        </div>
+        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Hapus audiens?' : 'Remove audience?'">Remove audience?</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          <strong class="text-gray-900 dark:text-white" x-text="removingAudiens?.name"></strong>
+          <span x-text="lang === 'id' ? ' tidak akan menerima summary lagi mulai jadwal berikutnya. Mereka akan dapat notifikasi dari Rizz.' : ' will stop receiving summary from next schedule. They will get a notification from Rizz.'"></span>
+        </p>
+        <p class="mt-2 text-xs text-gray-400" x-text="lang === 'id' ? 'Riwayat tetap tersimpan, dan kamu bisa undang ulang nanti.' : 'History remains, and you can re-invite later.'"></p>
+      </div>
+      <footer class="flex flex-col-reverse gap-2 border-t border-gray-100 bg-gray-50/50 px-6 py-4 sm:flex-row sm:items-center sm:justify-end dark:border-gray-800 dark:bg-white/[0.02]">
+        <button type="button" @click="confirmRemoveOpen = false" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+          <span x-text="lang === 'id' ? 'Batal' : 'Cancel'">Cancel</span>
+        </button>
+        <button type="button" @click="confirmRemove()" class="inline-flex items-center justify-center gap-2 rounded-full bg-error-500 px-5 py-2.5 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-error-600 focus:outline-none focus:ring-4 focus:ring-error-500/30">
+          <i data-lucide="user-minus" class="h-4 w-4"></i>
+          <span x-text="lang === 'id' ? 'Hapus' : 'Remove'">Remove</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div x-show="toast.open" x-cloak x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 transform">
+    <div class="flex items-start gap-2 rounded-xl border bg-white px-4 py-3 shadow-theme-md dark:bg-gray-800" :class="toast.type === 'warning' ? 'border-warning-500/30' : 'border-success-500/30'">
+      <i :data-lucide="toast.type === 'warning' ? 'alert-triangle' : 'check-circle'" :class="toast.type === 'warning' ? 'text-warning-500' : 'text-success-500'" class="mt-0.5 h-5 w-5 flex-shrink-0"></i>
+      <p class="max-w-xs text-sm text-gray-700 dark:text-gray-300" x-text="toast.message"></p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>
