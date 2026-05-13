@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selamat Datang · Sumrize</title>
+
+  <link rel="icon" type="image/png" href="./assets/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f8fbfd', 50: '#eaf4fb', 100: '#d4e8f7', 200: '#b3dbff',
+              300: '#7eb5e8', 400: '#4d6996', 500: '#26344a', 600: '#1c2738',
+              700: '#1c1f2c', 800: '#171a23', 900: '#101421', 950: '#0f0e0e'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#3c3f4c', 800: '#26344a', 900: '#1c1f2c', 950: '#0f0e0e'
+            },
+            success: {
+              50: '#ecfdf3', 500: '#12b76a', 600: '#039855'
+            },
+            warning: {
+              50: '#fffaeb', 500: '#f79009'
+            },
+            error: {
+              50: '#fef3f2', 500: '#f04438', 600: '#d92d20'
+            },
+            sumrize: {
+              DEFAULT: '#FF4438',
+              hover: '#e63b30'
+            }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    /* Skip feedback modal state */
+    skipModalOpen: false,
+    feedbackReasons: [],
+    feedbackOther: '',
+    feedbackSubmitted: false,
+    submitFeedback() {
+      this.feedbackSubmitted = true;
+      setTimeout(() => { window.location.href = 'index.html'; }, 900);
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="min-h-screen bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+
+  <!-- ===== Minimal top bar: lang switcher only ===== -->
+  <header class="absolute right-4 top-4 z-10 md:right-6 md:top-6">
+    <div class="relative" @click.outside="langOpen = false">
+      <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 px-3 py-2 text-sm font-medium text-gray-700 backdrop-blur transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-haspopup="listbox" :aria-expanded="langOpen.toString()">
+        <i data-lucide="globe" class="h-4 w-4"></i>
+        <span class="text-base leading-none" x-text="languages[lang].flag"></span>
+        <i data-lucide="chevron-down" class="h-3.5 w-3.5 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+      </button>
+      <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="listbox">
+        <template x-for="(meta, code) in languages" :key="code">
+          <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'" role="option" :aria-selected="(lang === code).toString()">
+            <span class="flex items-center gap-3">
+              <span class="text-lg leading-none" x-text="meta.flag"></span>
+              <span x-text="meta.label"></span>
+            </span>
+            <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+          </button>
+        </template>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Main centered container ===== -->
+  <main class="flex min-h-screen items-center justify-center px-4 py-12">
+    <div class="w-full max-w-xl">
+
+      <!-- Logo wordmark -->
+      <div class="mb-6 flex justify-center">
+        <img src="./assets/logo-black.png" class="h-10 w-auto dark:hidden" alt="Sumrize" />
+        <img src="./assets/logo-white.png" class="hidden h-10 w-auto dark:block" alt="Sumrize" />
+      </div>
+
+      <!-- ===== Welcome + Connector picker ===== -->
+      <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-8">
+        <!-- Headline -->
+        <header class="mb-6 text-center">
+          <div class="mb-3 flex justify-center">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-success-50 px-3 py-1 text-xs font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+              <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+              <span x-text="lang === 'id' ? 'Login berhasil' : 'Logged in'">Logged in</span>
+            </span>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Selamat datang di Sumrize!' : 'Welcome to Sumrize!'">Welcome to Sumrize!</h1>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Hubungkan satu sumber dulu untuk mulai meringkas chat & inbox Anda.' : 'Connect one source to start summarizing your chats & inbox.'">Connect one source to start summarizing your chats & inbox.</p>
+        </header>
+
+        <!-- Trust line -->
+        <p class="mb-5 flex items-center justify-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <i data-lucide="shield-check" class="h-3.5 w-3.5 text-success-600 dark:text-success-500"></i>
+          <span x-text="lang === 'id' ? 'Rizz indeks metadata — konten asli tidak disimpan.' : 'Rizz indexes metadata — your raw content stays private.'">Rizz indexes metadata — your raw content stays private.</span>
+        </p>
+
+        <!-- Connector tiles: 3 active chat options + Telegram soon -->
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <!-- WhatsApp (active, primary CTA) -->
+          <a href="onboard-whatsapp.html" class="group relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-brand-500 bg-white p-5 shadow-theme-sm transition hover:-translate-y-0.5 hover:shadow-theme-md dark:bg-white/[0.03]">
+            <span class="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-sumrize px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+              <span x-text="lang === 'id' ? 'Populer' : 'Popular'">Popular</span>
+            </span>
+            <img src="./assets/whatsapp.webp" class="h-10 w-10" alt="" />
+            <span class="text-center text-sm font-semibold text-gray-900 dark:text-white">WhatsApp</span>
+          </a>
+          <!-- Discord (active) -->
+          <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
+            <img src="./assets/discord.png" class="h-10 w-10 object-contain" alt="" />
+            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Discord</span>
+          </button>
+          <!-- Slack (active) -->
+          <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
+            <img src="./assets/slack.png" class="h-10 w-10 object-contain" alt="" />
+            <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Slack</span>
+          </button>
+          <!-- Telegram (soon) -->
+          <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
+            <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Segera' : 'Soon'">Soon</span>
+            <img src="./assets/telegram.png" class="h-10 w-10 object-contain" alt="" />
+            <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Telegram</span>
+          </button>
+        </div>
+
+        <!-- See more platforms link -->
+        <div class="mt-5 text-center">
+          <a href="add-connector.html" class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-500 transition hover:underline dark:text-brand-400">
+            <span x-text="lang === 'id' ? 'Atau lihat semua platform lain' : 'Or see all other platforms'">Or see all other platforms</span>
+            <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+          </a>
+        </div>
+      </section>
+
+      <!-- ===== Skip CTA — opens feedback modal ===== -->
+      <div class="mt-5 text-center">
+        <button type="button" @click="skipModalOpen = true" class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200">
+          <span x-text="lang === 'id' ? 'Lewati untuk sekarang' : 'Skip for now'">Skip for now</span>
+          <i data-lucide="arrow-right" class="h-3.5 w-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Mockup demo hint -->
+      <p class="mt-8 text-center text-[11px] text-gray-400" x-text="lang === 'id' ? 'Mockup demo · onboarding wajib setelah login pertama' : 'Mockup demo · required onboarding after first login'">Mockup demo · required onboarding after first login</p>
+
+    </div>
+  </main>
+
+  <!-- ===== SKIP FEEDBACK MODAL =====
+       Triggered when user clicks "Lewati untuk sekarang".
+       Goal: capture churn-signal reasons + free-text complaints.
+       Submit → log feedback (mock) → redirect to index.html. -->
+  <div
+    x-show="skipModalOpen"
+    x-cloak
+    @keydown.escape.window="skipModalOpen = false"
+    x-transition:enter="ease-out duration-200"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="skip-modal-title"
+  >
+    <!-- Backdrop -->
+    <div @click="skipModalOpen = false" class="absolute inset-0 bg-gray-900/70 backdrop-blur-sm"></div>
+
+    <!-- Modal panel -->
+    <div
+      x-transition:enter="ease-out duration-200"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="ease-in duration-150"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      class="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900"
+    >
+
+      <!-- ===== STATE A: Feedback form ===== -->
+      <template x-if="!feedbackSubmitted">
+        <div class="flex flex-col overflow-hidden">
+          <!-- Header -->
+          <header class="flex-shrink-0 border-b border-gray-100 px-6 py-5 dark:border-gray-800">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h2 id="skip-modal-title" class="text-lg font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Sebelum lewati, boleh ceritakan kenapa?' : 'Before you skip, can you tell us why?'">Before you skip, can you tell us why?</h2>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Feedback Anda bantu kami improve onboarding untuk user berikutnya.' : 'Your feedback helps us improve onboarding for future users.'">Your feedback helps us improve onboarding for future users.</p>
+              </div>
+              <button type="button" @click="skipModalOpen = false" :aria-label="lang === 'id' ? 'Tutup' : 'Close'" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-200">
+                <i data-lucide="x" class="h-5 w-5"></i>
+              </button>
+            </div>
+          </header>
+
+          <!-- Body (scrollable) -->
+          <div class="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            <!-- Section label -->
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Apa alasannya? (pilih semua yang sesuai)' : 'What is the reason? (select all that apply)'">What is the reason? (select all that apply)</p>
+
+            <!-- Checkbox list -->
+            <div class="space-y-2">
+              <!-- 1. Privacy -->
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.06]" :class="feedbackReasons.includes('privacy') ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-500/[0.08]' : ''">
+                <input type="checkbox" value="privacy" x-model="feedbackReasons" class="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-600" />
+                <div class="flex flex-1 items-center gap-2.5">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-error-50 text-error-500 dark:bg-error-500/[0.15]">
+                    <i data-lucide="shield" class="h-4 w-4"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Khawatir privasi & keamanan data chat' : 'Concerned about privacy & data security'">Concerned about privacy & data security</span>
+                </div>
+              </label>
+
+              <!-- 2. Browse first -->
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.06]" :class="feedbackReasons.includes('browse') ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-500/[0.08]' : ''">
+                <input type="checkbox" value="browse" x-model="feedbackReasons" class="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-600" />
+                <div class="flex flex-1 items-center gap-2.5">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                    <i data-lucide="eye" class="h-4 w-4"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Mau lihat-lihat dulu sebelum konek' : 'Want to look around first'">Want to look around first</span>
+                </div>
+              </label>
+
+              <!-- 3. No relevant group -->
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.06]" :class="feedbackReasons.includes('no-group') ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-500/[0.08]' : ''">
+                <input type="checkbox" value="no-group" x-model="feedbackReasons" class="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-600" />
+                <div class="flex flex-1 items-center gap-2.5">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                    <i data-lucide="users" class="h-4 w-4"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Belum punya grup chat yang sesuai' : 'No relevant chat group yet'">No relevant chat group yet</span>
+                </div>
+              </label>
+
+              <!-- 4. Setup looks complex -->
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.06]" :class="feedbackReasons.includes('complex') ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-500/[0.08]' : ''">
+                <input type="checkbox" value="complex" x-model="feedbackReasons" class="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-600" />
+                <div class="flex flex-1 items-center gap-2.5">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]">
+                    <i data-lucide="workflow" class="h-4 w-4"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Setup-nya kelihatan ribet' : 'Setup looks too complex'">Setup looks too complex</span>
+                </div>
+              </label>
+
+              <!-- 5. Try free first -->
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.06]" :class="feedbackReasons.includes('free-trial') ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-500/[0.08]' : ''">
+                <input type="checkbox" value="free-trial" x-model="feedbackReasons" class="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-600" />
+                <div class="flex flex-1 items-center gap-2.5">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                    <i data-lucide="gift" class="h-4 w-4"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Mau coba versi free dulu' : 'Want to try the free version first'">Want to try the free version first</span>
+                </div>
+              </label>
+
+              <!-- 6. Other -->
+              <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-brand-500 hover:bg-brand-50/40 dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.06]" :class="feedbackReasons.includes('other') ? 'border-brand-500 bg-brand-50/60 dark:bg-brand-500/[0.08]' : ''">
+                <input type="checkbox" value="other" x-model="feedbackReasons" class="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20 dark:border-gray-600" />
+                <div class="flex flex-1 items-center gap-2.5">
+                  <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                    <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Alasan lain' : 'Other reason'">Other reason</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Free text field -->
+            <div class="pt-2">
+              <label for="feedback-other" class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Ada saran atau keluhan lain? (opsional)' : 'Any other thoughts or concerns? (optional)'">Any other thoughts or concerns? (optional)</label>
+              <textarea
+                id="feedback-other"
+                x-model="feedbackOther"
+                rows="3"
+                :placeholder="lang === 'id' ? 'Ceritakan apa yang membuat Anda ragu konek...' : 'Tell us what made you hesitate to connect...'"
+                class="w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Footer buttons -->
+          <footer class="flex flex-shrink-0 flex-col-reverse gap-2 border-t border-gray-100 bg-gray-50/50 px-6 py-4 dark:border-gray-800 dark:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-between">
+            <button type="button" @click="skipModalOpen = false" class="inline-flex items-center justify-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+              <i data-lucide="arrow-left" class="h-4 w-4"></i>
+              <span x-text="lang === 'id' ? 'Kembali setup' : 'Back to setup'">Back to setup</span>
+            </button>
+            <button type="button" @click="submitFeedback()" :disabled="feedbackReasons.length === 0 && !feedbackOther.trim()" class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-theme-sm transition" :class="(feedbackReasons.length === 0 && !feedbackOther.trim()) ? 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600' : 'bg-sumrize text-white hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30'">
+              <span x-text="lang === 'id' ? 'Kirim & lewati' : 'Submit & skip'">Submit & skip</span>
+              <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </button>
+          </footer>
+        </div>
+      </template>
+
+      <!-- ===== STATE B: Submission success ===== -->
+      <template x-if="feedbackSubmitted">
+        <div class="p-8 text-center">
+          <div class="mb-4 flex justify-center">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+              <i data-lucide="check" class="h-7 w-7"></i>
+            </div>
+          </div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Terima kasih atas feedback Anda!' : 'Thank you for your feedback!'">Thank you for your feedback!</h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Kami akan pakai ini untuk improve onboarding. Membuka dashboard...' : 'We will use this to improve onboarding. Opening dashboard...'">We will use this to improve onboarding. Opening dashboard...</p>
+        </div>
+      </template>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>
