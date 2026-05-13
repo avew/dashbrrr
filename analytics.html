@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics · Sumrize Dashboard</title>
+
+  <link rel="icon" type="image/png" href="./assets/logo-black.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              25: '#f8fbfd', 50: '#eaf4fb', 100: '#d4e8f7', 200: '#b3dbff',
+              300: '#7eb5e8', 400: '#4d6996', 500: '#26344a', 600: '#1c2738',
+              700: '#1c1f2c', 800: '#171a23', 900: '#101421', 950: '#0f0e0e'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f2f4f7', 200: '#e4e7ec',
+              300: '#d0d5dd', 400: '#98a2b3', 500: '#667085', 600: '#475467',
+              700: '#3c3f4c', 800: '#26344a', 900: '#1c1f2c', 950: '#0f0e0e'
+            },
+            success: {
+              50: '#ecfdf3', 500: '#12b76a', 600: '#039855'
+            },
+            warning: {
+              50: '#fffaeb', 500: '#f79009'
+            },
+            error: {
+              50: '#fef3f2', 500: '#f04438', 600: '#d92d20'
+            },
+            sumrize: {
+              DEFAULT: '#FF4438',
+              hover: '#e63b30'
+            }
+          },
+          boxShadow: {
+            'theme-sm': '0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06)',
+            'theme-md': '0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Outfit', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [x-cloak] { display: none !important; }
+  </style>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body
+  x-data="{
+    sidebarToggle: false,
+    darkMode: false,
+    lang: 'en',
+    langOpen: false,
+    notifOpen: false,
+    profileOpen: false,
+    /* Tier-gated content. 'spark' default for hero-demo state; flip via
+       footer demo toggle. Not persisted to localStorage (in-session only). */
+    userTier: 'spark',
+    /* Daily summary count for the last 7 days, Mon-Sun.
+       Consistent with the 67 total messages anchor in index.html. */
+    chartData: [1, 2, 2, 4, 1, 1, 1],
+    chartMax: 4,
+    languages: {
+      en: { label: 'English', flag: '🇬🇧' },
+      id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
+    },
+    t: {
+      en: { home: 'Workspace', rizz: 'Ask Rizz', analytics: 'Analytics', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Workspace', rizz: 'Rizz', analytics: 'Analytics', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+    },
+    init() {
+      this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
+      this.lang = localStorage.getItem('lang') || 'en';
+      this.$watch('darkMode', v => localStorage.setItem('darkMode', JSON.stringify(v)));
+      this.$watch('lang', v => localStorage.setItem('lang', v));
+    }
+  }"
+  :class="{ 'dark bg-gray-900': darkMode }"
+  class="bg-gray-50 font-sans text-gray-700 dark:bg-gray-900 dark:text-gray-300"
+>
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ===== Sidebar (Analytics active) ===== -->
+    <aside
+      :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full w-[290px]'"
+      class="fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 transition-all duration-300 ease-linear dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0"
+    >
+      <div class="relative flex items-center justify-center pt-8 pb-7" :class="sidebarToggle ? 'lg:flex-col lg:gap-3' : ''">
+        <a href="index.html" class="flex items-center" :class="sidebarToggle ? 'lg:hidden' : ''">
+          <img src="./assets/logo-black.png" class="h-12 w-auto dark:hidden" alt="Sumrize" />
+          <img src="./assets/logo-white.png" class="hidden h-12 w-auto dark:block" alt="Sumrize" />
+        </a>
+
+        <a href="index.html" class="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-base font-bold text-white shadow-theme-sm" :class="sidebarToggle ? 'lg:flex' : ''" aria-label="Sumrize">S</a>
+
+        <button type="button" @click="sidebarToggle = !sidebarToggle" aria-label="Toggle sidebar" class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5" :class="sidebarToggle ? 'lg:static lg:translate-y-0' : 'absolute right-0 top-1/2 -translate-y-1/2'">
+          <i data-lucide="panel-left" class="h-5 w-5" x-show="!sidebarToggle"></i>
+          <i data-lucide="panel-left-close" class="h-5 w-5" x-show="sidebarToggle" x-cloak></i>
+        </button>
+      </div>
+
+      <div class="no-scrollbar flex flex-1 flex-col justify-between overflow-y-auto">
+        <nav>
+          <h3 class="mb-4 text-xs font-semibold uppercase leading-5 tracking-wider text-gray-400" :class="sidebarToggle ? 'lg:text-center' : ''">
+            <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu</span>
+            <span class="hidden" :class="sidebarToggle ? 'lg:inline' : ''">•••</span>
+          </h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a href="index.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="home" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].home" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="rizz.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="analytics.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="bar-chart-3" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].analytics" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a href="settings.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 mb-6">
+          <div class="mb-4 flex items-center gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-800" :class="sidebarToggle ? 'lg:flex-col lg:rounded-2xl' : ''">
+            <button type="button" @click="darkMode = true" :class="darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="moon" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Dark</span>
+            </button>
+            <button type="button" @click="darkMode = false" :class="!darkMode ? 'bg-white text-gray-900 shadow-theme-sm dark:bg-gray-700 dark:text-white' : 'text-gray-500 dark:text-gray-400'" class="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition">
+              <i data-lucide="sun" class="h-3.5 w-3.5 flex-shrink-0"></i>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Light</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile backdrop -->
+    <div x-show="sidebarToggle" @click="sidebarToggle = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" x-cloak></div>
+
+    <!-- ===== Content Area ===== -->
+    <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <main>
+        <div class="p-4 md:p-6">
+
+          <!-- ===== Page Header ===== -->
+          <section class="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex items-center gap-3">
+              <button type="button" @click="sidebarToggle = true" class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 lg:hidden dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-label="Open sidebar">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+              </button>
+
+              <div>
+                <div class="mb-1 flex items-center gap-2">
+                  <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl">Analytics</h1>
+                  <!-- Tier badge -->
+                  <span x-show="userTier === 'spark'" class="rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Spark</span>
+                  <span x-show="userTier === 'free'" x-cloak class="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300">Free</span>
+                </div>
+                <p class="max-w-2xl text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Performa workspace Anda minggu ini.' : 'Your workspace performance this week.'">Your workspace performance this week.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 self-stretch md:self-auto">
+              <!-- Language switcher -->
+              <div class="relative" @click.outside="langOpen = false">
+                <button type="button" @click="langOpen = !langOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-haspopup="listbox" :aria-expanded="langOpen.toString()">
+                  <i data-lucide="globe" class="h-4 w-4"></i>
+                  <span class="text-base leading-none" x-text="languages[lang].flag"></span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="langOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="langOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="listbox">
+                  <template x-for="(meta, code) in languages" :key="code">
+                    <button type="button" @click="lang = code; langOpen = false" class="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition" :class="lang === code ? 'bg-brand-50 font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'" role="option" :aria-selected="(lang === code).toString()">
+                      <span class="flex items-center gap-3">
+                        <span class="text-lg leading-none" x-text="meta.flag"></span>
+                        <span x-text="meta.label"></span>
+                      </span>
+                      <svg x-show="lang === code" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Notification dropdown (with analytics deep-link as top item) -->
+              <div class="relative" @click.outside="notifOpen = false">
+                <button type="button" @click="notifOpen = !notifOpen" :aria-label="lang === 'id' ? 'Notifikasi' : 'Notifications'" class="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5">
+                  <i data-lucide="bell" class="h-4 w-4"></i>
+                  <span class="absolute right-1.5 top-1.5 flex h-2 w-2" aria-hidden="true">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sumrize opacity-75"></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-sumrize"></span>
+                  </span>
+                </button>
+                <div x-show="notifOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900 sm:w-96">
+                  <header class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Notifikasi' : 'Notifications'">Notifications</p>
+                      <span class="rounded-full bg-sumrize/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sumrize">3 <span x-text="lang === 'id' ? 'baru' : 'new'">new</span></span>
+                    </div>
+                    <button type="button" class="text-xs font-medium text-brand-500 transition hover:text-brand-600 dark:text-brand-400" x-text="lang === 'id' ? 'Tandai dibaca' : 'Mark all read'">Mark all read</button>
+                  </header>
+                  <div class="max-h-96 divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800">
+                    <!-- NEW: Analytics weekly digest deep-link -->
+                    <a href="analytics.html" class="block bg-brand-50/40 px-4 py-3 transition hover:bg-brand-50/60 dark:bg-brand-500/[0.04] dark:hover:bg-brand-500/[0.08]">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                          <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm text-gray-700 dark:text-gray-300">
+                            <strong class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan mingguan siap dilihat' : 'Weekly insight is ready'">Weekly insight is ready</strong>
+                            <span x-text="lang === 'id' ? ' · 12 ringkasan + topik teratas' : ' · 12 summaries + top topics'"></span>
+                          </p>
+                          <p class="mt-0.5 text-xs text-gray-400" x-text="lang === 'id' ? 'Analytics · 30 menit lalu' : 'Analytics · 30 min ago'">Analytics · 30 min ago</p>
+                        </div>
+                        <span class="mt-1 inline-block h-2 w-2 flex-shrink-0 rounded-full bg-sumrize" aria-hidden="true"></span>
+                      </div>
+                    </a>
+                    <a href="referral.html" class="block bg-brand-50/40 px-4 py-3 transition hover:bg-brand-50/60 dark:bg-brand-500/[0.04] dark:hover:bg-brand-500/[0.08]">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                          <i data-lucide="user-plus" class="h-4 w-4"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm text-gray-700 dark:text-gray-300">
+                            <strong class="font-semibold text-gray-900 dark:text-white">Andi N.</strong>
+                            <span x-text="lang === 'id' ? ' bergabung pakai kode referral Anda' : ' joined using your referral code'"></span>
+                          </p>
+                          <p class="mt-0.5 text-xs text-gray-400" x-text="lang === 'id' ? 'Referral · 5 menit lalu' : 'Referral · 5 min ago'">Referral · 5 min ago</p>
+                        </div>
+                        <span class="mt-1 inline-block h-2 w-2 flex-shrink-0 rounded-full bg-sumrize" aria-hidden="true"></span>
+                      </div>
+                    </a>
+                    <a href="settings.html" class="block bg-brand-50/40 px-4 py-3 transition hover:bg-brand-50/60 dark:bg-brand-500/[0.04] dark:hover:bg-brand-500/[0.08]">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/15 text-sumrize">
+                          <i data-lucide="clock" class="h-4 w-4"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm text-gray-700 dark:text-gray-300">
+                            <strong class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Spark Trial berakhir 5 hari lagi' : 'Spark Trial ends in 5 days'">Spark Trial ends in 5 days</strong>
+                          </p>
+                          <p class="mt-0.5 text-xs text-gray-400" x-text="lang === 'id' ? 'Langganan · 2 hari lalu' : 'Subscription · 2 days ago'">Subscription · 2 days ago</p>
+                        </div>
+                        <span class="mt-1 inline-block h-2 w-2 flex-shrink-0 rounded-full bg-sumrize" aria-hidden="true"></span>
+                      </div>
+                    </a>
+                    <a href="invoice.html" class="block px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-white/[0.03]">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                          <i data-lucide="credit-card" class="h-4 w-4"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm text-gray-600 dark:text-gray-400">
+                            <strong class="font-medium text-gray-800 dark:text-gray-200" x-text="lang === 'id' ? 'Pembayaran berhasil' : 'Payment successful'">Payment successful</strong>
+                            <span> · Rp 99.000</span>
+                          </p>
+                          <p class="mt-0.5 text-xs text-gray-400" x-text="lang === 'id' ? 'Tagihan · 3 hari lalu' : 'Billing · 3 days ago'">Billing · 3 days ago</p>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                  <a href="#" class="block border-t border-gray-100 px-4 py-3 text-center text-sm font-semibold text-brand-500 transition hover:bg-gray-50 dark:border-gray-800 dark:text-brand-400 dark:hover:bg-white/[0.03]">
+                    <span x-text="lang === 'id' ? 'Lihat semua notifikasi' : 'View all notifications'">View all notifications</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Profile dropdown -->
+              <div class="relative" @click.outside="profileOpen = false">
+                <button type="button" @click="profileOpen = !profileOpen" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pl-1 pr-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/5" aria-haspopup="menu" :aria-expanded="profileOpen.toString()">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">A</span>
+                  <span>Avew</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition" :class="profileOpen ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="profileOpen" x-cloak x-transition.opacity.duration.150ms class="absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-theme-md dark:border-gray-800 dark:bg-gray-900" role="menu">
+                  <div class="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+                    <div class="flex items-center gap-2">
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">Avew</p>
+                      <span class="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400" x-text="userTier === 'spark' ? 'Spark' : 'Free'">Spark</span>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+                  </div>
+                  <div class="py-1.5">
+                    <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="settings" class="h-4 w-4"></i>
+                      <span x-text="lang === 'id' ? 'Pengaturan akun' : 'Account settings'">Account settings</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
+                      <i data-lucide="info" class="h-4 w-4"></i>
+                      <span x-text="lang === 'id' ? 'Bantuan' : 'Support'">Support</span>
+                    </a>
+                  </div>
+                  <div class="border-t border-gray-100 py-1.5 dark:border-gray-800">
+                    <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-error-500 transition hover:bg-error-50 dark:hover:bg-error-500/10">
+                      <i data-lucide="log-out" class="h-4 w-4"></i>
+                      <span x-text="lang === 'id' ? 'Keluar' : 'Sign out'">Sign out</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Section 1 — Hero Stats Row (both tiers) =====
+               4 cards. Delta indicator (success chip) only renders for Spark. -->
+          <section class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <!-- Stat 1: Summaries this week -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="mb-3 flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="sparkles" class="h-5 w-5"></i>
+                </div>
+                <span x-show="userTier === 'spark'" class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[10px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                  <i data-lucide="trending-up" class="h-3 w-3"></i>
+                  <span>+3</span>
+                </span>
+              </div>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">12</p>
+              <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Ringkasan minggu ini' : 'Summaries this week'">Summaries this week</p>
+            </div>
+
+            <!-- Stat 2: Time saved -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="mb-3 flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="clock" class="h-5 w-5"></i>
+                </div>
+                <span x-show="userTier === 'spark'" class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[10px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                  <i data-lucide="trending-up" class="h-3 w-3"></i>
+                  <span>+2j</span>
+                </span>
+              </div>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">
+                <span x-text="lang === 'id' ? '8j 24m' : '8h 24m'">8h 24m</span>
+              </p>
+              <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Waktu yang dihemat' : 'Time saved'">Time saved</p>
+            </div>
+
+            <!-- Stat 3: Active connectors -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="mb-3 flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="plug" class="h-5 w-5"></i>
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">3 <span class="text-base font-normal text-gray-400">/ 12</span></p>
+              <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Konektor aktif' : 'Active connectors'">Active connectors</p>
+            </div>
+
+            <!-- Stat 4: Last summary -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="mb-3 flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="bell" class="h-5 w-5"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[10px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                  <span x-text="lang === 'id' ? 'aktif' : 'live'">live</span>
+                </span>
+              </div>
+              <p class="text-3xl font-bold text-gray-900 dark:text-white">
+                <span x-text="lang === 'id' ? '2j lalu' : '2h ago'">2h ago</span>
+              </p>
+              <p class="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Ringkasan terakhir · BMW' : 'Last summary · BMW'">Last summary · BMW</p>
+            </div>
+          </section>
+
+          <!-- ===== Section 1b — AI Smart Insights (Spark only) =====
+               Narrative hook — auto-extracted observations dari Rizz.
+               Brand-bordered card untuk prominence (mirip primary card pattern). -->
+          <section x-show="userTier === 'spark'" class="mb-6 overflow-hidden rounded-2xl border-2 border-brand-500 bg-white shadow-theme-sm dark:bg-white/[0.03]">
+            <header class="flex items-center gap-2.5 border-b border-gray-100 bg-brand-50/50 px-5 py-3.5 dark:border-gray-800 dark:bg-brand-500/[0.08]">
+              <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-brand-500 text-white dark:bg-brand-400 dark:text-brand-950">
+                <i data-lucide="sparkles" class="h-4 w-4"></i>
+              </div>
+              <div>
+                <h2 class="text-sm font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Insights mingguan dari Rizz' : 'Weekly insights from Rizz'">Weekly insights from Rizz</h2>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Observasi otomatis dari aktivitas Anda minggu ini' : 'Auto observations from your activity this week'">Auto observations from your activity this week</p>
+              </div>
+            </header>
+            <ul class="divide-y divide-gray-100 dark:divide-gray-800">
+              <!-- Insight 1: BMW heat -->
+              <li class="flex items-start gap-3 px-5 py-3.5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/15 text-sumrize">
+                  <i data-lucide="flame" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Komunitas BMW lagi panas minggu ini' : 'BMW community is hot this week'">BMW community is hot this week</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '47 pesan terambil — 60% lebih banyak dari minggu lalu' : '47 messages captured — 60% more than last week'">47 messages captured — 60% more than last week</p>
+                </div>
+              </li>
+              <!-- Insight 2: Bro Adit streak -->
+              <li class="flex items-start gap-3 px-5 py-3.5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="crown" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Bro Adit top sender 3 minggu berturut' : 'Bro Adit is top sender 3 weeks in a row'">Bro Adit is top sender 3 weeks in a row</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Konsistensi tinggi di leadership grup BMW' : 'High consistency leading the BMW group'">High consistency leading the BMW group</p>
+                </div>
+              </li>
+              <!-- Insight 3: Kopdar trending -->
+              <li class="flex items-start gap-3 px-5 py-3.5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                  <i data-lucide="trending-up" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Kopdar Sabtu jadi topik #1' : 'Saturday meetup is topic #1'">Saturday meetup is topic #1</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '23 mention · 18 anggota sudah konfirmasi' : '23 mentions · 18 members confirmed'">23 mentions · 18 members confirmed</p>
+                </div>
+              </li>
+              <!-- Insight 4: Morning peak -->
+              <li class="flex items-start gap-3 px-5 py-3.5">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]">
+                  <i data-lucide="sunrise" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Pagi hari adalah peak Anda' : 'Mornings are your peak time'">Mornings are your peak time</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '60% ringkasan dibaca antara 06:00 — 09:00 WIB' : '60% of summaries read between 06:00 — 09:00'">60% of summaries read between 06:00 — 09:00</p>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <!-- ===== Section 2 — Time-series chart (both tiers, different complexity) ===== -->
+          <section class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Aktivitas ringkasan' : 'Summary activity'">Summary activity</h2>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  <span x-show="userTier === 'spark'" x-text="lang === 'id' ? 'Total 12 ringkasan · 7 hari terakhir' : 'Total 12 summaries · last 7 days'">Total 12 summaries · last 7 days</span>
+                  <span x-show="userTier === 'free'" x-cloak x-text="lang === 'id' ? '7 hari terakhir' : 'Last 7 days'">Last 7 days</span>
+                </p>
+              </div>
+              <!-- Date range selector (Spark only, non-functional placeholder) -->
+              <button x-show="userTier === 'spark'" type="button" class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.06]">
+                <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                <span x-text="lang === 'id' ? '7 hari' : '7 days'">7 days</span>
+                <i data-lucide="chevron-down" class="h-3.5 w-3.5"></i>
+              </button>
+            </header>
+
+            <!-- Spark chart — SMOOTH AREA CHART.
+                 Pure SVG with gradient fill + cubic bezier curve + dot markers.
+                 Cubic bezier control points at midpoint x of each segment
+                 for organic S-curves between data points. preserveAspectRatio
+                 "none" stretches the viewBox to container; non-scaling-stroke
+                 keeps line weight constant. Dots overlaid as HTML so they
+                 stay circular regardless of stretch. -->
+            <div x-show="userTier === 'spark'" class="flex items-start gap-3" role="img" :aria-label="lang === 'id' ? 'Grafik aktivitas 7 hari' : '7-day activity chart'">
+              <!-- Y-axis labels -->
+              <div class="flex h-40 flex-shrink-0 flex-col justify-between text-[10px] text-gray-400">
+                <span>4</span>
+                <span>2</span>
+                <span>0</span>
+              </div>
+              <!-- Chart area -->
+              <div class="flex-1">
+                <div class="relative text-brand-500 dark:text-brand-400">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="h-40 w-full overflow-visible" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="chartGradientSpark" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="currentColor" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <!-- Gradient area fill (closed path to bottom) -->
+                    <path d="M 0 75 C 8.33 75 8.33 50 16.67 50 C 25 50 25 50 33.33 50 C 41.67 50 41.67 0 50 0 C 58.33 0 58.33 75 66.67 75 C 75 75 75 75 83.33 75 C 91.67 75 91.67 75 100 75 L 100 100 L 0 100 Z" fill="url(#chartGradientSpark)"/>
+                    <!-- Smooth curve line -->
+                    <path d="M 0 75 C 8.33 75 8.33 50 16.67 50 C 25 50 25 50 33.33 50 C 41.67 50 41.67 0 50 0 C 58.33 0 58.33 75 66.67 75 C 75 75 75 75 83.33 75 C 91.67 75 91.67 75 100 75" stroke="currentColor" stroke-width="2" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <!-- Dot markers + tooltips, HTML-positioned over SVG -->
+                  <template x-for="(val, i) in chartData" :key="i">
+                    <div class="group absolute" :style="'left: ' + (i / 6 * 100) + '%; top: ' + (100 - val/chartMax*100) + '%; transform: translate(-50%, -50%);'">
+                      <div class="h-3 w-3 cursor-pointer rounded-full bg-brand-500 shadow-theme-sm ring-2 ring-white transition group-hover:scale-125 dark:bg-brand-400 dark:ring-gray-900"></div>
+                      <!-- Hover tooltip -->
+                      <div class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-theme-sm transition group-hover:opacity-100 dark:bg-white dark:text-gray-900">
+                        <span x-text="(lang === 'id' ? ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'] : ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])[i] + ' · ' + val + ' ' + (lang === 'id' ? 'ringkasan' : 'summaries')"></span>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+                <!-- Day labels -->
+                <div class="mt-3 flex justify-between text-xs text-gray-400">
+                  <template x-for="(val, i) in chartData" :key="i">
+                    <span x-text="['Sen','Sel','Rab','Kam','Jum','Sab','Min'][i]"></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Free chart — slim area (no axis, no dots, no tooltip) -->
+            <div x-show="userTier === 'free'" x-cloak class="text-brand-500 dark:text-brand-400">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="h-24 w-full" aria-hidden="true">
+                <defs>
+                  <linearGradient id="chartGradientFree" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 0 75 C 8.33 75 8.33 50 16.67 50 C 25 50 25 50 33.33 50 C 41.67 50 41.67 0 50 0 C 58.33 0 58.33 75 66.67 75 C 75 75 75 75 83.33 75 C 91.67 75 91.67 75 100 75 L 100 100 L 0 100 Z" fill="url(#chartGradientFree)"/>
+                <path d="M 0 75 C 8.33 75 8.33 50 16.67 50 C 25 50 25 50 33.33 50 C 41.67 50 41.67 0 50 0 C 58.33 0 58.33 75 66.67 75 C 75 75 75 75 83.33 75 C 91.67 75 91.67 75 100 75" stroke="currentColor" stroke-width="2" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="mt-2 flex justify-between text-[10px] text-gray-400">
+                <template x-for="(val, i) in chartData" :key="i">
+                  <span x-text="['Sen','Sel','Rab','Kam','Jum','Sab','Min'][i]"></span>
+                </template>
+              </div>
+            </div>
+
+            <!-- Footer legend (Spark only) -->
+            <footer x-show="userTier === 'spark'" class="mt-5 flex items-center justify-center gap-5 border-t border-gray-100 pt-4 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="inline-block h-2.5 w-2.5 rounded-sm bg-brand-500 dark:bg-brand-400"></span>
+                <span x-text="lang === 'id' ? 'Chat (10)' : 'Chat (10)'">Chat (10)</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="inline-block h-2.5 w-2.5 rounded-sm bg-brand-200 dark:bg-brand-300"></span>
+                <span x-text="lang === 'id' ? 'Email (2)' : 'Email (2)'">Email (2)</span>
+              </span>
+            </footer>
+          </section>
+
+          <!-- ===== Section 3 — Top Groups (Spark only) =====
+               Progress bar pattern lifted from referral.html. -->
+          <section x-show="userTier === 'spark'" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5">
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Grup paling aktif minggu ini' : 'Most active groups this week'">Most active groups this week</h2>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Ranking berdasarkan jumlah pesan diringkas' : 'Ranked by messages summarized'">Ranked by messages summarized</p>
+            </header>
+            <ul class="space-y-4">
+              <!-- BMW -->
+              <li>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <img src="./assets/whatsapp.webp" class="h-5 w-5 flex-shrink-0 rounded-full object-cover" alt="" />
+                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">Komunitas Mobil BMW</span>
+                  </div>
+                  <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">47 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                </div>
+                <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                  <div class="h-full rounded-full bg-brand-500 transition-all duration-500 dark:bg-brand-400" style="width: 70%"></div>
+                </div>
+              </li>
+              <!-- Trah Soemardjo -->
+              <li>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <img src="./assets/whatsapp.webp" class="h-5 w-5 flex-shrink-0 rounded-full object-cover" alt="" />
+                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">Trah Soemardjo</span>
+                  </div>
+                  <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">12 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                </div>
+                <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                  <div class="h-full rounded-full bg-brand-300 transition-all duration-500" style="width: 18%"></div>
+                </div>
+              </li>
+              <!-- Marketing Team -->
+              <li>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <img src="./assets/discord.png" class="h-5 w-5 flex-shrink-0 rounded-full object-cover" alt="" />
+                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">Marketing Team</span>
+                  </div>
+                  <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">8 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                </div>
+                <div class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                  <div class="h-full rounded-full bg-brand-200 transition-all duration-500" style="width: 12%"></div>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <!-- ===== Section 3a — Group Spotlight (Spark only) =====
+               Drill-down 1 grup terpenting (BMW) — featured mini-dashboard
+               dalam satu primary-bordered card. Hemat klik ke workspace. -->
+          <section x-show="userTier === 'spark'" class="mb-6 overflow-hidden rounded-2xl border-2 border-brand-500 bg-white shadow-theme-sm dark:bg-white/[0.03]">
+            <header class="flex flex-col items-start gap-3 border-b border-gray-100 bg-brand-50/50 px-5 py-4 dark:border-gray-800 dark:bg-brand-500/[0.08] sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-3">
+                <img src="./assets/whatsapp.webp" class="h-8 w-8 flex-shrink-0 rounded-full object-cover" alt="" />
+                <div>
+                  <h2 class="text-base font-bold text-gray-900 dark:text-white">Komunitas Mobil BMW</h2>
+                  <p class="text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Admin: Bro Adit · WhatsApp Group' : 'Admin: Bro Adit · WhatsApp Group'">Admin: Bro Adit · WhatsApp Group</p>
+                </div>
+              </div>
+              <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-sumrize to-sumrize-hover px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                <i data-lucide="flame" class="h-3.5 w-3.5"></i>
+                <span x-text="lang === 'id' ? 'Paling aktif minggu ini' : 'Most active this week'">Most active this week</span>
+              </span>
+            </header>
+
+            <!-- Mini stats strip -->
+            <div class="grid grid-cols-2 divide-x divide-gray-100 border-b border-gray-100 dark:divide-gray-800 dark:border-gray-800 sm:grid-cols-4">
+              <div class="p-3 text-center">
+                <p class="text-xl font-bold text-gray-900 dark:text-white">47</p>
+                <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Pesan' : 'Messages'">Messages</p>
+              </div>
+              <div class="p-3 text-center">
+                <p class="text-xl font-bold text-gray-900 dark:text-white">48</p>
+                <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Anggota' : 'Members'">Members</p>
+              </div>
+              <div class="p-3 text-center">
+                <p class="text-xl font-bold text-success-600 dark:text-success-500">80%</p>
+                <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Positif' : 'Positive'">Positive</p>
+              </div>
+              <div class="p-3 text-center">
+                <p class="text-xl font-bold text-gray-900 dark:text-white">2j</p>
+                <p class="text-[10px] font-medium uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Lalu update' : 'Since update'">Since update</p>
+              </div>
+            </div>
+
+            <!-- Top senders & topics di grup ini -->
+            <div class="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2">
+              <div>
+                <h3 class="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Top sender' : 'Top senders'">Top senders</h3>
+                <ul class="space-y-2 text-sm">
+                  <li class="flex items-center justify-between">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Bro Adit</span>
+                    <span class="text-gray-500 dark:text-gray-400">16 <span x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </li>
+                  <li class="flex items-center justify-between">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Mas Reza</span>
+                    <span class="text-gray-500 dark:text-gray-400">12 <span x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </li>
+                  <li class="flex items-center justify-between">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Om Andre</span>
+                    <span class="text-gray-500 dark:text-gray-400">9 <span x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Topik teratas' : 'Top topics'">Top topics</h3>
+                <ul class="space-y-2 text-sm">
+                  <li class="flex items-center justify-between">
+                    <span class="font-medium text-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Kopdar Sabtu' : 'Saturday meetup'">Kopdar Sabtu</span>
+                    <span class="text-gray-500 dark:text-gray-400">15 <span x-text="lang === 'id' ? 'mention' : 'mentions'">mentions</span></span>
+                  </li>
+                  <li class="flex items-center justify-between">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Maintenance Series 5</span>
+                    <span class="text-gray-500 dark:text-gray-400">8 <span x-text="lang === 'id' ? 'mention' : 'mentions'">mentions</span></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Last summary preview -->
+            <div class="border-t border-gray-100 bg-gray-50/60 px-5 py-3.5 dark:border-gray-800 dark:bg-white/[0.02]">
+              <p class="mb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Ringkasan terakhir · 2 jam lalu' : 'Latest summary · 2 hours ago'">Latest summary · 2 hours ago</p>
+              <p class="line-clamp-2 text-sm text-gray-600 dark:text-gray-400" x-text="lang === 'id' ? '“Persiapan kopdar Sabtu di Auto Bavarian, Kemang. Iuran konsumsi Rp 75K. 18 anggota konfirmasi, 5 belum balas. Bro Adit nawarin lokasinya + mekanik akan sharing maintenance tips Series 5...”' : '“Saturday meetup prep at Auto Bavarian, Kemang. Catering dues Rp 75K. 18 members confirmed, 5 pending. Bro Adit offered the venue + mechanic will share Series 5 maintenance tips...”'">"Persiapan kopdar Sabtu..."</p>
+            </div>
+
+            <!-- Footer CTA -->
+            <footer class="flex items-center justify-end bg-brand-50 px-5 py-3 dark:bg-brand-500/[0.08]">
+              <a href="index.html" class="inline-flex items-center gap-2 rounded-full text-sm font-semibold text-brand-500 transition hover:gap-3 dark:text-brand-400">
+                <span x-text="lang === 'id' ? 'Buka grup di Workspace' : 'Open group in Workspace'">Open group in Workspace</span>
+                <i data-lucide="arrow-right" class="h-4 w-4 transition"></i>
+              </a>
+            </footer>
+          </section>
+
+          <!-- ===== Section 3b — Top Senders (Spark only) =====
+               Top 5 active people across all groups. Names from existing
+               rizz.html senders list — emotional anchor ("orang nyata"). -->
+          <section x-show="userTier === 'spark'" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5">
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Orang paling aktif minggu ini' : 'Most active people this week'">Most active people this week</h2>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Top 5 across semua grup yang Anda ikuti' : 'Top 5 across all your groups'">Top 5 across all your groups</p>
+            </header>
+            <ul class="space-y-3">
+              <!-- 1. Bro Adit -->
+              <li class="flex items-center gap-3">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white dark:bg-brand-400 dark:text-brand-950">BA</div>
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">Bro Adit</p>
+                    <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">16 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                      <div class="h-full rounded-full bg-brand-500 transition-all duration-500 dark:bg-brand-400" style="width: 100%"></div>
+                    </div>
+                    <span class="flex-shrink-0 text-[10px] text-gray-400">BMW</span>
+                  </div>
+                </div>
+              </li>
+              <!-- 2. Mas Reza -->
+              <li class="flex items-center gap-3">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-400 text-xs font-bold text-white dark:bg-brand-400/80 dark:text-brand-950">MR</div>
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">Mas Reza</p>
+                    <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">12 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                      <div class="h-full rounded-full bg-brand-400 transition-all duration-500 dark:bg-brand-400/70" style="width: 75%"></div>
+                    </div>
+                    <span class="flex-shrink-0 text-[10px] text-gray-400">BMW</span>
+                  </div>
+                </div>
+              </li>
+              <!-- 3. Om Andre -->
+              <li class="flex items-center gap-3">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-300 text-xs font-bold text-brand-700 dark:bg-brand-400/60 dark:text-brand-950">OA</div>
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">Om Andre</p>
+                    <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">9 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                      <div class="h-full rounded-full bg-brand-300 transition-all duration-500 dark:bg-brand-400/50" style="width: 56%"></div>
+                    </div>
+                    <span class="flex-shrink-0 text-[10px] text-gray-400">BMW</span>
+                  </div>
+                </div>
+              </li>
+              <!-- 4. Pak Hendra -->
+              <li class="flex items-center gap-3">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-200 text-xs font-bold text-brand-700 dark:bg-brand-400/40 dark:text-brand-100">PH</div>
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">Pak Hendra</p>
+                    <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">7 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                      <div class="h-full rounded-full bg-brand-200 transition-all duration-500 dark:bg-brand-400/30" style="width: 44%"></div>
+                    </div>
+                    <span class="flex-shrink-0 text-[10px] text-gray-400">Trah Soemardjo</span>
+                  </div>
+                </div>
+              </li>
+              <!-- 5. Bro Doni -->
+              <li class="flex items-center gap-3">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-700 dark:bg-gray-700 dark:text-gray-300">BD</div>
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">Bro Doni</p>
+                    <span class="flex-shrink-0 text-sm font-semibold text-brand-500 dark:text-brand-400">5 <span class="text-xs font-normal text-gray-400" x-text="lang === 'id' ? 'pesan' : 'msgs'">msgs</span></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                      <div class="h-full rounded-full bg-gray-300 transition-all duration-500 dark:bg-gray-600" style="width: 31%"></div>
+                    </div>
+                    <span class="flex-shrink-0 text-[10px] text-gray-400">BMW</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <!-- ===== Section 3c — Sentiment Breakdown (Spark only) =====
+               Multi-segment bar per group: positive (success) / neutral (warning) / concern (error).
+               Tells "bagaimana rasanya" — emotional snapshot. -->
+          <section x-show="userTier === 'spark'" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Sentimen grup' : 'Group sentiment'">Group sentiment</h2>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Mood community Anda minggu ini' : 'Your community mood this week'">Your community mood this week</p>
+              </div>
+              <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-success-50 px-3 py-1 text-xs font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                <i data-lucide="smile" class="h-3.5 w-3.5"></i>
+                <span x-text="lang === 'id' ? 'Sangat positif' : 'Very positive'">Very positive</span>
+              </span>
+            </header>
+            <ul class="space-y-4">
+              <!-- BMW -->
+              <li>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <img src="./assets/whatsapp.webp" class="h-5 w-5 flex-shrink-0 rounded-full object-cover" alt="" />
+                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">Komunitas Mobil BMW</span>
+                  </div>
+                  <span class="flex-shrink-0 text-xs font-semibold text-success-600 dark:text-success-500">80% <span class="font-normal text-gray-400" x-text="lang === 'id' ? 'positif' : 'positive'">positive</span></span>
+                </div>
+                <div class="flex h-2 overflow-hidden rounded-full">
+                  <div class="bg-success-500" style="width: 80%"></div>
+                  <div class="bg-warning-500" style="width: 15%"></div>
+                  <div class="bg-error-500" style="width: 5%"></div>
+                </div>
+              </li>
+              <!-- Trah Soemardjo -->
+              <li>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <img src="./assets/whatsapp.webp" class="h-5 w-5 flex-shrink-0 rounded-full object-cover" alt="" />
+                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">Trah Soemardjo</span>
+                  </div>
+                  <span class="flex-shrink-0 text-xs font-semibold text-success-600 dark:text-success-500">60% <span class="font-normal text-gray-400" x-text="lang === 'id' ? 'positif' : 'positive'">positive</span></span>
+                </div>
+                <div class="flex h-2 overflow-hidden rounded-full">
+                  <div class="bg-success-500" style="width: 60%"></div>
+                  <div class="bg-warning-500" style="width: 35%"></div>
+                  <div class="bg-error-500" style="width: 5%"></div>
+                </div>
+              </li>
+              <!-- Marketing Team -->
+              <li>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <img src="./assets/discord.png" class="h-5 w-5 flex-shrink-0 rounded-full object-cover" alt="" />
+                    <span class="truncate text-sm font-semibold text-gray-900 dark:text-white">Marketing Team</span>
+                  </div>
+                  <span class="flex-shrink-0 text-xs font-semibold text-success-600 dark:text-success-500">90% <span class="font-normal text-gray-400" x-text="lang === 'id' ? 'positif' : 'positive'">positive</span></span>
+                </div>
+                <div class="flex h-2 overflow-hidden rounded-full">
+                  <div class="bg-success-500" style="width: 90%"></div>
+                  <div class="bg-warning-500" style="width: 10%"></div>
+                </div>
+              </li>
+            </ul>
+            <footer class="mt-4 flex items-center justify-center gap-4 border-t border-gray-100 pt-3 text-[11px] text-gray-500 dark:border-gray-800 dark:text-gray-400">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="inline-block h-2 w-2 rounded-sm bg-success-500"></span>
+                <span x-text="lang === 'id' ? 'Positif' : 'Positive'">Positive</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="inline-block h-2 w-2 rounded-sm bg-warning-500"></span>
+                <span x-text="lang === 'id' ? 'Netral' : 'Neutral'">Neutral</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="inline-block h-2 w-2 rounded-sm bg-error-500"></span>
+                <span x-text="lang === 'id' ? 'Concern' : 'Concern'">Concern</span>
+              </span>
+            </footer>
+          </section>
+
+          <!-- ===== Section 3d — Key Decisions Extracted (Spark only) =====
+               Action items & agreements yang Rizz extract dari ringkasan.
+               Narrative format — menjawab "apa hasil dari semua chat ini?". -->
+          <section x-show="userTier === 'spark'" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Keputusan penting minggu ini' : 'Key decisions this week'">Key decisions this week</h2>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Action items & kesepakatan diekstrak dari ringkasan' : 'Action items & agreements extracted from summaries'">Action items & agreements extracted from summaries</p>
+              </div>
+              <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                5 <span class="font-normal" x-text="lang === 'id' ? 'item' : 'items'">items</span>
+              </span>
+            </header>
+            <ul class="space-y-2.5">
+              <!-- Decision 1: Kopdar -->
+              <li class="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="calendar-check" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Kopdar Sabtu 13 Mei di Auto Bavarian' : 'Saturday meetup 13 May at Auto Bavarian'">Saturday meetup 13 May at Auto Bavarian</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '18 anggota konfirmasi · 5 belum balas' : '18 members confirmed · 5 pending'">18 members confirmed · 5 pending</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">BMW</span>
+              </li>
+              <!-- Decision 2: Iuran -->
+              <li class="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="wallet" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Iuran konsumsi Rp 75.000 per orang' : 'Catering dues Rp 75K per person'">Catering dues Rp 75K per person</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Disepakati untuk acara akhir bulan' : 'Agreed for end-of-month event'">Agreed for end-of-month event</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">BMW</span>
+              </li>
+              <!-- Decision 3: Maintenance sharing -->
+              <li class="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="wrench" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Sharing maintenance Series 5' : 'Series 5 maintenance sharing'">Series 5 maintenance sharing</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Sesi tambahan 30 menit jam 14:00 di kopdar' : 'Extra 30-min session at 14:00 during meetup'">Extra 30-min session at 14:00 during meetup</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">BMW</span>
+              </li>
+              <!-- Decision 4: New member -->
+              <li class="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="user-plus" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Anggota baru: Pak Hendra' : 'New member: Pak Hendra'">New member: Pak Hendra</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Disambut di grup, akan join arisan bulan depan' : 'Welcomed to group, joining next month gathering'">Welcomed to group, joining next month gathering</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">Trah</span>
+              </li>
+              <!-- Decision 5: Q3 deck -->
+              <li class="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/15 text-sumrize">
+                  <i data-lucide="alert-circle" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Deck kampanye Q3 selesai' : 'Q3 campaign deck completed'">Q3 campaign deck completed</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Butuh review final Anda sebelum Senin' : 'Needs your final review before Monday'">Needs your final review before Monday</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700">Marketing</span>
+              </li>
+            </ul>
+          </section>
+
+          <!-- ===== Section 3e — Pending Action Items (Spark only) =====
+               Filter dari Key Decisions yang masih open. Fokus ke urgency
+               supaya user tahu yang perlu attention sekarang. -->
+          <section x-show="userTier === 'spark'" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Yang perlu diperhatikan' : 'Needs your attention'">Needs your attention</h2>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Action items yang belum tuntas dari grup Anda' : 'Open action items from your groups'">Open action items from your groups</p>
+              </div>
+              <span class="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-sumrize/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sumrize">
+                3 <span class="font-normal normal-case" x-text="lang === 'id' ? 'item' : 'items'">items</span>
+              </span>
+            </header>
+            <ul class="space-y-2.5">
+              <!-- 1. Q3 deck (Mendesak) -->
+              <li class="flex items-start gap-3 rounded-xl border border-sumrize/20 bg-sumrize/5 p-3 dark:border-sumrize/30 dark:bg-sumrize/[0.08]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sumrize/15 text-sumrize">
+                  <i data-lucide="alert-triangle" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Review deck kampanye Q3' : 'Review Q3 campaign deck'">Review Q3 campaign deck</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Deadline Senin · Marketing Team menunggu approval' : 'Deadline Monday · Marketing Team awaits approval'">Deadline Monday · Marketing Team awaits approval</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-sumrize px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white" x-text="lang === 'id' ? 'Mendesak' : 'Urgent'">Urgent</span>
+              </li>
+              <!-- 2. Kopdar pending (Hari ini) -->
+              <li class="flex items-start gap-3 rounded-xl border border-warning-500/20 bg-warning-50/40 p-3 dark:border-warning-500/30 dark:bg-warning-500/[0.08]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-warning-50 text-warning-500 dark:bg-warning-500/[0.15]">
+                  <i data-lucide="phone" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Konfirmasi 5 anggota Kopdar' : 'Confirm 5 meetup attendees'">Confirm 5 meetup attendees</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Bro Doni & 4 lainnya belum balas · BMW' : 'Bro Doni & 4 others not yet replied · BMW'">Bro Doni & 4 others not yet replied · BMW</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-warning-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white" x-text="lang === 'id' ? 'Hari ini' : 'Today'">Today</span>
+              </li>
+              <!-- 3. Welcome Pak Hendra (Minggu ini) -->
+              <li class="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/60 p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                  <i data-lucide="hand" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Welcome Pak Hendra' : 'Welcome Pak Hendra'">Welcome Pak Hendra</p>
+                  <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Anggota baru menunggu intro · Trah Soemardjo' : 'New member awaiting intro · Trah Soemardjo'">New member awaiting intro · Trah Soemardjo</p>
+                </div>
+                <span class="flex-shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Minggu ini' : 'This week'">This week</span>
+              </li>
+            </ul>
+          </section>
+
+          <!-- ===== Section 4 — Topic Chips Cloud (Spark only) =====
+               Chip size varies by mention frequency. -->
+          <section x-show="userTier === 'spark'" class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <header class="mb-5">
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Topik paling banyak dibahas' : 'Most discussed topics'">Most discussed topics</h2>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Diekstrak dari 67 pesan minggu ini' : 'Extracted from 67 messages this week'">Extracted from 67 messages this week</p>
+            </header>
+            <div class="flex flex-wrap gap-2">
+              <!-- Largest: 23 mentions -->
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-500 px-4 py-2 text-base font-semibold text-white dark:bg-brand-400 dark:text-brand-950">
+                Kopdar Sabtu
+                <span class="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">23</span>
+              </span>
+              <!-- 15 mentions -->
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3.5 py-1.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                <span x-text="lang === 'id' ? 'Iuran konsumsi' : 'Catering dues'">Iuran konsumsi</span>
+                <span class="rounded-full bg-brand-500/15 px-1.5 py-0.5 text-[10px] font-bold">15</span>
+              </span>
+              <!-- 12 mentions -->
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3.5 py-1.5 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                Maintenance Series 5
+                <span class="rounded-full bg-brand-500/15 px-1.5 py-0.5 text-[10px] font-bold">12</span>
+              </span>
+              <!-- 9 mentions -->
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                Bengkel Auto Bavarian
+                <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold dark:bg-gray-700">9</span>
+              </span>
+              <!-- 7 mentions -->
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                <span x-text="lang === 'id' ? 'Anggota baru' : 'New members'">Anggota baru</span>
+                <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold dark:bg-gray-700">7</span>
+              </span>
+            </div>
+          </section>
+
+          <!-- ===== Section 4b — Achievement / Streak (Spark only) =====
+               Gamification: streak + total lifetime + achievement unlocked.
+               Celebration ending = sticky reason to return. -->
+          <section x-show="userTier === 'spark'" class="mb-6">
+            <header class="mb-3 flex items-center gap-2">
+              <i data-lucide="trophy" class="h-4 w-4 text-warning-500"></i>
+              <h2 class="text-base font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Pencapaian Anda' : 'Your achievements'">Your achievements</h2>
+            </header>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <!-- Card 1: Login Streak -->
+              <div class="rounded-2xl border border-sumrize/20 bg-gradient-to-br from-sumrize/5 to-warning-50/40 p-5 shadow-theme-sm dark:border-sumrize/30 dark:from-sumrize/[0.08] dark:to-warning-500/[0.04]">
+                <div class="mb-3 flex items-center gap-2">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sumrize/15 text-sumrize">
+                    <i data-lucide="flame" class="h-5 w-5"></i>
+                  </div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-sumrize" x-text="lang === 'id' ? 'Streak' : 'Streak'">Streak</span>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">12 <span class="text-base font-normal text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'minggu' : 'weeks'">weeks</span></p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Berturut-turut buka Sumrize' : 'In a row using Sumrize'">In a row using Sumrize</p>
+                <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200/60 dark:bg-white/[0.06]">
+                  <div class="h-full rounded-full bg-sumrize transition-all duration-500" style="width: 60%"></div>
+                </div>
+                <p class="mt-1.5 text-[10px] font-medium text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Next: 20 minggu (Iron streak)' : 'Next: 20 weeks (Iron streak)'">Next: 20 weeks (Iron streak)</p>
+              </div>
+
+              <!-- Card 2: Total Ringkasan -->
+              <div class="rounded-2xl border border-brand-500/20 bg-gradient-to-br from-brand-50 to-brand-50/40 p-5 shadow-theme-sm dark:border-brand-500/30 dark:from-brand-500/[0.12] dark:to-brand-500/[0.04]">
+                <div class="mb-3 flex items-center gap-2">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 text-white dark:bg-brand-400 dark:text-brand-950">
+                    <i data-lucide="sparkles" class="h-5 w-5"></i>
+                  </div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-brand-500 dark:text-brand-400" x-text="lang === 'id' ? 'Lifetime' : 'Lifetime'">Lifetime</span>
+                </div>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">847</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Ringkasan dibaca total' : 'Summaries read total'">Summaries read total</p>
+                <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-200/60 dark:bg-white/[0.06]">
+                  <div class="h-full rounded-full bg-brand-500 transition-all duration-500 dark:bg-brand-400" style="width: 85%"></div>
+                </div>
+                <p class="mt-1.5 text-[10px] font-medium text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '153 lagi → 1000 (Centurion)' : '153 to go → 1000 (Centurion)'">153 to go → 1000 (Centurion)</p>
+              </div>
+
+              <!-- Card 3: Achievement Unlocked -->
+              <div class="rounded-2xl border border-success-500/20 bg-gradient-to-br from-success-50 to-success-50/40 p-5 shadow-theme-sm dark:border-success-500/30 dark:from-success-500/[0.10] dark:to-success-500/[0.04]">
+                <div class="mb-3 flex items-center gap-2">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-success-500 text-white">
+                    <i data-lucide="trophy" class="h-5 w-5"></i>
+                  </div>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-success-600 dark:text-success-500" x-text="lang === 'id' ? 'Baru terbuka' : 'Just unlocked'">Just unlocked</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">Power User</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '100+ ringkasan dalam 1 bulan tercapai' : '100+ summaries in 1 month achieved'">100+ summaries in 1 month achieved</p>
+                <div class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-success-500/15 px-2 py-0.5 text-[10px] font-semibold text-success-600 dark:text-success-500">
+                  <i data-lucide="calendar-check" class="h-3 w-3"></i>
+                  <span x-text="lang === 'id' ? 'Mei 2026' : 'May 2026'">May 2026</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== Section 5 — Upsell Card (Free only) =====
+               Brand-bordered prominent CTA — icon + content + button (responsive). -->
+          <section x-show="userTier === 'free'" x-cloak class="mb-6 flex flex-col items-start gap-5 rounded-2xl border-2 border-brand-500 bg-white p-5 shadow-theme-sm dark:bg-white/[0.03] md:p-6 lg:flex-row lg:items-center">
+            <div class="flex flex-1 items-start gap-4">
+              <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                <i data-lucide="sparkles" class="h-6 w-6"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Buka analisis lengkap dengan Spark' : 'Unlock full analytics with Spark'">Unlock full analytics with Spark</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Anda sudah hemat 8 jam minggu ini — Spark kasih dimensi yang lebih dalam.' : 'You saved 8 hours this week — Spark gives you deeper dimensions.'">You saved 8 hours this week — Spark gives you deeper dimensions.</p>
+                <ul class="mt-3 grid grid-cols-1 gap-2 text-sm text-gray-700 dark:text-gray-300 sm:grid-cols-2">
+                  <li class="flex items-start gap-2">
+                    <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-600 dark:text-success-500"></i>
+                    <span x-text="lang === 'id' ? 'Top grup, orang, & spotlight per grup' : 'Top groups, people, & per-group spotlight'">Top groups, people, & per-group spotlight</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-600 dark:text-success-500"></i>
+                    <span x-text="lang === 'id' ? 'AI smart insights & sentimen' : 'AI smart insights & sentiment'">AI smart insights & sentiment</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-600 dark:text-success-500"></i>
+                    <span x-text="lang === 'id' ? 'Decisions, action items, & topic trends' : 'Decisions, action items, & topic trends'">Decisions, action items, & topic trends</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i data-lucide="check" class="mt-0.5 h-4 w-4 flex-shrink-0 text-success-600 dark:text-success-500"></i>
+                    <span x-text="lang === 'id' ? 'Achievement streak + export CSV' : 'Achievement streak + CSV export'">Achievement streak + CSV export</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <a href="pricing.html" class="inline-flex w-full flex-shrink-0 items-center justify-center gap-2 rounded-full bg-sumrize px-5 py-3 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-sumrize-hover focus:outline-none focus:ring-4 focus:ring-sumrize/30 lg:w-auto">
+              <i data-lucide="sparkles" class="h-4 w-4"></i>
+              <span x-text="lang === 'id' ? 'Coba Spark gratis 14 hari' : 'Try Spark free for 14 days'">Try Spark free for 14 days</span>
+              <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </a>
+          </section>
+
+          <!-- ===== Demo toggle (footer) =====
+               Mockup demo control: remove in production.
+               Toggles userTier between free <-> spark for reviewer demo. -->
+          <div class="mt-6 text-center text-xs text-gray-400">
+            <button type="button" @click="userTier = userTier === 'spark' ? 'free' : 'spark'" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
+              <span x-show="userTier === 'spark'" x-text="lang === 'id' ? 'Mockup demo · Lihat sebagai user Free' : 'Mockup demo · View as Free user'">Mockup demo · View as Free user</span>
+              <span x-show="userTier === 'free'" x-cloak x-text="lang === 'id' ? 'Mockup demo · Lihat sebagai user Spark' : 'Mockup demo · View as Spark user'">Mockup demo · View as Spark user</span>
+            </button>
+          </div>
+
+        </div>
+      </main>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      document.addEventListener('alpine:initialized', () => lucide.createIcons());
+    });
+  </script>
+</body>
+</html>

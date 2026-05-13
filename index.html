@@ -80,8 +80,8 @@
       id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
     },
     t: {
-      en: { home: 'Workspace', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
-      id: { home: 'Workspace', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+      en: { home: 'Workspace', rizz: 'Ask Rizz', analytics: 'Analytics', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Workspace', rizz: 'Rizz', analytics: 'Analytics', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
     },
     init() {
       this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
@@ -178,6 +178,16 @@
               >
                 <i data-lucide="sparkles" class="h-5 w-5 flex-shrink-0"></i>
                 <span x-text="t[lang].rizz" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="analytics.html"
+                class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white"
+                :class="sidebarToggle ? 'lg:justify-center' : ''"
+              >
+                <i data-lucide="bar-chart-3" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].analytics" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
               </a>
             </li>
             <li>
@@ -361,6 +371,21 @@
                     <button type="button" class="text-xs font-medium text-brand-500 transition hover:text-brand-600 dark:text-brand-400" x-text="lang === 'id' ? 'Tandai dibaca' : 'Mark all read'">Mark all read</button>
                   </header>
                   <div class="max-h-96 divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800">
+                    <a href="analytics.html" class="block bg-brand-50/40 px-4 py-3 transition hover:bg-brand-50/60 dark:bg-brand-500/[0.04] dark:hover:bg-brand-500/[0.08]">
+                      <div class="flex items-start gap-3">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-success-50 text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                          <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm text-gray-700 dark:text-gray-300">
+                            <strong class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan mingguan siap dilihat' : 'Weekly insight is ready'">Weekly insight is ready</strong>
+                            <span x-text="lang === 'id' ? ' · 12 ringkasan + topik teratas' : ' · 12 summaries + top topics'"></span>
+                          </p>
+                          <p class="mt-0.5 text-xs text-gray-400" x-text="lang === 'id' ? 'Analytics · 30 menit lalu' : 'Analytics · 30 min ago'">Analytics · 30 min ago</p>
+                        </div>
+                        <span class="mt-1 inline-block h-2 w-2 flex-shrink-0 rounded-full bg-sumrize" aria-hidden="true"></span>
+                      </div>
+                    </a>
                     <a href="referral.html" class="block bg-brand-50/40 px-4 py-3 transition hover:bg-brand-50/60 dark:bg-brand-500/[0.04] dark:hover:bg-brand-500/[0.08]">
                       <div class="flex items-start gap-3">
                         <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
