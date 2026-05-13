@@ -158,21 +158,15 @@
               </a>
             </li>
             <li>
-              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
-                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
-                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
-              </a>
-            </li>
-            <li>
               <a href="referral.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
                 <i data-lucide="gift" class="h-5 w-5 flex-shrink-0"></i>
                 <span x-text="t[lang].referral" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
               </a>
             </li>
             <li>
-              <a href="settings.html" class="group flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400" :class="sidebarToggle ? 'lg:justify-center' : ''">
-                <i data-lucide="settings" class="h-5 w-5 flex-shrink-0"></i>
-                <span x-text="t[lang].settings" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
+              <a href="invoice.html" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" :class="sidebarToggle ? 'lg:justify-center' : ''">
+                <i data-lucide="file-text" class="h-5 w-5 flex-shrink-0"></i>
+                <span x-text="t[lang].invoice" :class="sidebarToggle ? 'lg:hidden' : ''"></span>
               </a>
             </li>
           </ul>
@@ -378,7 +372,7 @@
                   <div class="py-1.5">
                     <a href="settings.html" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
                       <i data-lucide="settings" class="h-4 w-4"></i>
-                      Account settings
+                      <span x-text="lang === 'id' ? 'Pengaturan' : 'Settings'">Settings</span>
                     </a>
                     <a href="#" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5">
                       <i data-lucide="info" class="h-4 w-4"></i>
