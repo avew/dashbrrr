@@ -71,8 +71,8 @@
       id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
     },
     t: {
-      en: { home: 'Home', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
-      id: { home: 'Beranda', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
+      en: { home: 'Workspace', rizz: 'Ask Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Settings' },
+      id: { home: 'Workspace', rizz: 'Rizz', invoice: 'Invoice', referral: 'Referral', settings: 'Pengaturan' }
     },
     init() {
       this.darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false');
@@ -264,11 +264,11 @@
               </button>
 
               <div>
-                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl" x-text="lang === 'id' ? 'Konektor Anda' : 'Your Connectors'">Your Connectors</h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  <span class="font-semibold text-gray-700 dark:text-gray-300">3</span>
-                  <span x-text="lang === 'id' ? ' konektor siap dicari, difilter, dan dikelola dari satu workspace.' : ' connector cards ready to search, filter, and manage from one workspace.'"> connector cards ready to search, filter, and manage from one workspace.</span>
-                </p>
+                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white md:text-3xl">
+                  <span x-text="lang === 'id' ? 'Selamat datang kembali, Avew' : 'Welcome back, Avew'">Welcome back, Avew</span>
+                  <span class="inline-block animate-pulse">👋</span>
+                </h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Begini ringkasan workspace Anda hari ini.' : 'Here\'s your workspace at a glance today.'">Here's your workspace at a glance today.</p>
               </div>
             </div>
 
@@ -482,6 +482,33 @@
           </section>
           <!-- ===== Topbar (Section 2) End ===== -->
 
+          <!-- ===== Latest summary preview card =====
+               Surface the most recent summary so user can jump straight into
+               content instead of having to dig. Transforms the homepage from
+               "list view" to "launch pad." -->
+          <a href="rizz.html" class="group mb-6 flex flex-col gap-3 overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm transition hover:border-brand-500 hover:shadow-theme-md dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-500 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-1 items-start gap-3">
+              <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400">
+                <i data-lucide="messages-square" class="h-5 w-5"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Ringkasan Terbaru' : 'Latest Summary'">Latest Summary</p>
+                  <span class="rounded-full bg-success-50 px-1.5 py-0.5 text-[10px] font-semibold text-success-600 dark:bg-success-500/[0.15] dark:text-success-500">
+                    <span class="mr-0.5 inline-block h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                    <span x-text="lang === 'id' ? 'baru' : 'new'">new</span>
+                  </span>
+                </div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">Komunitas Mobil BMW <span class="font-normal text-gray-400">· 2 <span x-text="lang === 'id' ? 'jam lalu' : 'hours ago'">hours ago</span></span></p>
+                <p class="mt-1 line-clamp-2 text-sm text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '“Persiapan kopdar Sabtu di Auto Bavarian, Kemang. Iuran konsumsi Rp 75K. 18 anggota konfirmasi, 5 belum balas. Bro Adit nawarin lokasinya + mekanik akan sharing maintenance tips Series 5...”' : '“Saturday meetup prep at Auto Bavarian, Kemang. Catering dues Rp 75K. 18 members confirmed, 5 pending. Bro Adit offered the venue + mechanic will share Series 5 maintenance tips...”'">"Persiapan kopdar Sabtu di Auto Bavarian..."</p>
+              </div>
+            </div>
+            <div class="inline-flex flex-shrink-0 items-center gap-1 self-start rounded-full bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-500 transition group-hover:bg-brand-100 sm:self-auto dark:bg-brand-500/[0.12] dark:text-brand-400">
+              <span x-text="lang === 'id' ? 'Buka ringkasan' : 'Open summary'">Open summary</span>
+              <i data-lucide="arrow-right" class="h-3.5 w-3.5 transition group-hover:translate-x-0.5"></i>
+            </div>
+          </a>
+
           <!-- ===== Filter Toolbar (Section 3) Start =====
                Pattern: pill button = `rounded-full px-4 py-2 text-sm font-medium`
                         active   = `bg-brand-50 text-brand-500`           (+ dark variants)
@@ -523,21 +550,34 @@
                Repeat <article> per connector — copy/paste-friendly. -->
           <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
 
-            <!-- Connector card: WhatsApp / Komunitas Mobil BMW -->
-            <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <!-- Connector card: WhatsApp / Komunitas Mobil BMW (MOST ACTIVE) -->
+            <article class="overflow-hidden rounded-2xl border-2 border-brand-500 bg-white shadow-theme-sm ring-2 ring-brand-500/10 dark:bg-white/[0.03]">
               <div class="p-6">
-                <header class="mb-8 flex items-start justify-between">
-                  <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
-                    <img src="./assets/whatsapp.webp" class="h-3.5 w-3.5" alt="" />
-                    <span x-text="lang === 'id' ? 'Grup WhatsApp' : 'WhatsApp Group'">WhatsApp Group</span>
-                  </span>
+                <header class="mb-6 flex items-start justify-between">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
+                      <img src="./assets/whatsapp.webp" class="h-3.5 w-3.5" alt="" />
+                      <span x-text="lang === 'id' ? 'Grup WhatsApp' : 'WhatsApp Group'">WhatsApp Group</span>
+                    </span>
+                    <!-- "Most active" badge -->
+                    <span class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sumrize/15 to-brand-500/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-sumrize">
+                      <i data-lucide="flame" class="h-3 w-3"></i>
+                      <span x-text="lang === 'id' ? 'Paling aktif' : 'Most active'">Most active</span>
+                    </span>
+                  </div>
                   <button type="button" :aria-label="lang === 'id' ? 'Pengaturan konektor' : 'Connector setting'" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-white">
                     <i data-lucide="settings" class="h-4 w-4"></i>
                   </button>
                 </header>
 
                 <h2 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Komunitas Mobil BMW</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Admin: Bro Adit · 48 <span x-text="lang === 'id' ? 'anggota' : 'members'">anggota</span></p>
+                <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Admin: Bro Adit · 48 <span x-text="lang === 'id' ? 'anggota' : 'members'">anggota</span></p>
+
+                <!-- Activity meta -->
+                <p class="flex items-center gap-1.5 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                  <span x-text="lang === 'id' ? 'Aktif 2 jam lalu · 47 pesan baru' : 'Active 2h ago · 47 new messages'">Active 2h ago · 47 new messages</span>
+                </p>
               </div>
 
               <footer class="grid grid-cols-2 divide-x divide-brand-100 bg-brand-50 dark:divide-brand-500/20 dark:bg-brand-500/[0.08]">
@@ -556,7 +596,7 @@
             <!-- Connector card: WhatsApp / Keluarga Besar -->
             <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
               <div class="p-6">
-                <header class="mb-8 flex items-start justify-between">
+                <header class="mb-6 flex items-start justify-between">
                   <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
                     <img src="./assets/whatsapp.webp" class="h-3.5 w-3.5" alt="" />
                     <span x-text="lang === 'id' ? 'Grup WhatsApp' : 'WhatsApp Group'">WhatsApp Group</span>
@@ -567,7 +607,13 @@
                 </header>
 
                 <h2 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Keluarga Besar</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Trah Soemardjo · 24 <span x-text="lang === 'id' ? 'anggota' : 'members'">anggota</span></p>
+                <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Trah Soemardjo · 24 <span x-text="lang === 'id' ? 'anggota' : 'members'">anggota</span></p>
+
+                <!-- Activity meta -->
+                <p class="flex items-center gap-1.5 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                  <span x-text="lang === 'id' ? 'Aktif 5 jam lalu · 12 pesan baru' : 'Active 5h ago · 12 new messages'">Active 5h ago · 12 new messages</span>
+                </p>
               </div>
 
               <footer class="grid grid-cols-2 divide-x divide-brand-100 bg-brand-50 dark:divide-brand-500/20 dark:bg-brand-500/[0.08]">
@@ -585,7 +631,7 @@
             <!-- Connector card: Discord / Tim Marketing -->
             <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
               <div class="p-6">
-                <header class="mb-8 flex items-start justify-between">
+                <header class="mb-6 flex items-start justify-between">
                   <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
                     <img src="./assets/discord.png" class="h-3.5 w-3.5" alt="" />
                     Discord
@@ -596,7 +642,13 @@
                 </header>
 
                 <h2 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Tim Marketing</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Server: marketing-team · 8 <span x-text="lang === 'id' ? 'anggota' : 'members'">anggota</span></p>
+                <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Server: marketing-team · 8 <span x-text="lang === 'id' ? 'anggota' : 'members'">anggota</span></p>
+
+                <!-- Activity meta -->
+                <p class="flex items-center gap-1.5 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                  <span x-text="lang === 'id' ? 'Aktif 1 hari lalu · 8 pesan baru' : 'Active 1d ago · 8 new messages'">Active 1d ago · 8 new messages</span>
+                </p>
               </div>
 
               <footer class="grid grid-cols-2 divide-x divide-brand-100 bg-brand-50 dark:divide-brand-500/20 dark:bg-brand-500/[0.08]">
