@@ -70,6 +70,12 @@
        When false: hero CTA + connector picker inline + sample preview.
        When true: filled workspace (greeting, summary, filter, cards). */
     hasConnectors: true,
+    /* Sample preview tab switcher in empty state — 3 use case examples
+       (chat / email / calendar) to communicate broad product scope. */
+    sampleTab: 'chat',
+    /* Filled-state connector filter — group cards by product tool category.
+       Values: all (default) | chat | email. Future: calendar, docs. */
+    connectorTab: 'all',
     languages: {
       en: { label: 'English', flag: '🇬🇧' },
       id: { label: 'Bahasa Indonesia', flag: '🇮🇩' }
@@ -521,38 +527,59 @@
           </a>
 
           <!-- ===== Filter Toolbar (Section 3) Start =====
-               Pattern: pill button = `rounded-full px-4 py-2 text-sm font-medium`
-                        active   = `bg-brand-50 text-brand-500`           (+ dark variants)
-                        inactive = `bg-white ring-1 ring-gray-200 text-gray-700`
-                        count    = nested span inside the pill -->
-          <section class="mb-6 flex flex-wrap items-center gap-3">
-            <!-- Filter pill: All (active) -->
-            <button type="button" class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-medium text-brand-500 transition dark:bg-brand-500/[0.12] dark:text-brand-400">
+               Category-based pills (product tools): All / Chat / Email.
+               Click sets connectorTab; cards filter via x-show.
+               Pattern: pill active = `bg-brand-50 text-brand-500`,
+                        inactive   = `bg-white ring-1 ring-gray-200 text-gray-700`. -->
+          <section role="tablist" class="mb-6 flex flex-wrap items-center gap-3">
+            <!-- Filter pill: All -->
+            <button type="button" role="tab" :aria-selected="(connectorTab === 'all').toString()" @click="connectorTab = 'all'"
+              class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition"
+              :class="connectorTab === 'all'
+                ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'
+                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]'">
               <i data-lucide="layout-grid" class="h-4 w-4"></i>
               <span x-text="lang === 'id' ? 'Semua' : 'All'">All</span>
-              <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/70 px-1.5 text-xs font-semibold dark:bg-white/10">3</span>
+              <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-semibold"
+                :class="connectorTab === 'all' ? 'bg-white/70 dark:bg-white/10' : 'bg-gray-100 dark:bg-white/10'">4</span>
+            </button>
+
+            <!-- Filter pill: Chat (WhatsApp + Discord + Slack) -->
+            <button type="button" role="tab" :aria-selected="(connectorTab === 'chat').toString()" @click="connectorTab = 'chat'"
+              class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition"
+              :class="connectorTab === 'chat'
+                ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'
+                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]'">
+              <i data-lucide="messages-square" class="h-4 w-4"></i>
+              <span x-text="lang === 'id' ? 'Chat' : 'Chat'">Chat</span>
+              <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-semibold"
+                :class="connectorTab === 'chat' ? 'bg-white/70 dark:bg-white/10' : 'bg-gray-100 dark:bg-white/10'">3</span>
+            </button>
+
+            <!-- Filter pill: Email (Gmail) -->
+            <button type="button" role="tab" :aria-selected="(connectorTab === 'email').toString()" @click="connectorTab = 'email'"
+              class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition"
+              :class="connectorTab === 'email'
+                ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'
+                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]'">
+              <i data-lucide="mail" class="h-4 w-4"></i>
+              <span x-text="lang === 'id' ? 'Email' : 'Email'">Email</span>
+              <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-semibold"
+                :class="connectorTab === 'email' ? 'bg-white/70 dark:bg-white/10' : 'bg-gray-100 dark:bg-white/10'">1</span>
             </button>
 
             <!-- Search reveal button -->
-            <button type="button" :aria-label="lang === 'id' ? 'Cari konektor' : 'Search connectors'" class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-400 dark:hover:bg-white/[0.08]">
+            <button type="button" :aria-label="lang === 'id' ? 'Cari konektor' : 'Search connectors'" class="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200 dark:bg-white/[0.05] dark:text-gray-400 dark:hover:bg-white/[0.08]">
               <i data-lucide="search" class="h-4 w-4"></i>
-            </button>
-
-            <!-- Filter pill: WhatsApp Group -->
-            <button type="button" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]">
-              <img src="./assets/whatsapp.webp" class="h-5 w-5 rounded-full object-cover" alt="" />
-              <span x-text="lang === 'id' ? 'Grup WhatsApp' : 'WhatsApp Group'">WhatsApp Group</span>
-              <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gray-100 px-1.5 text-xs font-semibold dark:bg-white/10">2</span>
-            </button>
-
-            <!-- Filter pill: Discord -->
-            <button type="button" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 transition hover:bg-gray-50 dark:bg-white/[0.03] dark:text-gray-300 dark:ring-gray-800 dark:hover:bg-white/[0.06]">
-              <img src="./assets/discord.png" class="h-5 w-5 rounded-full object-cover" alt="" />
-              <span>Discord</span>
-              <span class="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gray-100 px-1.5 text-xs font-semibold dark:bg-white/10">1</span>
             </button>
           </section>
           <!-- ===== Filter Toolbar (Section 3) End ===== -->
+
+          <!-- Active category header — gives context which tools are shown -->
+          <p class="mb-4 text-xs text-gray-500 dark:text-gray-400" x-show="connectorTab !== 'all'" x-cloak>
+            <span x-show="connectorTab === 'chat'" x-text="lang === 'id' ? 'Konektor chat group · WhatsApp, Discord, Slack' : 'Chat group connectors · WhatsApp, Discord, Slack'"></span>
+            <span x-show="connectorTab === 'email'" x-text="lang === 'id' ? 'Konektor inbox email · Gmail' : 'Email inbox connectors · Gmail'"></span>
+          </p>
 
           <!-- ===== Connector Cards Grid (Section 4) Start =====
                Card layout = two-zone:
@@ -562,7 +589,7 @@
           <section class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
 
             <!-- Connector card: WhatsApp / Komunitas Mobil BMW (MOST ACTIVE) -->
-            <article class="overflow-hidden rounded-2xl border-2 border-brand-500 bg-white shadow-theme-sm ring-2 ring-brand-500/10 dark:bg-white/[0.03]">
+            <article x-show="connectorTab === 'all' || connectorTab === 'chat'" class="overflow-hidden rounded-2xl border-2 border-brand-500 bg-white shadow-theme-sm ring-2 ring-brand-500/10 dark:bg-white/[0.03]">
               <div class="p-6">
                 <header class="mb-6 flex items-start justify-between">
                   <div class="flex flex-wrap items-center gap-1.5">
@@ -605,7 +632,7 @@
             </article>
 
             <!-- Connector card: WhatsApp / Keluarga Besar -->
-            <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <article x-show="connectorTab === 'all' || connectorTab === 'chat'" class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
               <div class="p-6">
                 <header class="mb-6 flex items-start justify-between">
                   <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
@@ -640,7 +667,7 @@
             </article>
 
             <!-- Connector card: Discord / Tim Marketing -->
-            <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <article x-show="connectorTab === 'all' || connectorTab === 'chat'" class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
               <div class="p-6">
                 <header class="mb-6 flex items-start justify-between">
                   <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
@@ -674,6 +701,41 @@
               </footer>
             </article>
 
+            <!-- Connector card: Gmail / Inbox Pribadi (EMAIL category) -->
+            <article x-show="connectorTab === 'all' || connectorTab === 'email'" x-cloak class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="p-6">
+                <header class="mb-6 flex items-start justify-between">
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white dark:ring-transparent">
+                    <img src="./assets/Gmail_Icon.png" class="h-3.5 w-3.5" alt="" />
+                    Gmail
+                  </span>
+                  <button type="button" :aria-label="lang === 'id' ? 'Pengaturan konektor' : 'Connector setting'" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-white">
+                    <i data-lucide="settings" class="h-4 w-4"></i>
+                  </button>
+                </header>
+
+                <h2 class="mb-1 text-xl font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Inbox Pribadi' : 'Personal Inbox'">Personal Inbox</h2>
+                <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">aseprojali@gmail.com</p>
+
+                <!-- Activity meta -->
+                <p class="flex items-center gap-1.5 border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                  <span x-text="lang === 'id' ? 'Sinkron 12 menit lalu · 5 penting dari 47' : 'Synced 12m ago · 5 important of 47'">Synced 12m ago · 5 important of 47</span>
+                </p>
+              </div>
+
+              <footer class="grid grid-cols-2 divide-x divide-brand-100 bg-brand-50 dark:divide-brand-500/20 dark:bg-brand-500/[0.08]">
+                <button type="button" class="flex items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium text-brand-700 transition hover:bg-brand-100 dark:text-brand-300 dark:hover:bg-brand-500/[0.12]">
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Ringkasan' : 'Summaries'">Summaries</span>
+                </button>
+                <a href="rizz.html" class="flex items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium text-brand-700 transition hover:bg-brand-100 dark:text-brand-300 dark:hover:bg-brand-500/[0.12]">
+                  <i data-lucide="message-circle" class="h-4 w-4"></i>
+                  <span x-text="lang === 'id' ? 'Tanya Rizz' : 'Ask Rizz'">Ask Rizz</span>
+                </a>
+              </footer>
+            </article>
+
           </section>
           <!-- ===== Connector Cards Grid (Section 4) End ===== -->
 
@@ -686,82 +748,155 @@
                state when hasConnectors === false. -->
           <div x-show="!hasConnectors" x-cloak>
 
-            <!-- Hero CTA + inline connector picker.
-                 Single decision card — user picks platform → goes straight
-                 to onboarding flow (no separate modal step). -->
+            <!-- Hero CTA + categorized connector picker.
+                 Outcome-driven copy + 4 categories (1 active tile-grid +
+                 3 slim soon-rows) to signal broad product scope without bloat. -->
             <section class="mb-6 overflow-hidden rounded-2xl border-2 border-brand-500 bg-white shadow-theme-sm dark:bg-white/[0.03]">
-              <!-- Hero text + sumrize gradient header -->
+              <!-- Hero text + sumrize gradient header — outcome-focused copy -->
               <div class="bg-gradient-to-br from-sumrize/[0.06] via-white to-brand-500/[0.06] p-6 text-center dark:from-sumrize/[0.1] dark:via-gray-900 dark:to-brand-500/[0.1] md:p-8">
                 <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sumrize to-brand-500 text-white shadow-theme-md">
                   <i data-lucide="sparkles" class="h-7 w-7"></i>
                 </div>
-                <h2 class="mb-2 text-xl font-bold text-gray-900 dark:text-white md:text-2xl" x-text="lang === 'id' ? 'Belum ada konektor terhubung' : 'No connectors yet'">No connectors yet</h2>
-                <p class="mx-auto mb-1 max-w-lg text-sm text-gray-600 dark:text-gray-300" x-text="lang === 'id' ? 'Pilih satu platform di bawah untuk mulai. Rizz akan kirim ringkasan harian otomatis ke WhatsApp Anda.' : 'Pick a platform below to start. Rizz will send daily summaries straight to your WhatsApp.'">Pick a platform below to start.</p>
+                <h2 class="mb-2 text-xl font-bold text-gray-900 dark:text-white md:text-2xl" x-text="lang === 'id' ? 'Mulai dari mana?' : 'Where do you want to start?'">Where do you want to start?</h2>
+                <p class="mx-auto mb-2 max-w-lg text-sm text-gray-600 dark:text-gray-300" x-text="lang === 'id' ? 'Hubungkan sumber yang ingin Rizz pantau — chat group, inbox email, atau kalender. Setiap pagi, ringkasan jelas di tangan Anda.' : 'Connect any source you want Rizz to watch — chat group, email inbox, or calendar. Every morning, a clear briefing in your hands.'">Connect any source you want Rizz to watch — chat group, email inbox, or calendar. Every morning, a clear briefing in your hands.</p>
                 <p class="inline-flex items-center gap-1.5 text-[11px] font-medium text-success-600 dark:text-success-500">
                   <i data-lucide="shield-check" class="h-3.5 w-3.5"></i>
-                  <span x-text="lang === 'id' ? 'Pesan tetap aman di WhatsApp · Sumrize cuma indeks metadata' : 'Messages stay in WhatsApp · Sumrize only indexes metadata'">Messages stay in WhatsApp · Sumrize only indexes metadata</span>
+                  <span x-text="lang === 'id' ? 'Data tetap aman di tempatnya · Sumrize cuma indeks metadata' : 'Your data stays where it lives · Sumrize only indexes metadata'">Your data stays where it lives · Sumrize only indexes metadata</span>
                 </p>
               </div>
 
-              <!-- Connector tile picker — only active platforms.
-                   Tiles directly clickable, skip modal step for speed. -->
-              <div class="border-t border-gray-200 p-5 dark:border-gray-800 md:p-6">
-                <p class="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="lang === 'id' ? 'Pilih platform untuk mulai' : 'Pick a platform to start'">Pick a platform to start</p>
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <!-- ===== Categorized connector picker =====
+                   Category 1 (Chat) = full tile grid, 3 active + 1 soon.
+                   Categories 2-4 (Email/Calendar/Docs) = slim text rows. -->
 
-                  <!-- WhatsApp (most-popular badge) -->
+              <!-- Chat & Komunitas: 4-tile grid with active platforms -->
+              <div class="border-t border-gray-200 p-5 dark:border-gray-800 md:p-6">
+                <p class="mb-3 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  <i data-lucide="message-circle" class="h-3.5 w-3.5"></i>
+                  <span x-text="lang === 'id' ? 'Chat & Komunitas' : 'Chat & Community'">Chat & Community</span>
+                </p>
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+                  <!-- WhatsApp (most-popular badge, active) -->
                   <a href="onboard-whatsapp.html" class="group relative flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
                     <span class="absolute right-2 top-2 rounded-full bg-sumrize px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white" x-text="lang === 'id' ? 'Paling laku' : 'Popular'">Popular</span>
                     <img src="./assets/whatsapp.webp" class="h-10 w-10" alt="" />
                     <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">WhatsApp</span>
                   </a>
 
-                  <!-- Discord -->
+                  <!-- Discord (active) -->
                   <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
                     <img src="./assets/discord.png" class="h-10 w-10 object-contain" alt="" />
                     <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Discord</span>
                   </button>
 
-                  <!-- Slack -->
+                  <!-- Slack (active) -->
                   <button type="button" class="group flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500 hover:bg-brand-50/40 hover:shadow-theme-sm dark:border-gray-700 dark:bg-white/[0.02] dark:hover:border-brand-500 dark:hover:bg-brand-500/[0.08]">
                     <img src="./assets/slack.png" class="h-10 w-10 object-contain" alt="" />
                     <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white">Slack</span>
                   </button>
 
-                </div>
+                  <!-- Telegram (soon) -->
+                  <button type="button" disabled class="relative flex cursor-not-allowed flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-5 opacity-60 dark:border-gray-800 dark:bg-white/[0.02]">
+                    <span class="absolute right-2 top-2 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:bg-gray-700 dark:text-gray-300" x-text="lang === 'id' ? 'Segera' : 'Soon'">Soon</span>
+                    <img src="./assets/telegram.png" class="h-10 w-10 object-contain" alt="" />
+                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Telegram</span>
+                  </button>
 
-                <!-- Coming soon roadmap line — single text row, not tiles -->
-                <p class="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-gray-400">
-                  <span class="font-semibold uppercase tracking-wider" x-text="lang === 'id' ? 'Segera:' : 'Coming soon:'">Coming soon:</span>
-                  <span class="inline-flex items-center gap-1">
-                    <img src="./assets/telegram.png" class="h-3.5 w-3.5 opacity-60" alt="" />
-                    Telegram
-                  </span>
+                </div>
+              </div>
+
+              <!-- Email & Inbox: slim row (soon-only) -->
+              <div class="flex flex-col gap-2 border-t border-gray-200 px-5 py-4 dark:border-gray-800 md:flex-row md:items-center md:justify-between md:px-6">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <i data-lucide="mail" class="h-3.5 w-3.5"></i>
+                    <span x-text="lang === 'id' ? 'Email & Inbox' : 'Email & Inbox'">Email & Inbox</span>
+                  </p>
                   <span class="text-gray-300 dark:text-gray-700">·</span>
-                  <span class="inline-flex items-center gap-1">
-                    <img src="./assets/notion.webp" class="h-3.5 w-3.5 opacity-60" alt="" />
-                    Notion
-                  </span>
-                  <span class="text-gray-300 dark:text-gray-700">·</span>
-                  <span class="inline-flex items-center gap-1">
-                    <img src="./assets/Gmail_Icon.png" class="h-3.5 w-3.5 opacity-60" alt="" />
+                  <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                    <img src="./assets/Gmail_Icon.png" class="h-4 w-4 opacity-60" alt="" />
                     Gmail
                   </span>
-                </p>
+                  <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                    <i data-lucide="mail" class="h-3.5 w-3.5 opacity-60"></i>
+                    Outlook
+                  </span>
+                </div>
+                <span class="self-start rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 md:self-auto dark:bg-white/10 dark:text-gray-400" x-text="lang === 'id' ? 'Segera hadir' : 'Coming soon'">Coming soon</span>
+              </div>
+
+              <!-- Calendar & Jadwal: slim row (soon-only) -->
+              <div class="flex flex-col gap-2 border-t border-gray-200 px-5 py-4 dark:border-gray-800 md:flex-row md:items-center md:justify-between md:px-6">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                    <span x-text="lang === 'id' ? 'Calendar & Jadwal' : 'Calendar & Schedule'">Calendar & Schedule</span>
+                  </p>
+                  <span class="text-gray-300 dark:text-gray-700">·</span>
+                  <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                    <i data-lucide="calendar-days" class="h-3.5 w-3.5 opacity-60"></i>
+                    Google Calendar
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                    <i data-lucide="calendar-days" class="h-3.5 w-3.5 opacity-60"></i>
+                    Outlook Calendar
+                  </span>
+                </div>
+                <span class="self-start rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 md:self-auto dark:bg-white/10 dark:text-gray-400" x-text="lang === 'id' ? 'Segera hadir' : 'Coming soon'">Coming soon</span>
+              </div>
+
+              <!-- Docs & Notes: slim row (soon-only) -->
+              <div class="flex flex-col gap-2 border-t border-gray-200 px-5 py-4 dark:border-gray-800 md:flex-row md:items-center md:justify-between md:px-6">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <i data-lucide="file-text" class="h-3.5 w-3.5"></i>
+                    <span x-text="lang === 'id' ? 'Docs & Notes' : 'Docs & Notes'">Docs & Notes</span>
+                  </p>
+                  <span class="text-gray-300 dark:text-gray-700">·</span>
+                  <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                    <img src="./assets/notion.webp" class="h-4 w-4 opacity-60" alt="" />
+                    Notion
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                    <i data-lucide="file-text" class="h-3.5 w-3.5 opacity-60"></i>
+                    Google Docs
+                  </span>
+                </div>
+                <span class="self-start rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 md:self-auto dark:bg-white/10 dark:text-gray-400" x-text="lang === 'id' ? 'Segera hadir' : 'Coming soon'">Coming soon</span>
               </div>
             </section>
 
-            <!-- Sample summary preview — compact version (3 bullets + footer).
-                 Shows user concretely what Rizz delivers without bloating UI. -->
+            <!-- Sample summary preview with 3-tab switcher.
+                 User can flip through chat / email / calendar use cases to
+                 see concrete value for each broader product scope. -->
             <section class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03]">
-              <header class="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-3 dark:border-gray-800">
+              <header class="flex flex-col gap-3 border-b border-gray-100 px-5 py-3 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
                 <p class="inline-flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
                   <i data-lucide="eye" class="h-4 w-4 text-gray-400"></i>
                   <span x-text="lang === 'id' ? 'Begini yang akan Anda terima setiap hari' : 'Here\'s what Rizz delivers every day'">Here's what Rizz delivers every day</span>
                 </p>
-                <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:bg-white/10 dark:text-gray-400" x-text="lang === 'id' ? 'Contoh' : 'Sample'">Sample</span>
+                <span class="self-start rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:self-auto dark:bg-white/10 dark:text-gray-400" x-text="lang === 'id' ? 'Contoh' : 'Sample'">Sample</span>
               </header>
-              <div class="p-5 text-sm text-gray-700 dark:text-gray-300">
+
+              <!-- Tab switcher: chat / email / calendar -->
+              <div role="tablist" class="flex flex-wrap gap-1 border-b border-gray-100 px-5 py-2 dark:border-gray-800">
+                <button type="button" role="tab" :aria-selected="(sampleTab === 'chat').toString()" @click="sampleTab = 'chat'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition" :class="sampleTab === 'chat' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200'">
+                  <i data-lucide="message-circle" class="h-3.5 w-3.5"></i>
+                  <span x-text="lang === 'id' ? 'Chat' : 'Chat'">Chat</span>
+                </button>
+                <button type="button" role="tab" :aria-selected="(sampleTab === 'email').toString()" @click="sampleTab = 'email'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition" :class="sampleTab === 'email' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200'">
+                  <i data-lucide="mail" class="h-3.5 w-3.5"></i>
+                  <span x-text="lang === 'id' ? 'Email' : 'Email'">Email</span>
+                </button>
+                <button type="button" role="tab" :aria-selected="(sampleTab === 'calendar').toString()" @click="sampleTab = 'calendar'" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition" :class="sampleTab === 'calendar' ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.15] dark:text-brand-400' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200'">
+                  <i data-lucide="calendar" class="h-3.5 w-3.5"></i>
+                  <span x-text="lang === 'id' ? 'Calendar' : 'Calendar'">Calendar</span>
+                </button>
+              </div>
+
+              <!-- Chat sample (default) -->
+              <div x-show="sampleTab === 'chat'" class="p-5 text-sm text-gray-700 dark:text-gray-300">
                 <p class="mb-2 text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan — Komunitas Mobil BMW' : 'Summary — BMW Community'">Summary — BMW Community</p>
                 <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">13 Mei 2026, 09:12 — 22:48</p>
                 <ul class="space-y-1.5 pl-1">
@@ -770,9 +905,33 @@
                   <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span x-text="lang === 'id' ? '18 anggota konfirmasi hadir, 5 belum balas.' : '18 members confirmed, 5 haven\'t replied.'">18 members confirmed, 5 haven't replied.</span></li>
                 </ul>
               </div>
+
+              <!-- Email sample (Gmail inbox digest) -->
+              <div x-show="sampleTab === 'email'" x-cloak class="p-5 text-sm text-gray-700 dark:text-gray-300">
+                <p class="mb-2 text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Ringkasan Inbox Pagi — Gmail' : 'Morning Inbox Briefing — Gmail'">Morning Inbox Briefing — Gmail</p>
+                <p class="mb-3 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? '13 Mei 2026, 06:30 · 5 penting dari 47 email' : '13 May 2026, 06:30 · 5 important of 47 emails'">13 May 2026, 06:30 · 5 important of 47 emails</p>
+                <ul class="space-y-1.5 pl-1">
+                  <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span><strong class="font-semibold text-gray-900 dark:text-white">Klien Acme Corp</strong> — <span x-text="lang === 'id' ? 'minta call review proposal Senin. Deadline jawab Sabtu.' : 'requests proposal review call Monday. Reply deadline Saturday.'">requests proposal review call Monday. Reply deadline Saturday.</span></span></li>
+                  <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span><strong class="font-semibold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Tim Marketing' : 'Marketing Team'">Marketing Team</strong> — <span x-text="lang === 'id' ? 'deck kampanye Q3 selesai, butuh feedback final Anda.' : 'Q3 campaign deck finalized, awaiting your final feedback.'">Q3 campaign deck finalized, awaiting your final feedback.</span></span></li>
+                  <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span><strong class="font-semibold text-gray-900 dark:text-white">Newsletter Stratechery</strong> — <span x-text="lang === 'id' ? 'artikel baru tentang AI workspace.' : 'new article on AI workspace.'">new article on AI workspace.</span></span></li>
+                </ul>
+              </div>
+
+              <!-- Calendar sample (daily meeting briefing) -->
+              <div x-show="sampleTab === 'calendar'" x-cloak class="p-5 text-sm text-gray-700 dark:text-gray-300">
+                <p class="mb-2 text-base font-bold text-gray-900 dark:text-white" x-text="lang === 'id' ? 'Jadwal Anda Hari Ini' : 'Your Schedule Today'">Your Schedule Today</p>
+                <p class="mb-3 text-xs text-gray-500 dark:text-gray-400" x-text="lang === 'id' ? 'Selasa, 13 Mei 2026 · 3 meeting · briefing siap di setiap meeting' : 'Tuesday, 13 May 2026 · 3 meetings · briefing ready for each'">Tuesday, 13 May 2026 · 3 meetings · briefing ready for each</p>
+                <ul class="space-y-1.5 pl-1">
+                  <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span><strong class="font-semibold text-gray-900 dark:text-white">09:30 <span x-text="lang === 'id' ? 'Standup Tim' : 'Team Standup'">Team Standup</span></strong> — <span x-text="lang === 'id' ? 'siap update milestone Q2 ke Alfyan.' : 'prep Q2 milestone update for Alfyan.'">prep Q2 milestone update for Alfyan.</span></span></li>
+                  <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span><strong class="font-semibold text-gray-900 dark:text-white">13:00 <span x-text="lang === 'id' ? 'Demo Client Acme Corp' : 'Client Demo Acme Corp'">Client Demo Acme Corp</span></strong> — <span x-text="lang === 'id' ? 're-check proposal, bawa Rio sebagai support.' : 'recheck proposal, bring Rio as support.'">recheck proposal, bring Rio as support.</span></span></li>
+                  <li class="flex gap-2"><span class="select-none text-gray-400">•</span><span><strong class="font-semibold text-gray-900 dark:text-white">16:00 <span x-text="lang === 'id' ? '1-on-1 dengan Mas Reza' : '1-on-1 with Mas Reza'">1-on-1 with Mas Reza</span></strong> — <span x-text="lang === 'id' ? 'agenda: review hiring engineer.' : 'agenda: engineer hiring review.'">agenda: engineer hiring review.</span></span></li>
+                </ul>
+              </div>
+
+              <!-- Footer delivery promise — agnostic ("channel pilihan Anda") -->
               <div class="flex items-center justify-center gap-2 border-t border-gray-100 bg-gray-50/50 px-5 py-3 text-xs text-gray-500 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400">
                 <i data-lucide="send" class="h-3.5 w-3.5"></i>
-                <span x-text="lang === 'id' ? 'Otomatis dikirim ke WhatsApp Anda setiap hari' : 'Auto-sent to your WhatsApp daily'">Auto-sent to your WhatsApp daily</span>
+                <span x-text="lang === 'id' ? 'Otomatis dikirim ke channel pilihan Anda setiap pagi' : 'Auto-sent to your channel of choice every morning'">Auto-sent to your channel of choice every morning</span>
               </div>
             </section>
 
@@ -784,7 +943,7 @@
             <i data-lucide="eye" class="h-3.5 w-3.5"></i>
             <button type="button" @click="hasConnectors = !hasConnectors" class="underline-offset-2 hover:text-gray-600 hover:underline dark:hover:text-gray-300">
               <span x-show="hasConnectors" x-text="lang === 'id' ? 'Lihat sebagai user baru (belum ada konektor)' : 'View as new user (no connectors)'">View as new user (no connectors)</span>
-              <span x-show="!hasConnectors" x-cloak x-text="lang === 'id' ? 'Lihat dengan 3 konektor terhubung' : 'View with 3 connectors connected'">View with 3 connectors connected</span>
+              <span x-show="!hasConnectors" x-cloak x-text="lang === 'id' ? 'Lihat dengan 4 konektor terhubung' : 'View with 4 connectors connected'">View with 4 connectors connected</span>
             </button>
           </div>
 
